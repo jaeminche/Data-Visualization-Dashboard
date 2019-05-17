@@ -5,7 +5,7 @@ const client_config = require("../config/client");
 
 const client = new Client(client_config);
 
-router.get("/sharedroutes", async function(req, res) {
+router.get("/dashboard_super/:id", async function(req, res) {
   try {
     await client.connect();
     console.log("Connected successfully");
