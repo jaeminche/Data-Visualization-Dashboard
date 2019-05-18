@@ -30,8 +30,8 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use("/", indexRoutes);
-app.use("/", sharedroutesRoutes);
 app.use("/", dashboardRoutes);
+app.use("/", sharedroutesRoutes);
 // app.use("/", log_login);
 // app.use("/", log_startcycling);
 // app.use("/", log_cycling);
