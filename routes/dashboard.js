@@ -29,21 +29,29 @@ router.get("/dashboard_super/:id", async function(req, res) {
     let result = {
       noOfOrgLogInToday: 0,
       noOfOrgLogInAll: 0,
+      noOfOrg: 0,
+      noOfUser: 0,
       array: [
         {
           type: "node"
         }
       ]
     };
+
+    // queries
     const noOfOrgLogInToday = await client.query(
       "select orgid, count(orgid) from public.log_login where date(client_timestamp) = '2017-01-29' group by orgid"
     );
-    // console.table(noOfOrgLogInToday.rows);
     const noOfOrgLogInAll = await client.query(
       "select orgid, count(orgid) from public.log_login group by orgid"
     );
+    const noOfOrg = await client.query("SELECT * FROM public.organisations");
+    const noOfUser = await client.query("SELECT * FROM public.users");
     result.noOfOrgLogInToday = noOfOrgLogInToday.rowCount;
     result.noOfOrgLogInAll = noOfOrgLogInAll.rowCount;
+    result.noOfOrg = noOfOrg.rowCount;
+    result.noOfUser = noOfUser.rowCount;
+
     res.render("dashboard_super", { retrievedData: result });
   } catch (ex) {
     console.log(`something went wrong ${ex}`);
