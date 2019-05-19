@@ -26,14 +26,31 @@ pool.on("error", (err, client) => {
 router.get("/dashboard_super/:id", async function(req, res) {
   const client = await pool.connect();
   try {
-    let result = {
-      noOfOrgLogInToday: 0,
-      noOfOrgLogInAll: 0,
-      noOfOrg: 0,
-      noOfUser: 0,
-      array: [
+    const result = {
+      cards: [
         {
-          type: "node"
+          name: "NO. OF ORGANIZATIONS LOGGED IN TODAY",
+          number: 0,
+          color: "primary",
+          fa: "sign-in-alt"
+        },
+        {
+          name: "NO. OF ORGANIZATIONS LOGGED IN THIS MONTH",
+          number: 0,
+          color: "success",
+          fa: "sign-in-alt"
+        },
+        {
+          name: "TOTAL NO. OF ORGANIZATIONS",
+          number: 0,
+          color: "info",
+          fa: "users"
+        },
+        {
+          name: "TOTAL NO. OF USERS",
+          number: 0,
+          color: "warning",
+          fa: "user"
         }
       ]
     };
@@ -47,12 +64,16 @@ router.get("/dashboard_super/:id", async function(req, res) {
     );
     const noOfOrg = await client.query("SELECT * FROM public.organisations");
     const noOfUser = await client.query("SELECT * FROM public.users");
-    result.noOfOrgLogInToday = noOfOrgLogInToday.rowCount;
-    result.noOfOrgLogInAll = noOfOrgLogInAll.rowCount;
-    result.noOfOrg = noOfOrg.rowCount;
-    result.noOfUser = noOfUser.rowCount;
-
-    res.render("dashboard_super", { retrievedData: result });
+    const cards = [noOfOrgLogInToday, noOfOrgLogInAll, noOfOrg, noOfUser];
+    result.cards.forEach((card, index) => {
+      return (result.cards[index].number = cards[index].rowCount);
+    });
+    // result.cards.noOfOrgLogInToday = noOfOrgLogInToday.rowCount;
+    // result.cards.noOfOrgLogInAll = noOfOrgLogInAll.rowCount;
+    // result.cards.noOfOrg = noOfOrg.rowCount;
+    // result.cards.noOfUser = noOfUser.rowCount;
+    console.log("result: ", result.cards);
+    res.render("dashboard_super", { cards: result.cards });
   } catch (ex) {
     console.log(`something went wrong ${ex}`);
   } finally {
