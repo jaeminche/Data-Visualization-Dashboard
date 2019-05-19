@@ -19,8 +19,16 @@ router.get("/dashboard_super/:id", async function(req, res) {
       let queriedData = await client.query(card.query);
       card.number = queriedData.rowCount;
     }
-    console.log("retrieved: ", retrieved.cards);
-    res.render("dashboard_super", { cards: retrieved.cards });
+    // console.log("retrieved: ", retrieved.cards);
+    const pieData = await client.query(
+      "SELECT name, distance, duration, thema_city, thema_countryside, thema_coast, thema_mountains, thema_trip, thema_tdf, count, points, score, votes FROM sharedroutes ORDER BY votes DESC LIMIT 10"
+    );
+    console.log("pieData: ", pieData.rows);
+    res.render("dashboard_super", {
+      cards: retrieved.cards,
+      pie: pieData.rows,
+      pieColors: retrieved.pieColors
+    });
   } catch (ex) {
     console.log(`something went wrong ${ex}`);
   } finally {

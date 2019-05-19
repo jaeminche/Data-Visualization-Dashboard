@@ -60,6 +60,18 @@ const retrieved = {
       //   todo:
       query: "SELECT * FROM public.users"
     }
+  ],
+  pieColors: [
+    "primary",
+    "success",
+    "info",
+    "warning",
+    "dark",
+    "danger",
+    "secondary",
+    "light",
+    "white",
+    "muted"
   ]
 };
 
