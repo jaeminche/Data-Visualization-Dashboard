@@ -1,4 +1,4 @@
-const retrieved = {
+const dataModel = {
   cards: [
     {
       name: "NO. OF ORGANIZATIONS LOGGED IN TODAY",
@@ -35,7 +35,7 @@ const retrieved = {
       color: "primary",
       fa: "bicycle",
       query:
-        "SELECT userid FROM public.log_startcycling WHERE date(client_timestamp) = '2017-01-29' GROUP BY userid"
+        "SELECT userid FROM public.log_startcycling WHERE date(client_timestamp) = '2017-01-30' GROUP BY userid"
     },
     {
       name: "NO. OF ACTIVE USERS THIS MONTH",
@@ -61,6 +61,8 @@ const retrieved = {
       query: "SELECT * FROM public.users"
     }
   ],
+  pieQuery:
+    "SELECT name, distance, duration, thema_city, thema_countryside, thema_coast, thema_mountains, thema_trip, thema_tdf, count, points, score, votes FROM sharedroutes ORDER BY votes DESC LIMIT 10",
   pieColors: [
     "primary",
     "success",
@@ -75,4 +77,4 @@ const retrieved = {
   ]
 };
 
-module.exports = retrieved;
+module.exports = dataModel;

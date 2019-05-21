@@ -1,3 +1,4 @@
+console.log("chart-piedemo called");
 // Set new default font family and font color to mimic Bootstrap's default styling
 (Chart.defaults.global.defaultFontFamily = "Nunito"),
   '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
@@ -5,20 +6,22 @@ Chart.defaults.global.defaultFontColor = "#858796";
 
 // Pie Chart Example
 var ctx = document.getElementById("myPieChart");
+
 var myPieChart = new Chart(ctx, {
   type: "doughnut",
   data: {
-    labels: ["City", "Countryside", "Mountain", "Coast", "Trip", "TDF"],
+    labels: pieData.map(route => route.name),
     datasets: [
       {
-        data: [30, 20, 15, 10, 15, 10],
+        data: pieData.map(route => route.votes),
         backgroundColor: [
           "#4e73df",
           "#1cc88a",
           "#36b9cc",
-          "#4e73df",
-          "#1cc88a",
-          "#36b9cc"
+          "#f6c23e",
+          "#eaecf4",
+          "#e74a3b",
+          "#d1d3e2"
         ],
         hoverBackgroundColor: [
           "#2e59d9",
@@ -26,7 +29,8 @@ var myPieChart = new Chart(ctx, {
           "#2c9faf",
           "#2e59d9",
           "#17a673",
-          "#2c9faf"
+          "#2c9faf",
+          "#2e59d9"
         ],
         hoverBorderColor: "rgba(234, 236, 244, 1)"
       }

@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { Pool, Client } = require("pg");
 const client_config = require("../config/client");
-const retrieved = require("../public/js/retrieved");
+const dataModel = require("../public/js/dataModel");
 
 const pool = new Pool(client_config);
 // const client = new Client(client_config);
@@ -14,20 +14,18 @@ pool.on("error", (err, client) => {
 router.get("/dashboard_super/:id", async function(req, res) {
   const client = await pool.connect();
   try {
-    for await (let card of retrieved.cards) {
+    for await (let card of dataModel.cards) {
       // queries
-      let queriedData = await client.query(card.query);
-      card.number = queriedData.rowCount;
+      let resCard = await client.query(card.query);
+      card.number = resCard.rowCount;
     }
-    // console.log("retrieved: ", retrieved.cards);
-    const pieData = await client.query(
-      "SELECT name, distance, duration, thema_city, thema_countryside, thema_coast, thema_mountains, thema_trip, thema_tdf, count, points, score, votes FROM sharedroutes ORDER BY votes DESC LIMIT 10"
-    );
-    console.log("pieData: ", pieData.rows);
+
+    const resPie = await client.query(dataModel.pieQuery);
+
     res.render("dashboard_super", {
-      cards: retrieved.cards,
-      pie: pieData.rows,
-      pieColors: retrieved.pieColors
+      cards: dataModel.cards,
+      pie: resPie.rows,
+      pieColors: dataModel.pieColors
     });
   } catch (ex) {
     console.log(`something went wrong ${ex}`);
@@ -39,7 +37,7 @@ router.get("/dashboard_super/:id", async function(req, res) {
 
 // router.get("/dashboard_org/:id", async function(req, res) {
 //   try {
-//     //   const retrieved = {
+//     //   const dataModel = {
 //     //     "version": "0.2.0",
 //     //     "array": [
 //     //         {
@@ -56,7 +54,7 @@ router.get("/dashboard_super/:id", async function(req, res) {
 //       "select orgid, count(orgid) from public.log_login where date(client_timestamp) = '2017-01-28' group by orgid"
 //     );
 //     console.table(noOfOrgLogInToday.rows);
-//     res.render("dashboard_org", { retrievedData: noOfOrgLogInToday.rowCount });
+//     res.render("dashboard_org", { dataModelData: noOfOrgLogInToday.rowCount });
 //   } catch (ex) {
 //     console.log(`something went wrong ${ex}`);
 //   } finally {
