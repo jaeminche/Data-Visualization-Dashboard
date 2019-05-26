@@ -22,10 +22,37 @@ router.get("/dashboard_super/:id", async function(req, res) {
 
     const resPie = await client.query(dataModel.pieQuery);
 
+    const resOrg = await client.query(dataModel.listOrg);
+    console.log("resorg: ", resOrg);
     res.render("dashboard_super", {
       cards: dataModel.cards,
       pie: resPie.rows,
-      pieColors: dataModel.pieColors
+      pieColors: dataModel.pieColors,
+      orgs: resOrg.rows
+    });
+  } catch (ex) {
+    console.log(`something went wrong ${ex}`);
+  } finally {
+    await client.release();
+    console.log("Client disconnected");
+  }
+});
+
+router.get("/dashboard_org/:uuid", async function(req, res) {
+  const client = await pool.connect();
+  try {
+    for await (let card of dataModel.cards) {
+      // queries
+      let resCard = await client.query(card.query);
+      card.number = resCard.rowCount;
+    }
+
+    const resOrg = await client.query(dataModel.listOrg);
+    console.log("resorg: ", resOrg);
+
+    res.render("dashboard_org", {
+      cards: dataModel.cards,
+      orgs: resOrg.rows
     });
   } catch (ex) {
     console.log(`something went wrong ${ex}`);

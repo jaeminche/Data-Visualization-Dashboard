@@ -74,7 +74,8 @@ const dataModel = {
     "light",
     "white",
     "muted"
-  ]
+  ],
+  listOrg: "SELECT name, id, uuid FROM public.organisations"
 };
 
 module.exports = dataModel;
