@@ -2,7 +2,8 @@ const express = require("express");
 const router = express.Router({ mergeParams: true });
 const { Pool, Client } = require("pg");
 const client_config = require("../config/client");
-const dataModel = require("../public/js/dataModel");
+const dataModel = require("../db/dataModel");
+const db = require("../db/index");
 
 const pool = new Pool(client_config);
 // const client = new Client(client_config);
@@ -15,6 +16,7 @@ pool.on("error", (err, client) => {
 router.get("/dashboard/:uuid", async function(req, res) {
   const client = await pool.connect();
   try {
+    // TODO: later connect this with db.query > const query = client.query.bind(client);
     const { rows } = await client.query(
       "SELECT uuid, id, name, language, img, active, superadmin FROM public.organisations WHERE uuid = $1",
       [req.params.uuid]
@@ -22,67 +24,79 @@ router.get("/dashboard/:uuid", async function(req, res) {
     if (rows[0].superadmin === false) {
       dataModel.loginType = "org";
     } else {
-      dataModel.loginType = "superadmin";
+      dataModel.loginType = "superAdmin";
     }
+    console.log(dataModel.loginType);
+
     for await (let card of dataModel.cards) {
       // queries
-      let resCard = await client.query(card.query);
-      card.number = resCard.rowCount;
-    }
-
-    const resPie = await client.query(dataModel.pieQuery);
-
-    const resOrgsList = await client.query(dataModel.listOrg);
-    // console.log("resorgsList: ", resOrgsList);
-
-    res.render("dashboard", {
-      cards: dataModel.cards,
-      pie: resPie.rows,
-      pieColors: dataModel.pieColors,
-      orgs: resOrgsList.rows
-    });
-  } catch (ex) {
-    console.log(`something went wrong ${ex}`);
-  } finally {
-    await client.release();
-    console.log("Client disconnected");
-  }
-});
-
-router.get("/dashboard_org/:uuid", async function(req, res) {
-  const client = await pool.connect();
-  try {
-    state = "orgAdmin";
-    for await (let card of dataModel.cards) {
-      // queries
-      if (card.auth === "orgAdmin") {
+      if (card.auth.includes(dataModel.loginType)) {
         let resCard = await client.query(card.query);
         card.number = resCard.rowCount;
       }
     }
 
-    const resOrgsList = await client.query(dataModel.listOrg);
+    const resPie = await client.query(dataModel.pie[0].query);
 
-    // const resOrg = await client.query("");
-    // let orgName;
-    for (let i = 0; i < resOrgsList.rows.length; i++) {
-      if (resOrgsList.rows[i].uuid === req.params.uuid) {
-        break;
-      }
-    }
-    res.render("dashboard_org", {
-      state: state,
+    const resOrgsList = await client.query(dataModel.listOrg);
+    // for (let i = 0; i < resOrgsList.rows.length; i++) {
+    //   if (resOrgsList.rows[i].uuid === req.params.uuid) {
+    //     break;
+    //   }
+    // }
+    // console.log("resorgsList: ", resOrgsList);
+    let data = {
+      loginType: dataModel.loginType,
       cards: dataModel.cards,
+      pie: resPie.rows,
+      pieData: dataModel.pie[0],
       orgs: resOrgsList.rows
-      // org: resOrg.rows
-    });
+    };
+
+    res.render("dashboard", data);
   } catch (ex) {
+    // await client.query('ROLLBACK')
     console.log(`something went wrong ${ex}`);
   } finally {
     await client.release();
     console.log("Client disconnected");
   }
 });
+
+// router.get("/dashboard_org/:uuid", async function(req, res) {
+//   const client = await pool.connect();
+//   try {
+//     state = "orgAdmin";
+//     for await (let card of dataModel.cards) {
+//       // queries
+//       if (card.auth === "orgAdmin") {
+//         let resCard = await client.query(card.query);
+//         card.number = resCard.rowCount;
+//       }
+//     }
+
+//     const resOrgsList = await client.query(dataModel.listOrg);
+
+//     // const resOrg = await client.query("");
+//     // let orgName;
+//     for (let i = 0; i < resOrgsList.rows.length; i++) {
+//       if (resOrgsList.rows[i].uuid === req.params.uuid) {
+//         break;
+//       }
+//     }
+//     res.render("dashboard_org", {
+//       state: state,
+//       cards: dataModel.cards,
+//       orgs: resOrgsList.rows
+//       // org: resOrg.rows
+//     });
+//   } catch (ex) {
+//     console.log(`something went wrong ${ex}`);
+//   } finally {
+//     await client.release();
+//     console.log("Client disconnected");
+//   }
+// });
 
 // router.get("/dashboard_org/:id", async function(req, res) {
 //   try {

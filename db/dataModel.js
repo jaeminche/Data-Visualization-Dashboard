@@ -8,7 +8,7 @@ const dataModel = {
       fa: "sign-in-alt",
       query:
         "select orgid, count(orgid) from public.log_login where date(client_timestamp) = '2017-01-29' GROUP BY orgid",
-      auth: "superAdmin"
+      auth: ["superAdmin"]
     },
     {
       name: "NO. OF ORGANIZATIONS LOGGED IN THIS MONTH",
@@ -16,7 +16,7 @@ const dataModel = {
       color: "info",
       fa: "sign-in-alt",
       query: "select orgid, count(orgid) from public.log_login GROUP BY orgid",
-      auth: "superAdmin"
+      auth: ["superAdmin"]
     },
     {
       name: "TOTAL NO. OF ORGANIZATIONS",
@@ -24,7 +24,7 @@ const dataModel = {
       color: "warning",
       fa: "user",
       query: "SELECT * FROM public.organisations",
-      auth: "superAdmin"
+      auth: ["superAdmin"]
     },
     {
       name: "TOTAL NO. OF USERS",
@@ -32,7 +32,7 @@ const dataModel = {
       color: "warning",
       fa: "users",
       query: "SELECT * FROM public.users",
-      auth: "superAdmin"
+      auth: ["superAdmin"]
     },
     {
       name: "NO. OF ACTIVE USERS TODAY",
@@ -41,7 +41,7 @@ const dataModel = {
       fa: "bicycle",
       query:
         "SELECT userid FROM public.log_startcycling WHERE date(client_timestamp) = '2017-01-30' GROUP BY userid",
-      auth: "orgAdmin"
+      auth: ["superAdmin", "org"]
     },
     {
       name: "NO. OF ACTIVE USERS THIS MONTH",
@@ -49,7 +49,7 @@ const dataModel = {
       color: "info",
       fa: "bicycle",
       query: "SELECT userid FROM public.log_startcycling GROUP BY userid",
-      auth: "orgAdmin"
+      auth: ["superAdmin", "org"]
     },
     {
       name: "AVERAGE CYCLING TIME THIS WEEK",
@@ -58,7 +58,7 @@ const dataModel = {
       fa: "stopwatch",
       //   todo:
       query: "SELECT * FROM public.users",
-      auth: "orgAdmin"
+      auth: ["superAdmin", "org"]
     },
     {
       name: "AVERAGE CYCLING TIME THIS MONTH",
@@ -67,22 +67,27 @@ const dataModel = {
       fa: "stopwatch",
       //   todo:
       query: "SELECT * FROM public.users",
-      auth: "orgAdmin"
+      auth: ["superAdmin", "org"]
     }
   ],
-  pieQuery:
-    "SELECT name, distance, duration, thema_city, thema_countryside, thema_coast, thema_mountains, thema_trip, thema_tdf, count, points, score, votes FROM sharedroutes ORDER BY votes DESC LIMIT 10",
-  pieColors: [
-    "primary",
-    "success",
-    "info",
-    "warning",
-    "dark",
-    "danger",
-    "secondary",
-    "light",
-    "white",
-    "muted"
+  pie: [
+    {
+      query:
+        "SELECT name, distance, duration, thema_city, thema_countryside, thema_coast, thema_mountains, thema_trip, thema_tdf, count, points, score, votes FROM sharedroutes ORDER BY votes DESC LIMIT 10",
+      colors: [
+        "primary",
+        "success",
+        "info",
+        "warning",
+        "dark",
+        "danger",
+        "secondary",
+        "light",
+        "white",
+        "muted"
+      ],
+      auth: ["superAdmin"]
+    }
   ],
   listOrg: "SELECT name, id, uuid FROM public.organisations"
   // getOrg: "SELECT "
