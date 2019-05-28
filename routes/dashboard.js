@@ -1,19 +1,29 @@
 const express = require("express");
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 const { Pool, Client } = require("pg");
 const client_config = require("../config/client");
 const dataModel = require("../public/js/dataModel");
 
 const pool = new Pool(client_config);
 // const client = new Client(client_config);
+
 pool.on("error", (err, client) => {
   console.error("Unexpected error on idle client", err);
   process.exit(-1);
 });
 
-router.get("/dashboard_super/:id", async function(req, res) {
+router.get("/dashboard/:uuid", async function(req, res) {
   const client = await pool.connect();
   try {
+    const { rows } = await client.query(
+      "SELECT uuid, id, name, language, img, active, superadmin FROM public.organisations WHERE uuid = $1",
+      [req.params.uuid]
+    );
+    if (rows[0].superadmin === false) {
+      dataModel.loginType = "org";
+    } else {
+      dataModel.loginType = "superadmin";
+    }
     for await (let card of dataModel.cards) {
       // queries
       let resCard = await client.query(card.query);
@@ -22,13 +32,14 @@ router.get("/dashboard_super/:id", async function(req, res) {
 
     const resPie = await client.query(dataModel.pieQuery);
 
-    const resOrg = await client.query(dataModel.listOrg);
-    console.log("resorg: ", resOrg);
-    res.render("dashboard_super", {
+    const resOrgsList = await client.query(dataModel.listOrg);
+    // console.log("resorgsList: ", resOrgsList);
+
+    res.render("dashboard", {
       cards: dataModel.cards,
       pie: resPie.rows,
       pieColors: dataModel.pieColors,
-      orgs: resOrg.rows
+      orgs: resOrgsList.rows
     });
   } catch (ex) {
     console.log(`something went wrong ${ex}`);
@@ -41,18 +52,29 @@ router.get("/dashboard_super/:id", async function(req, res) {
 router.get("/dashboard_org/:uuid", async function(req, res) {
   const client = await pool.connect();
   try {
+    state = "orgAdmin";
     for await (let card of dataModel.cards) {
       // queries
-      let resCard = await client.query(card.query);
-      card.number = resCard.rowCount;
+      if (card.auth === "orgAdmin") {
+        let resCard = await client.query(card.query);
+        card.number = resCard.rowCount;
+      }
     }
 
-    const resOrg = await client.query(dataModel.listOrg);
-    console.log("resorg: ", resOrg);
+    const resOrgsList = await client.query(dataModel.listOrg);
 
+    // const resOrg = await client.query("");
+    // let orgName;
+    for (let i = 0; i < resOrgsList.rows.length; i++) {
+      if (resOrgsList.rows[i].uuid === req.params.uuid) {
+        break;
+      }
+    }
     res.render("dashboard_org", {
+      state: state,
       cards: dataModel.cards,
-      orgs: resOrg.rows
+      orgs: resOrgsList.rows
+      // org: resOrg.rows
     });
   } catch (ex) {
     console.log(`something went wrong ${ex}`);

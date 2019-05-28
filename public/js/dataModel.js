@@ -1,4 +1,5 @@
 const dataModel = {
+  loginType: "user", // superadmin || org || user
   cards: [
     {
       name: "NO. OF ORGANIZATIONS LOGGED IN TODAY",
@@ -6,28 +7,32 @@ const dataModel = {
       color: "primary",
       fa: "sign-in-alt",
       query:
-        "select orgid, count(orgid) from public.log_login where date(client_timestamp) = '2017-01-29' GROUP BY orgid"
+        "select orgid, count(orgid) from public.log_login where date(client_timestamp) = '2017-01-29' GROUP BY orgid",
+      auth: "superAdmin"
     },
     {
       name: "NO. OF ORGANIZATIONS LOGGED IN THIS MONTH",
       number: 0,
       color: "info",
       fa: "sign-in-alt",
-      query: "select orgid, count(orgid) from public.log_login GROUP BY orgid"
+      query: "select orgid, count(orgid) from public.log_login GROUP BY orgid",
+      auth: "superAdmin"
     },
     {
       name: "TOTAL NO. OF ORGANIZATIONS",
       number: 0,
       color: "warning",
       fa: "user",
-      query: "SELECT * FROM public.organisations"
+      query: "SELECT * FROM public.organisations",
+      auth: "superAdmin"
     },
     {
       name: "TOTAL NO. OF USERS",
       number: 0,
       color: "warning",
       fa: "users",
-      query: "SELECT * FROM public.users"
+      query: "SELECT * FROM public.users",
+      auth: "superAdmin"
     },
     {
       name: "NO. OF ACTIVE USERS TODAY",
@@ -35,14 +40,16 @@ const dataModel = {
       color: "primary",
       fa: "bicycle",
       query:
-        "SELECT userid FROM public.log_startcycling WHERE date(client_timestamp) = '2017-01-30' GROUP BY userid"
+        "SELECT userid FROM public.log_startcycling WHERE date(client_timestamp) = '2017-01-30' GROUP BY userid",
+      auth: "orgAdmin"
     },
     {
       name: "NO. OF ACTIVE USERS THIS MONTH",
       number: 0,
       color: "info",
       fa: "bicycle",
-      query: "SELECT userid FROM public.log_startcycling GROUP BY userid"
+      query: "SELECT userid FROM public.log_startcycling GROUP BY userid",
+      auth: "orgAdmin"
     },
     {
       name: "AVERAGE CYCLING TIME THIS WEEK",
@@ -50,7 +57,8 @@ const dataModel = {
       color: "success",
       fa: "stopwatch",
       //   todo:
-      query: "SELECT * FROM public.users"
+      query: "SELECT * FROM public.users",
+      auth: "orgAdmin"
     },
     {
       name: "AVERAGE CYCLING TIME THIS MONTH",
@@ -58,7 +66,8 @@ const dataModel = {
       color: "success",
       fa: "stopwatch",
       //   todo:
-      query: "SELECT * FROM public.users"
+      query: "SELECT * FROM public.users",
+      auth: "orgAdmin"
     }
   ],
   pieQuery:
@@ -76,6 +85,7 @@ const dataModel = {
     "muted"
   ],
   listOrg: "SELECT name, id, uuid FROM public.organisations"
+  // getOrg: "SELECT "
 };
 
 module.exports = dataModel;
