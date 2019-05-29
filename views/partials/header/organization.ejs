@@ -1,8 +1,0 @@
-<div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-    <div class="bg-white py-2 collapse-inner rounded">
-    <h6 class="collapse-header">Select Organization:</h6>
-    <% orgs.forEach(org => { %>
-        <a class="collapse-item" href="/dashboard_org/<%= org.uuid %>"><%= org.name %> <%= org.id %></a>
-    <% }) %>
-    </div>
-</div>

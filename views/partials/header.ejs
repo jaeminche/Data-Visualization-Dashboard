@@ -74,8 +74,15 @@
           <i class="fas fa-fw fa-clinic-medical"></i>
           <span>ORGANIZATIONS</span>
         </a>
-
-        <% include ./header/organization %>
+        <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+          <div class="bg-white py-2 collapse-inner rounded">
+          <% if (typeof orgs != 'undefined') { %>
+            <% include ./menus/organization %>
+          <% } else { %>
+            <h6 class="collapse-header">Login required!</h6>
+          <% } %>
+          </div>
+        </div>
         
       </li>
 
@@ -87,11 +94,15 @@
         </a>
         <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
           <div class="bg-white py-2 collapse-inner rounded">
+          <% if (typeof orgs != 'undefined') { %>
             <h6 class="collapse-header">SELECT USER</h6>
             <a class="collapse-item" href="utilities-color.html">Ben Folds</a>
             <a class="collapse-item" href="utilities-border.html">Elliot Smith</a>
             <a class="collapse-item" href="utilities-animation.html">David Bowie</a>
             <a class="collapse-item" href="utilities-other.html">Damien Rice</a>
+          <% } else { %>
+            <h6 class="collapse-header">Login required!</h6>
+          <% } %>
           </div>
         </div>
       </li>
