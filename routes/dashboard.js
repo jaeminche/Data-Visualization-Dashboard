@@ -17,6 +17,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
   const client = await pool.connect();
   try {
     // TODO: later connect this with db.query > const query = client.query.bind(client);
+    let resOrgList;
     const { rows } = await client.query(
       "SELECT uuid, id, name, language, img, active, superadmin FROM public.organisations WHERE uuid = $1",
       [req.params.uuid]
@@ -24,35 +25,41 @@ router.get("/dashboard/:uuid", async function(req, res) {
     if (rows[0].superadmin === false) {
       dataModel.loginType = "org";
     } else {
-      dataModel.loginType = "superAdmin";
+      dataModel.loginType = "superadmin";
     }
     console.log(dataModel.loginType);
 
     for await (let card of dataModel.cards) {
-      // queries
       if (card.auth.includes(dataModel.loginType)) {
-        let resCard = await client.query(card.query);
+        const resCard = await client.query(card.query);
         card.number = resCard.rowCount;
       }
     }
 
     const resPie = await client.query(dataModel.pie[0].query);
 
-    const resOrgsList = await client.query(dataModel.listOrg);
-    // for (let i = 0; i < resOrgsList.rows.length; i++) {
-    //   if (resOrgsList.rows[i].uuid === req.params.uuid) {
+    // if (req.user.id === req.params.uudi)
+    if (dataModel.loginType === "org") {
+      resOrgList = await client.query(dataModel.orgList.findOne.query, [
+        req.params.uuid
+      ]);
+    } else {
+      resOrgList = await client.query(dataModel.orgList.findAll.query);
+    }
+    // for (let i = 0; i < resOrgList.rows.length; i++) {
+    //   if (resOrgList.rows[i].uuid === req.params.uuid) {
     //     break;
     //   }
     // }
-    // console.log("resorgsList: ", resOrgsList);
     let data = {
       loginType: dataModel.loginType,
       cards: dataModel.cards,
       pie: resPie.rows,
       pieData: dataModel.pie[0],
-      orgs: resOrgsList.rows
+      orgs: resOrgList.rows
     };
-
+    console.log("req.user: ", req.user);
+    console.log("req.params: ", req.params);
     res.render("dashboard", data);
   } catch (ex) {
     // await client.query('ROLLBACK')
@@ -75,19 +82,19 @@ router.get("/dashboard/:uuid", async function(req, res) {
 //       }
 //     }
 
-//     const resOrgsList = await client.query(dataModel.listOrg);
+//     const resOrgList = await client.query(dataModel.listOrg);
 
 //     // const resOrg = await client.query("");
 //     // let orgName;
-//     for (let i = 0; i < resOrgsList.rows.length; i++) {
-//       if (resOrgsList.rows[i].uuid === req.params.uuid) {
+//     for (let i = 0; i < resOrgList.rows.length; i++) {
+//       if (resOrgList.rows[i].uuid === req.params.uuid) {
 //         break;
 //       }
 //     }
 //     res.render("dashboard_org", {
 //       state: state,
 //       cards: dataModel.cards,
-//       orgs: resOrgsList.rows
+//       orgs: resOrgList.rows
 //       // org: resOrg.rows
 //     });
 //   } catch (ex) {

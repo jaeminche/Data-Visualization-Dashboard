@@ -8,7 +8,7 @@ const dataModel = {
       fa: "sign-in-alt",
       query:
         "select orgid, count(orgid) from public.log_login where date(client_timestamp) = '2017-01-29' GROUP BY orgid",
-      auth: ["superAdmin"]
+      auth: ["superadmin"]
     },
     {
       name: "NO. OF ORGANIZATIONS LOGGED IN THIS MONTH",
@@ -16,7 +16,7 @@ const dataModel = {
       color: "info",
       fa: "sign-in-alt",
       query: "select orgid, count(orgid) from public.log_login GROUP BY orgid",
-      auth: ["superAdmin"]
+      auth: ["superadmin"]
     },
     {
       name: "TOTAL NO. OF ORGANIZATIONS",
@@ -24,7 +24,7 @@ const dataModel = {
       color: "warning",
       fa: "user",
       query: "SELECT * FROM public.organisations",
-      auth: ["superAdmin"]
+      auth: ["superadmin"]
     },
     {
       name: "TOTAL NO. OF USERS",
@@ -32,7 +32,7 @@ const dataModel = {
       color: "warning",
       fa: "users",
       query: "SELECT * FROM public.users",
-      auth: ["superAdmin"]
+      auth: ["superadmin"]
     },
     {
       name: "NO. OF ACTIVE USERS TODAY",
@@ -41,7 +41,7 @@ const dataModel = {
       fa: "bicycle",
       query:
         "SELECT userid FROM public.log_startcycling WHERE date(client_timestamp) = '2017-01-30' GROUP BY userid",
-      auth: ["superAdmin", "org"]
+      auth: ["superadmin", "org"]
     },
     {
       name: "NO. OF ACTIVE USERS THIS MONTH",
@@ -49,7 +49,7 @@ const dataModel = {
       color: "info",
       fa: "bicycle",
       query: "SELECT userid FROM public.log_startcycling GROUP BY userid",
-      auth: ["superAdmin", "org"]
+      auth: ["superadmin", "org"]
     },
     {
       name: "AVERAGE CYCLING TIME THIS WEEK",
@@ -58,7 +58,7 @@ const dataModel = {
       fa: "stopwatch",
       //   todo:
       query: "SELECT * FROM public.users",
-      auth: ["superAdmin", "org"]
+      auth: ["superadmin", "org"]
     },
     {
       name: "AVERAGE CYCLING TIME THIS MONTH",
@@ -67,7 +67,7 @@ const dataModel = {
       fa: "stopwatch",
       //   todo:
       query: "SELECT * FROM public.users",
-      auth: ["superAdmin", "org"]
+      auth: ["superadmin", "org"]
     }
   ],
   pie: [
@@ -86,10 +86,20 @@ const dataModel = {
         "white",
         "muted"
       ],
-      auth: ["superAdmin"]
+      auth: ["superadmin"]
     }
   ],
-  listOrg: "SELECT name, id, uuid FROM public.organisations"
+  orgList: {
+    findAll: {
+      query: "SELECT name, id, uuid FROM public.organisations",
+      auth: ["superadmin"]
+    },
+    findOne: {
+      query: "SELECT name, id, uuid FROM public.organisations WHERE uuid = $1",
+      auth: ["superadmin", "org"]
+    }
+  }
+
   // getOrg: "SELECT "
 };
 
