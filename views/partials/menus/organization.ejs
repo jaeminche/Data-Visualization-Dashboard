@@ -1,4 +1,4 @@
 <h6 class="collapse-header">Select Organization:</h6>
 <% orgs.forEach(org => { %>
-    <a class="collapse-item" href="/dashboard_org/<%= org.uuid %>"><%= org.name %> <%= org.id %></a>
+    <a class="collapse-item" href="/dashboard/<%= org.uuid %>"><%= org.name %> <%= org.id %></a>
 <% }) %>
