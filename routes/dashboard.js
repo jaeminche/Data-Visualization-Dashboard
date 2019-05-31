@@ -17,7 +17,9 @@ router.get("/dashboard/:uuid", async function(req, res) {
   const client = await pool.connect();
   try {
     // TODO: later connect this with db.query > const query = client.query.bind(client);
+    // TODO: this, yet, is only for organization logins including superadmin and orgs, but not users' logins.
     let resOrgList;
+    // fetch the account's organisation data, and check if it's superadmin
     const { rows } = await client.query(
       "SELECT uuid, id, name, language, img, active, superadmin FROM public.organisations WHERE uuid = $1",
       [req.params.uuid]
@@ -29,6 +31,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
     }
     console.log(dataModel.loginType);
 
+    // fetch the number cards data that belongs to the account
     for await (let card of dataModel.cards[`for${dataModel.loginType}`]) {
       let resCard;
       dataModel.loginType === "superadmin"
@@ -37,9 +40,11 @@ router.get("/dashboard/:uuid", async function(req, res) {
       card.number = resCard.rowCount;
     }
 
+    // fetch top 10 votes' rows in sharedroutes table for pie graph
     const resPie = await client.query(dataModel.pie[0].query);
 
-    // TODO: change this to if (this session's id != superadmin && ~~~)
+    // TODO: make this session-able and change it to if (this session's id != superadmin && ~~~)
+    // fetch organisations' list in accordance with the account's logintype
     if (dataModel.loginType === "org") {
       resOrgList = await client.query(dataModel.orgList.findOne.query, [
         req.params.uuid
@@ -47,11 +52,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
     } else {
       resOrgList = await client.query(dataModel.orgList.findAll.query);
     }
-    // for (let i = 0; i < resOrgList.rows.length; i++) {
-    //   if (resOrgList.rows[i].uuid === req.params.uuid) {
-    //     break;
-    //   }
-    // }
+
     let data = {
       loginType: dataModel.loginType,
       cards: dataModel.cards[`for${dataModel.loginType}`],
@@ -70,6 +71,12 @@ router.get("/dashboard/:uuid", async function(req, res) {
     console.log("Client disconnected");
   }
 });
+
+// for (let i = 0; i < resOrgList.rows.length; i++) {
+//   if (resOrgList.rows[i].uuid === req.params.uuid) {
+//     break;
+//   }
+// }
 
 // router.get("/dashboard_org/:uuid", async function(req, res) {
 //   const client = await pool.connect();
