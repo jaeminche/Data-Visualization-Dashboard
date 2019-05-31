@@ -76,11 +76,20 @@
         </a>
         <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
           <div class="bg-white py-2 collapse-inner rounded">
+
+          <%# ========  ORGANIZATION LIST DROPDOWN ======== %>
           <% if (typeof orgs != 'undefined') { %>
-            <% include ./menus/organization %>
+            <%# include ./menus/organization %>
+
+            <h6 class="collapse-header">Select Organization:</h6>
+            <% orgs.forEach(org => { %>
+                <a class="collapse-item" href="/dashboard/<%= org.uuid %>"><%= org.name %> <%= org.id %></a>
+            <% }) %>
+
           <% } else { %>
             <h6 class="collapse-header">Login required!</h6>
           <% } %>
+
           </div>
         </div>
         
@@ -94,12 +103,15 @@
         </a>
         <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
           <div class="bg-white py-2 collapse-inner rounded">
+
+          <%# ======== USERS LIST DROPDOWN ======== %>
           <% if (typeof orgs != 'undefined') { %>
             <h6 class="collapse-header">SELECT USER</h6>
-            <a class="collapse-item" href="utilities-color.html">Ben Folds</a>
-            <a class="collapse-item" href="utilities-border.html">Elliot Smith</a>
-            <a class="collapse-item" href="utilities-animation.html">David Bowie</a>
-            <a class="collapse-item" href="utilities-other.html">Damien Rice</a>
+
+            <% users.forEach(user => { %>
+                <a class="collapse-item" href="/dashboard/<%= user.org_uuid %>/<%= user.user_uuid %>"><%= user.user_name %></a>
+            <% }) %>
+
           <% } else { %>
             <h6 class="collapse-header">Login required!</h6>
           <% } %>

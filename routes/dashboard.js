@@ -16,10 +16,10 @@ pool.on("error", (err, client) => {
 router.get("/dashboard/:uuid", async function(req, res) {
   const client = await pool.connect();
   try {
+    let resOrgList;
+    // fetch the account's organisation data, and check if it's superadmin.
     // TODO: later connect this with db.query > const query = client.query.bind(client);
     // TODO: this, yet, is only for organization logins including superadmin and orgs, but not users' logins.
-    let resOrgList;
-    // fetch the account's organisation data, and check if it's superadmin
     const { rows } = await client.query(
       "SELECT uuid, id, name, language, img, active, superadmin FROM public.organisations WHERE uuid = $1",
       [req.params.uuid]
@@ -43,8 +43,8 @@ router.get("/dashboard/:uuid", async function(req, res) {
     // fetch top 10 votes' rows in sharedroutes table for pie graph
     const resPie = await client.query(dataModel.pie[0].query);
 
-    // TODO: make this session-able and change it to if (this session's id != superadmin && ~~~)
     // fetch organisations' list in accordance with the account's logintype
+    // TODO: make this session-able and change it to if (this session's id != superadmin && ~~~)
     if (dataModel.loginType === "org") {
       resOrgList = await client.query(dataModel.orgList.findOne.query, [
         req.params.uuid
@@ -52,13 +52,19 @@ router.get("/dashboard/:uuid", async function(req, res) {
     } else {
       resOrgList = await client.query(dataModel.orgList.findAll.query);
     }
+    // fetch users' list that belongs only to the specific(uuid) org account
+    resUserList = await client.query(dataModel.userList.findAllForOrg.query, [
+      req.params.uuid
+    ]);
+    console.log("resUserList", resUserList);
 
     let data = {
       loginType: dataModel.loginType,
       cards: dataModel.cards[`for${dataModel.loginType}`],
       pie: resPie.rows,
       pieData: dataModel.pie[0],
-      orgs: resOrgList.rows
+      orgs: resOrgList.rows,
+      users: resUserList.rows
     };
     console.log("req.user: ", req.user);
     console.log("req.params: ", req.params);
@@ -70,6 +76,23 @@ router.get("/dashboard/:uuid", async function(req, res) {
     await client.release();
     console.log("Client disconnected");
   }
+});
+
+router.get("/dashboard/usernameupdate", async function(req, res) {
+  const client = await pool.connect();
+  const { rows } = await client.query("select * from users");
+  let index = 0;
+
+  for await (let row of rows) {
+    let rowid = row.id;
+    let roworgid = row.organisation;
+    client.query("UPDATE users SET name = $1 WHERE id = $2", [
+      `${roworgid.toString()}_${dataModel.names[index]}_${rowid.toString()}`,
+      rowid
+    ]);
+    index++;
+  }
+  res.redirect("/dashboard/5cce22c0-8bac-4662-b52c-cfa0504ec987");
 });
 
 // for (let i = 0; i < resOrgList.rows.length; i++) {
