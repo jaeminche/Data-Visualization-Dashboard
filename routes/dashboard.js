@@ -29,16 +29,17 @@ router.get("/dashboard/:uuid", async function(req, res) {
     }
     console.log(dataModel.loginType);
 
-    for await (let card of dataModel.cards) {
-      if (card.auth.includes(dataModel.loginType)) {
-        const resCard = await client.query(card.query);
-        card.number = resCard.rowCount;
-      }
+    for await (let card of dataModel.cards[`for${dataModel.loginType}`]) {
+      let resCard;
+      dataModel.loginType === "superadmin"
+        ? (resCard = await client.query(card.query))
+        : (resCard = await client.query(card.query, [rows[0].id]));
+      card.number = resCard.rowCount;
     }
 
     const resPie = await client.query(dataModel.pie[0].query);
 
-    // if (req.user.id === req.params.uudi)
+    // TODO: change this to if (this session's id != superadmin && ~~~)
     if (dataModel.loginType === "org") {
       resOrgList = await client.query(dataModel.orgList.findOne.query, [
         req.params.uuid
@@ -53,7 +54,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
     // }
     let data = {
       loginType: dataModel.loginType,
-      cards: dataModel.cards,
+      cards: dataModel.cards[`for${dataModel.loginType}`],
       pie: resPie.rows,
       pieData: dataModel.pie[0],
       orgs: resOrgList.rows
