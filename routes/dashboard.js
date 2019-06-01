@@ -78,6 +78,71 @@ router.get("/dashboard/:uuid", async function(req, res) {
   }
 });
 
+router.get("/dashboard/:uuid/:user_uuid %>", async function(req, res) {
+  const client = await pool.connect();
+  try {
+    let resOrgList;
+    // fetch the account's organisation data, and check if it's superadmin.
+    // TODO: later connect this with db.query > const query = client.query.bind(client);
+    // TODO: this, yet, is only for organization logins including superadmin and orgs, but not users' logins.
+    const { rows } = await client.query(
+      "SELECT uuid, id, name, language, img, active, superadmin FROM public.organisations WHERE uuid = $1",
+      [req.params.uuid]
+    );
+    if (rows[0].superadmin === false) {
+      dataModel.loginType = "org";
+    } else {
+      dataModel.loginType = "superadmin";
+    }
+    console.log(dataModel.loginType);
+
+    // fetch the number cards data that belongs to the account
+    for await (let card of dataModel.cards[`for${dataModel.loginType}`]) {
+      let resCard;
+      dataModel.loginType === "superadmin"
+        ? (resCard = await client.query(card.query))
+        : (resCard = await client.query(card.query, [rows[0].id]));
+      card.number = resCard.rowCount;
+    }
+
+    // fetch top 10 votes' rows in sharedroutes table for pie graph
+    const resPie = await client.query(dataModel.pie[0].query);
+
+    // fetch organisations' list in accordance with the account's logintype
+    // TODO: make this session-able and change it to if (this session's id != superadmin && ~~~)
+    if (dataModel.loginType === "org") {
+      resOrgList = await client.query(dataModel.orgList.findOne.query, [
+        req.params.uuid
+      ]);
+    } else {
+      resOrgList = await client.query(dataModel.orgList.findAll.query);
+    }
+    // fetch users' list that belongs only to the specific(uuid) org account
+    resUserList = await client.query(dataModel.userList.findAllForOrg.query, [
+      req.params.uuid
+    ]);
+    console.log("resUserList", resUserList);
+
+    let data = {
+      loginType: dataModel.loginType,
+      cards: dataModel.cards[`for${dataModel.loginType}`],
+      pie: resPie.rows,
+      pieData: dataModel.pie[0],
+      orgs: resOrgList.rows,
+      users: resUserList.rows
+    };
+    console.log("req.user: ", req.user);
+    console.log("req.params: ", req.params);
+    res.render("dashboard", data);
+  } catch (ex) {
+    // await client.query('ROLLBACK')
+    console.log(`something went wrong ${ex}`);
+  } finally {
+    await client.release();
+    console.log("Client disconnected");
+  }
+});
+
 router.get("/dashboard/usernameupdate", async function(req, res) {
   const client = await pool.connect();
   const { rows } = await client.query("select * from users");
