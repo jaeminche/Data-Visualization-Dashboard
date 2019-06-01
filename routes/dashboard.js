@@ -20,11 +20,11 @@ router.get("/dashboard/:uuid", async function(req, res) {
     // fetch the account's organisation data, and check if it's superadmin.
     // TODO: later connect this with db.query > const query = client.query.bind(client);
     // TODO: this, yet, is only for organization logins including superadmin and orgs, but not users' logins.
-    const { rows } = await client.query(
+    const thisOrg = await client.query(
       "SELECT uuid, id, name, language, img, active, superadmin FROM public.organisations WHERE uuid = $1",
       [req.params.uuid]
     );
-    if (rows[0].superadmin === false) {
+    if (thisOrg.rows[0].superadmin === false) {
       dataModel.loginType = "org";
     } else {
       dataModel.loginType = "superadmin";
@@ -36,7 +36,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
       let resCard;
       dataModel.loginType === "superadmin"
         ? (resCard = await client.query(card.query))
-        : (resCard = await client.query(card.query, [rows[0].id]));
+        : (resCard = await client.query(card.query, [thisOrg.rows[0].id]));
       card.number = resCard.rowCount;
     }
 
@@ -85,11 +85,11 @@ router.get("/dashboard/:uuid/:user_uuid %>", async function(req, res) {
     // fetch the account's organisation data, and check if it's superadmin.
     // TODO: later connect this with db.query > const query = client.query.bind(client);
     // TODO: this, yet, is only for organization logins including superadmin and orgs, but not users' logins.
-    const { rows } = await client.query(
+    const thisOrg = await client.query(
       "SELECT uuid, id, name, language, img, active, superadmin FROM public.organisations WHERE uuid = $1",
       [req.params.uuid]
     );
-    if (rows[0].superadmin === false) {
+    if (thisOrg.rows[0].superadmin === false) {
       dataModel.loginType = "org";
     } else {
       dataModel.loginType = "superadmin";
@@ -101,7 +101,7 @@ router.get("/dashboard/:uuid/:user_uuid %>", async function(req, res) {
       let resCard;
       dataModel.loginType === "superadmin"
         ? (resCard = await client.query(card.query))
-        : (resCard = await client.query(card.query, [rows[0].id]));
+        : (resCard = await client.query(card.query, [thisOrg.rows[0].id]));
       card.number = resCard.rowCount;
     }
 
