@@ -71,6 +71,7 @@
       </div>
 
       <%# Nav Item - Pages Collapse Menu  %>
+      <% if (loginType === "superadmin") { %>
       <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
           <i class="fas fa-fw fa-clinic-medical"></i>
@@ -96,6 +97,7 @@
         </div>
         
       </li>
+      <% } %>
 
       <%# Nav Item - Utilities Collapse Menu  %>
       <li class="nav-item">
