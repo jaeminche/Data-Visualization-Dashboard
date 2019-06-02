@@ -157,7 +157,7 @@ const dataModel = {
   ],
   orgList: {
     findAll: {
-      query: "SELECT name, id, uuid FROM public.organisations",
+      query: "SELECT name, id, uuid FROM public.organisations ORDER BY id",
       auth: ["superadmin"]
     },
     findOne: {
@@ -169,7 +169,7 @@ const dataModel = {
     // findAll is not likely to be used often
     findAll: {
       query:
-        "SELECT u.name as user_name, u.id as user_id, u.uuid as user_uuid, organisation as org_id, u.admin as user_admin, o.uuid as org_uuid FROM public.users u LEFT JOIN public.organisations o ON organisation = o.id ",
+        "SELECT u.name as user_name, u.id as user_id, u.uuid as user_uuid, organisation as org_id, u.admin as user_admin, o.uuid as org_uuid FROM public.users u LEFT JOIN public.organisations o ON organisation = o.id",
       auth: ["superadmin"]
     },
     findAllForOrg: {
