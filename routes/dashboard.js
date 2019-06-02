@@ -59,6 +59,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
     console.log("resUserList", resUserList);
 
     let data = {
+      thisOrg: thisOrg.rows[0],
       loginType: dataModel.loginType,
       cards: dataModel.cards[`for${dataModel.loginType}`],
       pie: resPie.rows,
