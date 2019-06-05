@@ -1,0 +1,308 @@
+#litemain {
+  position: absolute;
+  width: 100%;
+  height: calc(100% - 50px);
+  left: 0;
+  overflow: hidden;
+  /*Carefull with the settings below, it does not get overruled.*/
+  /*pointer-events: none;*/
+}
+
+#literoutelist {
+  position: absolute;
+  width: 95%;
+  height: 100%;
+  left: 2.5%;
+}
+
+#litenav {
+  position: fixed;
+  width: 100%;
+  top: 0px;
+  height: 50px;
+  z-index: 1000;
+}
+
+.litenavelement {
+  position: relative;
+  top: 15%;
+  height: 80%;
+  width: 30%;
+
+  border: 1px solid transparent;
+  border-width: 1 1 1px;
+  border-radius: 5px;
+  border-color: #e7e7e7;
+  background-color: #f8f8f8;
+}
+
+.litenavelement p{
+  text-align: center;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%); 
+  font-size: 23px;
+  font-weight: bold;
+}
+
+#litenavelement-left {
+  left: 12%;
+  float: left;
+}
+
+#litenavelement-right {
+  right: 12%;
+  float: right;
+}
+
+#litenavelement-center {
+  margin: auto;
+}
+
+#litenavelement-left-small{
+  left: 5%;
+  float: left;
+  width: 15%;
+}
+
+#litenavelement-right-small{
+  right: 5%;
+  float: right;
+  width: 15%;
+}
+
+.literouteelement-outer{
+  position: relative;
+  float: left;
+  height: 45%;
+  width: 31.33%;
+  margin: 1%;
+}
+
+.literouteelement-inner{
+  position: absolute;
+  width: 100%;
+  height: 100%;
+
+  border: 1px solid transparent;
+  border-width: 1 1 1px;
+  border-radius: 5px;
+  border-color: #e7e7e7;
+  background-color: #f8f8f8;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.literouteelement-button{
+  position:absolute;
+  left: calc(50%);
+  transform: translate(-50%, 0);
+  bottom: 5px;
+}
+
+.literoutetiteldiv {
+  text-align: center;
+  font-size: 23px;
+  font-weight: bold;
+}
+
+.literouteimgdiv {
+  flex: 1 1 auto;
+  overflow: hidden;
+  position: relative;
+}
+
+.literouteimgdiv img{
+  width: 100%;
+  /*height: 100%;*/
+  padding-bottom: 1%;
+  object-position: center;
+  object-fit: scale-down;
+}
+
+#routesharinglist-lite{
+  position: relative;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  overflow: scroll;
+}
+
+#pac-input-container2-lite {
+  background-color: #fff;
+  /*font-family: Roboto;*/
+  /*font-size: 15px;*/
+  /*font-weight: 300;*/
+  /*margin-left: 12px;*/
+  /*padding: 0 11px 0 13px;*/
+  /*text-overflow: ellipsis;*/
+  /*width: 400px;*/
+  position: absolute;
+  top: 10px;
+  left: 150px;
+  z-index: 999;
+  width: 300px;
+}
+
+.pac-container {
+  z-index: 1100;
+}
+
+.routesharing-map-refresh-controls-lite {
+  position: absolute;
+  top: 11px;
+  left: 513px;
+}
+.turn-left-indicator{
+   position: fixed;
+   /*right:25px;*/
+   right:60%;
+   margin-right: -20px;
+   width:40px;
+   height:40px;
+   z-index: 999;
+}
+.stopindicator-lite {
+  position: fixed;
+  right: 0%;
+  top: 0px;
+  z-index: 999;
+  width: 120px;
+  height: 110px;
+}
+
+.stopindicator-lite-inner{
+  height: 50px;
+  position: fixed;
+  width: 50px;
+  right: 0px;
+  margin: 0px;
+  text-align: center;
+  top: 0px;
+  font-family: 'FontAwesome';
+  border: 1px solid #ccc;
+  background: #C0C0C0;
+  border-radius: 0px 0px 0px 15px;
+  opacity: 0.8;
+}
+
+#stopindicator-lite-svg{
+  top: 0;
+  left: 0;
+  width: 50px;
+  height: 50px;
+}
+
+
+
+#routesharing-lite{
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+#routesharingtitle-lite{
+  width: 240px;
+  margin: 15px;
+  margin-top: -7px;
+}
+
+#routesharinglite-top{
+  /*min-height: 50%;*/
+  width: 100%;
+  top: 0px;
+  position: relative;
+  display: flex; /*Influences direct children*/
+  flex: 0 1 auto;
+  /* The above is shorthand for:
+    flex-grow: 0,
+    flex-shrink: 1,
+    flex-basis: auto
+    */
+}
+
+#routesharinglite-leftcolumn{
+  position: relative;
+  width: 270px;
+  float: left;
+  display: flex; /*To make second child scrollable without setting a fixed height*/
+  flex-direction: column;
+}
+
+#routesharing-map-canvas-container-lite {
+  position: absolute;
+  width: calc(100% - 270px);
+  height: 100%;
+  top: 0;
+  right: 0px;
+  z-index: 100;
+  overflow: hidden;
+}
+
+#routesharinglist-lite{
+  position: relative;
+  width: 100%;
+  min-height: 250px;
+  left: 0;
+  top: 0;
+  overflow: hidden;
+  flex: 1 1000 auto;
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+}
+
+#routesharing-map-canvas{
+  width: 100%;
+  height: 100%;
+  top: 0;
+  right: 0;
+  position: unset;
+}
+
+#routesharing-settings {
+  position: relative;
+  padding-left: 10px;
+  padding-right: 10px;
+  overflow-y: auto;
+}
+
+#routesharinglite-close {
+  position: absolute ;
+  top: -1px;
+  right: -1px;
+  width: 35px;
+  height: 35px;
+  border: 1px solid #ccc;
+  background: #fff;
+  border-radius: 4px;
+  z-index: 101;
+  text-align: center;
+  padding-top: 2px;
+}
+
+.LiteRouteElementAlignRight {
+  float:right;
+}
+
+.LiteRouteElementAlignCenter {
+  display: inline-block;
+}
+
+.flagDiv{
+  position: absolute;
+  left: 5px;
+  top: 5px;
+  z-index: 999;
+  width: 54px;
+  height: 35px;
+  border-radius: 6px;
+  overflow:hidden;
+}
