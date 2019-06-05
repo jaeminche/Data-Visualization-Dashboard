@@ -52,11 +52,18 @@ router.get("/dashboard/:uuid", async function(req, res) {
     } else {
       resOrgList = await client.query(dataModel.orgList.findAll.query);
     }
-    // fetch users' list that belongs only to the specific(uuid) org account
-    resUserList = await client.query(dataModel.userList.findAllForOrg.query, [
-      req.params.uuid
-    ]);
-    console.log("resUserList", resUserList);
+    if (dataModel.loginType === "user") {
+      resUserList = await client.query(dataModel.userList.findOne.query, [
+        req.params.uuid
+      ]);
+    } else {
+      // fetch users' list that belongs only to the specific(uuid) org account
+      resUserList = await client.query(dataModel.userList.findAllForOrg.query, [
+        req.params.uuid
+      ]);
+      // resBar = await client.query(dataModel.bar.find)
+    }
+    // console.log("resUserList", resUserList);
 
     let data = {
       thisOrg: thisOrg.rows[0],
