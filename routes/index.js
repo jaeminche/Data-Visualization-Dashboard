@@ -5,12 +5,12 @@ const router = express.Router();
 
 // root route
 router.get("/", function(req, res) {
-  res.redirect("/login");
+  res.redirect("/loggedin");
 });
 
 // login route
-router.get("/login", function(req, res) {
-  res.render("login");
+router.get("/loggedin", function(req, res) {
+  res.render("loggedin");
 });
 
 // =========================
