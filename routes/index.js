@@ -1,16 +1,63 @@
 const express = require("express");
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 // const passport = require("passport");
 // const User = require("../models/user");
+const { Pool, Client } = require("pg");
+const client_config = require("../config/client");
+const dataModel = require("../db/dataModel");
+const db = require("../db/index");
+
+const pool = new Pool(client_config);
+// const client = new Client(client_config);
+
+pool.on("error", (err, client) => {
+  console.error("Unexpected error on idle client", err);
+  process.exit(-1);
+});
 
 // root route
 router.get("/", function(req, res) {
   res.redirect("/loggedin");
 });
 
-// login route
-router.get("/loggedin", function(req, res) {
-  res.render("loggedin");
+// loggedin route
+// when deployment,
+router.get("/logged_in_as/:id", async function(req, res) {
+  const client = await pool.connect();
+  let resLoggedInUser;
+  try {
+    resLoggedInUser = await client.query(
+      "SELECT a.name, a.id, a.uuid as u_uuid, a.organisation as o_id, b.uuid as o_uuid, b.superadmin, a.admin FROM public.users a LEFT JOIN organisations b ON organisation = b.id WHERE a.id = $1",
+      [req.params.id]
+    );
+    if (resLoggedInUser.rowCount === 0)
+      throw `Could not find user id ${
+        req.params.id
+      } in the database. Try another number!`;
+  } catch (ex) {
+    // await client.query('ROLLBACK')
+    console.log(`something went wrong : ${ex}`);
+  } finally {
+    await client.release();
+    console.log("Client disconnected");
+  }
+
+  function getSuperadmin() {}
+
+  // let u_uuid = row.u_uuid;
+  let o_uuid = resLoggedInUser.rows[0].o_uuid;
+  let o_id = resLoggedInUser.rows[0].o_id;
+  let admin = resLoggedInUser.rows[0].admin;
+  const date = new Date();
+  dataModel.jwt.u = JSON.parse(req.params.id);
+  dataModel.jwt.o = o_id;
+  dataModel.jwt.a = admin;
+  dataModel.jwt.d = date.toUTCString();
+
+  let token = dataModel.jwt;
+  console.log(token);
+
+  res.render("headerForLoggedinTBD", { token: token, uuid: o_uuid });
 });
 
 // =========================
