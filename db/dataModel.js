@@ -5,7 +5,15 @@ const dataModel = {
     a: false,
     d: null
   },
-  s: false,
+  currentUser: {
+    name: null,
+    id: null,
+    u_uuid: null,
+    o_id: null,
+    o_uuid: null,
+    superadmin: false,
+    admin: false
+  },
   loginType: "user", // superadmin || org || user
   cards: {
     forsuperadmin: [

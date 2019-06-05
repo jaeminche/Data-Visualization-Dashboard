@@ -16,6 +16,9 @@ pool.on("error", (err, client) => {
 router.get("/dashboard/:uuid", async function(req, res) {
   const client = await pool.connect();
   try {
+    console.log("dataModel.jwt: ", dataModel.jwt);
+    console.log("dataModel.currentUser: ", dataModel.currentUser);
+
     let resOrgList;
     // fetch the account's organisation data, and check if it's superadmin.
     // TODO: later connect this with db.query > const query = client.query.bind(client);

@@ -48,14 +48,15 @@ router.get("/logged_in_as/:id", async function(req, res) {
   let o_uuid = resLoggedInUser.rows[0].o_uuid;
   let o_id = resLoggedInUser.rows[0].o_id;
   let admin = resLoggedInUser.rows[0].admin;
+  dataModel.currentUser = resLoggedInUser.rows[0];
   const date = new Date();
   dataModel.jwt.u = JSON.parse(req.params.id);
   dataModel.jwt.o = o_id;
   dataModel.jwt.a = admin;
   dataModel.jwt.d = date.toUTCString();
-
   let token = dataModel.jwt;
   console.log(token);
+  console.log("currentUser: ", resLoggedInUser.rows[0]);
 
   res.render("headerForLoggedinTBD", { token: token, uuid: o_uuid });
 });
