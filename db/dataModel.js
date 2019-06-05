@@ -1,4 +1,16 @@
 const dataModel = {
+  jwt14t: {
+    o: 1,
+    u: 4,
+    a: true,
+    d: "2019-06-25T10:42:00.165305"
+  },
+  jwt14f: {
+    o: 1,
+    u: 4,
+    a: false,
+    d: "2019-06-25T10:42:00.165305"
+  },
   loginType: "user", // superadmin || org || user
   cards: {
     forsuperadmin: [
