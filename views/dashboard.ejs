@@ -34,7 +34,9 @@
 
     <%# Content Column %>
     <div class="col-lg-6 mb-4">
+      <% if (typeof users !== "undefined") { %>
       <% include ./partials/chart_bar %>
+      <% } %>
     </div>
 
     <div class="col-lg-6 mb-4">
