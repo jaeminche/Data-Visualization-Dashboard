@@ -27,7 +27,7 @@ router.get("/logged_in_as/:id", async function(req, res) {
   let resLoggedInUser;
   try {
     resLoggedInUser = await client.query(
-      "SELECT u.name, u.id, u.uuid as u_uuid, u.admin, o.name as o_name, u.organisation as o_id, o.uuid as o_uuid, o.superadmin FROM public.users u LEFT JOIN organisations o ON organisation = o.id WHERE u.id =  $1",
+      "SELECT u.name, u.id, u.uuid as uuid, u.admin, o.name as o_name, u.organisation as o_id, o.uuid as o_uuid, o.superadmin FROM public.users u LEFT JOIN organisations o ON organisation = o.id WHERE u.id =  $1",
       [req.params.id]
     );
     if (resLoggedInUser.rowCount === 0)
@@ -44,11 +44,11 @@ router.get("/logged_in_as/:id", async function(req, res) {
 
   function getSuperadmin() {}
 
-  // let u_uuid = row.u_uuid;
-  let u_uuid = resLoggedInUser.rows[0].u_uuid;
+  // let uuid = row.uuid;
+  let uuid = resLoggedInUser.rows[0].uuid;
   let o_id = resLoggedInUser.rows[0].o_id;
   let admin = resLoggedInUser.rows[0].admin;
-  dataModel.currentUser = resLoggedInUser.rows[0];
+  dataModel.currentLogin = resLoggedInUser.rows[0];
   const date = new Date();
   dataModel.jwt.u = JSON.parse(req.params.id);
   dataModel.jwt.o = o_id;
@@ -56,9 +56,9 @@ router.get("/logged_in_as/:id", async function(req, res) {
   dataModel.jwt.d = date.toUTCString();
   let token = dataModel.jwt;
   console.log(token);
-  console.log("currentUser: ", resLoggedInUser.rows[0]);
+  console.log("currentLogin: ", resLoggedInUser.rows[0]);
 
-  res.render("headerForLoggedinTBD", { token: token, uuid: u_uuid });
+  res.render("headerForLoggedinTBD", { token: token, uuid: uuid });
 });
 
 // =========================
