@@ -15,12 +15,14 @@ const dataModel = {
     name: null,
     id: null,
     uuid: null,
+    o_name: null,
     o_id: null,
     o_uuid: null,
     superadmin: false,
     admin: false
   },
   currentLoginType: null, // superadmin || admin || user
+  currentShow: null,
   cards: {
     forsuperadmin: [
       {
@@ -195,7 +197,7 @@ const dataModel = {
   },
   orgList: {
     findAll: {
-      query: "SELECT name, id, uuid FROM public.organisations ORDER BY id",
+      query: "SELECT name, id, uuid FROM public.organisations ORDER BY name",
       auth: ["superadmin"]
     },
     findOne: {
