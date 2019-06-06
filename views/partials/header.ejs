@@ -80,7 +80,7 @@
         <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
           <div class="bg-white py-2 collapse-inner rounded">
 
-          <%# ========  ORGANIZATION LIST DROPDOWN ======== %>
+          <%# ================  ORGANIZATION LIST DROPDOWN ================ %>
           <% if (typeof orgs != 'undefined') { %>
             <%# include ./menus/organization %>
 
@@ -108,12 +108,12 @@
         <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
           <div class="bg-white py-2 collapse-inner rounded">
 
-          <%# ======== USERS LIST DROPDOWN ======== %>
+          <%# ================ USERS LIST DROPDOWN ================ %>
           <% if (typeof users != 'undefined') { %>
             <h6 class="collapse-header">SELECT USER</h6>
 
             <% users.forEach(user => { %>
-                <a class="collapse-item" href="/dashboard/<%= user.org_uuid %>/<%= user.uuid %>"><%= user.name %></a>
+                <a class="collapse-item" href="/dashboard/<%= user.uuid %>"><%= user.name %></a>
             <% }) %>
 
           <% } else { %>
@@ -212,11 +212,12 @@
               <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               
               <%# TODO: Get the logged in org's name from THE SESSION, REQ.USERS %>
-                <% if (typeof thisOrg !== "undefined") { %>
-                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Logged in as <%= thisOrg.name %><%= thisOrg.id %></span>
+                <% if (typeof currentLogin !== "undefined") { %>
+                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Logged in as <%= currentLogin.name %></span>
                 <% } %>
                 <img class="img-profile rounded-circle" src="/img/userImg300x300.jpeg">
               </a>
+              
               <%# Dropdown - User Information  %>
               <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
                 <a class="dropdown-item" href="#">
