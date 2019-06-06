@@ -11,16 +11,16 @@ const dataModel = {
   //   a: true,
   //   d: null
   // },
-  currentUser: {
+  currentLogin: {
     name: null,
     id: null,
-    u_uuid: null,
+    uuid: null,
     o_id: null,
     o_uuid: null,
     superadmin: false,
     admin: false
   },
-  loginType: null, // superadmin || admin || user
+  currentLoginType: null, // superadmin || admin || user
   cards: {
     forsuperadmin: [
       {
@@ -155,27 +155,38 @@ const dataModel = {
         query: "SELECT * FROM public.users WHERE organisation = $1",
         auth: ["superadmin"]
       }
+    ],
+    foruser: [
+      {
+        // TODO: add query condition for this week
+        name: "CYCLING TIME TODAY",
+        number: 0,
+        color: "success",
+        fa: "stopwatch",
+        //   todo:
+        query:
+          "SELECT e.start_id, e.event_id, e.packet_id, e.packet_len, e.start_userid, e.event_userid, u.uuid AS u_uuid, e.event_orgid, e.event_type, e.event_data, e.start_cycling, e.event_time, e.packet_generated, e.locationid, e.routeid, e.location FROM (SELECT d.id AS start_id, c.event_id, c.packet_id, c.packet_len, d.userid AS start_userid, c.userid AS event_userid, c.orgid AS event_orgid, c.event_type, c.event_data, d.client_timestamp AS start_cycling, c.event_time, c.packet_generated, d.locationid, d.routeid, d.location FROM (SELECT a.id AS event_id, b.id AS packet_id, length AS packet_len, userid, orgid, event_type, event_data, event_time, b.client_timestamp AS packet_generated FROM log_cycling a FULL OUTER JOIN log_cycling_packets b ON a.packet_id = b.id ORDER BY packet_generated, event_time) c FULL OUTER JOIN log_startcycling d ON d.client_timestamp = c.event_time AND d.userid = c.userid ORDER BY COALESCE(packet_generated, d.client_timestamp), event_time) e LEFT JOIN users u ON e.event_userid = u.id WHERE u.uuid = $1",
+        auth: ["superadmin", "org", "user"]
+      }
     ]
   },
-  pie: [
-    {
-      query:
-        "SELECT name, distance, duration, thema_city, thema_countryside, thema_coast, thema_mountains, thema_trip, thema_tdf, count, points, score, votes FROM sharedroutes ORDER BY votes DESC LIMIT 10",
-      colors: [
-        "primary",
-        "success",
-        "info",
-        "warning",
-        "dark",
-        "danger",
-        "secondary",
-        "light",
-        "white",
-        "muted"
-      ],
-      auth: ["superadmin"]
-    }
-  ],
+  pie: {
+    query:
+      "SELECT name, distance, duration, thema_city, thema_countryside, thema_coast, thema_mountains, thema_trip, thema_tdf, count, points, score, votes FROM sharedroutes ORDER BY votes DESC LIMIT 10",
+    colors: [
+      "primary",
+      "success",
+      "info",
+      "warning",
+      "dark",
+      "danger",
+      "secondary",
+      "light",
+      "white",
+      "muted"
+    ],
+    auth: ["superadmin"]
+  },
   bar: {
     findOne: {
       query:
@@ -188,26 +199,26 @@ const dataModel = {
       auth: ["superadmin"]
     },
     findOne: {
-      query: "SELECT name, id, uuid FROM public.organisations WHERE uuid = $1",
-      auth: ["superadmin", "admin"]
+      query: "SELECT name, id, uuid FROM public.organisations WHERE id = $1",
+      auth: ["admin", "superadmin"]
     }
   },
   userList: {
     // findAll is not likely to be used often
     findAll: {
       query:
-        "SELECT u.name as user_name, u.id as user_id, u.uuid as user_uuid, organisation as org_id, u.admin as user_admin, o.uuid as org_uuid FROM public.users u LEFT JOIN public.organisations o ON organisation = o.id",
+        "SELECT u.name as u_name, u.id as u_id, u.uuid as u_uuid, organisation as o_id, u.admin as u_admin, o.uuid as o_uuid FROM public.users u LEFT JOIN public.organisations o ON organisation = o.id",
       auth: ["superadmin"]
     },
     findAllForAdmin: {
       query:
-        "SELECT u.name as user_name, u.id as user_id, u.uuid as user_uuid, organisation as org_id, u.admin as user_admin, o.uuid as org_uuid FROM public.users u LEFT JOIN public.organisations o ON organisation = o.id WHERE o.uuid = $1",
-      auth: ["superadmin", "admin"]
+        "SELECT u.name as u_name, u.id as u_id, u.uuid as u_uuid, organisation as o_id, u.admin as admin, o.uuid as o_uuid FROM public.users u LEFT JOIN public.organisations o ON organisation = o.id WHERE o.id = $1",
+      auth: ["admin", "superadmin"]
     },
     findOne: {
       query:
         "SELECT name, id, uuid, organisation, admin FROM public.users WHERE uuid = $1",
-      auth: ["admin", "user"]
+      auth: ["user", "admin", "superadmin"]
     }
   }
 
