@@ -27,7 +27,7 @@ router.get("/logged_in_as/:id", async function(req, res) {
   let resLoggedInUser;
   try {
     resLoggedInUser = await client.query(
-      "SELECT a.name, a.id, a.uuid as u_uuid, a.organisation as o_id, b.uuid as o_uuid, b.superadmin, a.admin FROM public.users a LEFT JOIN organisations b ON organisation = b.id WHERE a.id = $1",
+      "SELECT u.name, u.id, u.uuid as u_uuid, u.admin, o.name as o_name, u.organisation as o_id, o.uuid as o_uuid, o.superadmin FROM public.users u LEFT JOIN organisations o ON organisation = o.id WHERE u.id =  $1",
       [req.params.id]
     );
     if (resLoggedInUser.rowCount === 0)
@@ -45,7 +45,7 @@ router.get("/logged_in_as/:id", async function(req, res) {
   function getSuperadmin() {}
 
   // let u_uuid = row.u_uuid;
-  let o_uuid = resLoggedInUser.rows[0].o_uuid;
+  let u_uuid = resLoggedInUser.rows[0].u_uuid;
   let o_id = resLoggedInUser.rows[0].o_id;
   let admin = resLoggedInUser.rows[0].admin;
   dataModel.currentUser = resLoggedInUser.rows[0];
@@ -58,7 +58,7 @@ router.get("/logged_in_as/:id", async function(req, res) {
   console.log(token);
   console.log("currentUser: ", resLoggedInUser.rows[0]);
 
-  res.render("headerForLoggedinTBD", { token: token, uuid: o_uuid });
+  res.render("headerForLoggedinTBD", { token: token, uuid: u_uuid });
 });
 
 // =========================

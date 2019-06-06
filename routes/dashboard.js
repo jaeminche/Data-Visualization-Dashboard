@@ -13,26 +13,29 @@ pool.on("error", (err, client) => {
   process.exit(-1);
 });
 
+// uuid as in the req.params.uuid is user's uuid
 router.get("/dashboard/:uuid", async function(req, res) {
   const client = await pool.connect();
+  console.log("dataModel.jwt: ", dataModel.jwt);
+  console.log("dataModel.currentUser: ", dataModel.currentUser);
+  let currentUser = dataModel.currentUser;
+  if (currentUser.superadmin === true && currentUser.admin === true) {
+    // prompt and get input by asking which one of superadmin and user the user wants
+    dataModel.loginType = "superadmin";
+  } else if (currentUser.superadmin === false && currentUser.admin === true) {
+    // prompt and get input by asking which one of org and user the user wants
+    dataModel.loginType = "admin";
+  } else {
+    dataModel.loginType = "user";
+  }
+  console.log("loginType", dataModel.loginType);
   try {
-    console.log("dataModel.jwt: ", dataModel.jwt);
-    console.log("dataModel.currentUser: ", dataModel.currentUser);
-
     let resOrgList;
-    // fetch the account's organisation data, and check if it's superadmin.
     // TODO: later connect this with db.query > const query = client.query.bind(client);
-    // TODO: this, yet, is only for organization logins including superadmin and orgs, but not users' logins.
-    const thisOrg = await client.query(
-      "SELECT uuid, id, name, language, img, active, superadmin FROM public.organisations WHERE uuid = $1",
-      [req.params.uuid]
-    );
-    if (thisOrg.rows[0].superadmin === false) {
-      dataModel.loginType = "org";
-    } else {
-      dataModel.loginType = "superadmin";
-    }
-    console.log(dataModel.loginType);
+    // const thisOrg = await client.query(
+    //   "SELECT uuid, id, name, language, img, active, superadmin FROM public.organisations WHERE uuid = $1",
+    //   [dataModel.currentUser.o_uuid]
+    // );
 
     // fetch the number cards data that belongs to the account
     for await (let card of dataModel.cards[`for${dataModel.loginType}`]) {
