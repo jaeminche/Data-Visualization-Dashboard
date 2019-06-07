@@ -3,9 +3,19 @@
 <div class="container-fluid">
   <%# Page Heading %>
   <div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <% if (typeof thisOrg !== "undefined") { %>
-    <h1 class="h3 mb-0 text-gray-800">This is <%= thisOrg.name %><%= thisOrg.id %>'s Dashboard</h1>
+
+    <% if (typeof currentShow !== "undefined") { %> 
+      <% if (currentShowType === "user") { %>
+      <h1 class="h3 mb-0 text-gray-800">DASHBOARD : <%= currentShow.name %></h1>
+      <% } else if (currentShowType === "admin") {%>
+      <h1 class="h3 mb-0 text-gray-800">DASHBOARD : Org <%= currentShow.o_id %>'s <%= currentShow.o_name %></h1>
+      <% } else if (currentShowType === "superadmin") {%>
+      <h1 class="h3 mb-0 text-gray-800">DASHBOARD : SuperAdmin</h1>
+      <% } %>
     <% } %>
+
+
+
     <%# To show, add a d-sm-inline-block in class %>
     <a href="/dashboard/usernameupdate" class="d-none btn btn-sm btn-primary shadow-sm">update users name</a>
     <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
