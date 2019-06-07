@@ -23,6 +23,8 @@ const dataModel = {
   },
   currentLoginType: null, // superadmin || admin || user
   currentShow: null, // take input as object with same format as currentLogin
+  currentShowType: null, // superadmin || admin || user
+
   cards: {
     forsuperadmin: [
       {
