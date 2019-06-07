@@ -57,6 +57,7 @@ router.get("/logged_in_as/:id", async function(req, res) {
   let token = dataModel.jwt;
   console.log(token);
   console.log("currentLogin: ", resLoggedInUser.rows[0]);
+  console.log("================logged page ends ===============");
 
   res.render("headerForLoggedinTBD", { token: token, uuid: uuid });
 });
