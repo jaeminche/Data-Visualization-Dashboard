@@ -13,73 +13,123 @@ pool.on("error", (err, client) => {
   process.exit(-1);
 });
 
-// uuid as in the req.params.uuid is user's uuid
 router.get("/dashboard/:uuid", async function(req, res) {
   const client = await pool.connect();
   console.log("dataModel.jwt: ", dataModel.jwt);
-  console.log("dataModel.currentUser: ", dataModel.currentUser);
-  let currentUser = dataModel.currentUser;
-  if (currentUser.superadmin === true && currentUser.admin === true) {
+  console.log("dataModel.currentLogin: ", dataModel.currentLogin);
+  // ======================= Get CURRENT LOGIN start ======================
+  let currentLogin = dataModel.currentLogin;
+  if (currentLogin.superadmin === true && currentLogin.admin === true) {
     // prompt and get input by asking which one of superadmin and user the user wants
-    dataModel.loginType = "superadmin";
-  } else if (currentUser.superadmin === false && currentUser.admin === true) {
+    dataModel.currentLoginType = "superadmin";
+  } else if (currentLogin.superadmin === false && currentLogin.admin === true) {
     // prompt and get input by asking which one of org and user the user wants
-    dataModel.loginType = "admin";
+    dataModel.currentLoginType = "admin";
   } else {
-    dataModel.loginType = "user";
+    dataModel.currentLoginType = "user";
   }
-  console.log("loginType", dataModel.loginType);
+  console.log("currentLoginType", dataModel.currentLoginType);
+  // ======================= Get CURRENT LOGIN end ========================
+
+  // ======================= Get CURRENT SHOW start =======================
+  if (dataModel.currentShow === null) {
+    dataModel.currentShow = currentLogin; // always gets data along with user_uuid
+  } else {
+    // check if the params.uuid is org's or user's
+    dataModel.currentShow = await client.query(
+      `${dataModel.userList.findAll.query} WHERE u.uuid = $1`,
+      [req.params.uuid]
+    );
+    console.log("thisthisthis: ", dataModel.currentShow.rowCount);
+    if (dataModel.currentLoginType === "superadmin") {
+      if (dataModel.currentShow.rowCount === 0) {
+        dataModel.currentShow = await client.query(
+          `${dataModel.userList.findAll.query} WHERE o.uuid = $1`,
+          [req.params.uuid]
+        );
+        console.log("this2this22222: ", dataModel.currentShow.rowCount);
+      }
+    }
+  }
+  let currentShow = dataModel.currentShow;
+  console.log("currentShow: ", currentShow);
+  // ======================= Get CURRENT SHOW end =========================
+
   try {
-    let resOrgList;
+    let data;
+    let resOrgList, resUserList;
+    let resPie;
     // TODO: later connect this with db.query > const query = client.query.bind(client);
     // const thisOrg = await client.query(
     //   "SELECT uuid, id, name, language, img, active, superadmin FROM public.organisations WHERE uuid = $1",
-    //   [dataModel.currentUser.o_uuid]
+    //   [dataModel.currentLogin.o_uuid]
     // );
 
     // fetch the number cards data that belongs to the account
-    for await (let card of dataModel.cards[`for${dataModel.loginType}`]) {
-      let resCard;
-      dataModel.loginType === "superadmin"
-        ? (resCard = await client.query(card.query))
-        : (resCard = await client.query(card.query, [thisOrg.rows[0].id]));
-      card.number = resCard.rowCount;
-    }
+    // for await (let card of dataModel.cards[`for${dataModel.currentLoginType}`]) {
+    //   let resCard;
+    //   dataModel.currentLoginType === "superadmin"
+    //     ? (resCard = await client.query(card.query))
+    //     : (resCard = await client.query(card.query, [thisOrg.rows[0].id]));
+    //   card.number = resCard.rowCount;
+    // }
 
-    // fetch top 10 votes' rows in sharedroutes table for pie graph
-    const resPie = await client.query(dataModel.pie[0].query);
+    if (dataModel.currentLoginType === "superadmin") {
+      // let currentShow = dataModel.currentShow;
+      // try {
+      //   console.log("req.params: ", req.params);
+      //   currentShow = await client.query(
+      //     `${dataModel.userList.findAll.query} WHERE u.uuid = $1`,
+      //     [req.params.uuid]
+      //   );
+      // } catch (ex) {
+      //   // await client.query('ROLLBACK')
+      //   console.log(`something went wrong ${ex}`);
+      // } finally {
+      //   // await client.release();
+      //   // console.log("Client disconnected");
+      // }
 
-    // fetch organisations' list in accordance with the account's logintype
-    // TODO: make this session-able and change it to if (this session's id != superadmin && ~~~)
-    if (dataModel.loginType === "org") {
-      resOrgList = await client.query(dataModel.orgList.findOne.query, [
-        req.params.uuid
-      ]);
-    } else {
       resOrgList = await client.query(dataModel.orgList.findAll.query);
-    }
-    if (dataModel.loginType === "user") {
-      resUserList = await client.query(dataModel.userList.findOne.query, [
-        req.params.uuid
-      ]);
+      // resUserList = await client.query(
+      //   dataModel.userList.findAllForAdmin.query,
+      //   [currentShow.o_id]
+      // );
+      // console.log("resUserList: ", resUserList);
+      // fetch top 10 votes' rows in sharedroutes table for pie graph
+      resPie = await client.query(dataModel.pie.query);
+    } else if (dataModel.currentLoginType === "admin") {
+      // resOrgList = await client.query(dataModel.orgList.findOne.query, [
+      //   currentLogin.o_id
+      // ]);
+      resUserList = await client.query(
+        dataModel.userList.findAllForAdmin.query,
+        [currentLogin.o_id]
+      );
     } else {
-      // fetch users' list that belongs only to the specific(uuid) org account
-      resUserList = await client.query(dataModel.userList.findAllForOrg.query, [
-        req.params.uuid
-      ]);
-      // resBar = await client.query(dataModel.bar.find)
+      // resOrgList = await client.query(dataModel.orgList.findOne.query, [
+      //   currentLogin.o_id
+      // ]);
+      // resUserList = await client.query(dataModel.userList.findOne.query, [
+      //   currentLogin.uuid]);
     }
+
+    // resBar = await client.query(dataModel.bar.find)
+
     // console.log("resUserList", resUserList);
 
-    let data = {
-      thisOrg: thisOrg.rows[0],
-      loginType: dataModel.loginType,
-      cards: dataModel.cards[`for${dataModel.loginType}`],
-      pie: resPie.rows,
-      pieData: dataModel.pie[0],
-      orgs: resOrgList.rows,
-      users: resUserList.rows
+    data = {
+      currentLogin: currentLogin,
+      loginType: dataModel.currentLoginType
+      // thisOrg: thisOrg.rows[0],
+      // cards: dataModel.cards[`for${dataModel.currentLoginType}`]
     };
+    if (typeof resOrgList != "undefined") data["orgs"] = resOrgList.rows;
+    if (typeof resUserList != "undefined") data["users"] = resUserList.rows;
+    if (typeof resPie != "undefined") {
+      data["pie"] = resPie.rows;
+      data["pieData"] = dataModel.pie;
+    }
     console.log("req.user: ", req.user);
     console.log("req.params: ", req.params);
     res.render("dashboard", data);
@@ -92,7 +142,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
   }
 });
 
-router.get("/dashboard/:uuid/:user_uuid %>", async function(req, res) {
+router.get("/dashboard/:uuid/:user_uuid", async function(req, res) {
   const client = await pool.connect();
   try {
     let resOrgList;
@@ -104,16 +154,18 @@ router.get("/dashboard/:uuid/:user_uuid %>", async function(req, res) {
       [req.params.uuid]
     );
     if (thisOrg.rows[0].superadmin === false) {
-      dataModel.loginType = "org";
+      dataModel.currentLoginType = "org";
     } else {
-      dataModel.loginType = "superadmin";
+      dataModel.currentLoginType = "superadmin";
     }
-    console.log(dataModel.loginType);
+    console.log(dataModel.currentLoginType);
 
     // fetch the number cards data that belongs to the account
-    for await (let card of dataModel.cards[`for${dataModel.loginType}`]) {
+    for await (let card of dataModel.cards[
+      `for${dataModel.currentLoginType}`
+    ]) {
       let resCard;
-      dataModel.loginType === "superadmin"
+      dataModel.currentLoginType === "superadmin"
         ? (resCard = await client.query(card.query))
         : (resCard = await client.query(card.query, [thisOrg.rows[0].id]));
       card.number = resCard.rowCount;
@@ -122,9 +174,9 @@ router.get("/dashboard/:uuid/:user_uuid %>", async function(req, res) {
     // fetch top 10 votes' rows in sharedroutes table for pie graph
     const resPie = await client.query(dataModel.pie[0].query);
 
-    // fetch organisations' list in accordance with the account's logintype
+    // fetch organisations' list in accordance with the account's currentLogintype
     // TODO: make this session-able and change it to if (this session's id != superadmin && ~~~)
-    if (dataModel.loginType === "org") {
+    if (dataModel.currentLoginType === "org") {
       resOrgList = await client.query(dataModel.orgList.findOne.query, [
         req.params.uuid
       ]);
@@ -138,8 +190,8 @@ router.get("/dashboard/:uuid/:user_uuid %>", async function(req, res) {
     console.log("resUserList", resUserList);
 
     let data = {
-      loginType: dataModel.loginType,
-      cards: dataModel.cards[`for${dataModel.loginType}`],
+      loginType: dataModel.currentLoginType,
+      cards: dataModel.cards[`for${dataModel.currentLoginType}`],
       pie: resPie.rows,
       pieData: dataModel.pie[0],
       orgs: resOrgList.rows,
