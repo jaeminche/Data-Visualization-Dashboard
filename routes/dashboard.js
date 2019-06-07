@@ -96,7 +96,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
     // ========================== DASHBOARD CONTENTS end =============================
     let data = {
       currentLogin: currentLogin,
-      loginType: dataModel.currentLoginType
+      currentLoginType: dataModel.currentLoginType
       // cards: dataModel.cards[`for${dataModel.currentLoginType}`]
     };
     if (typeof resOrgList != "undefined") data["orgs"] = resOrgList.rows;

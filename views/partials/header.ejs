@@ -57,7 +57,7 @@
 
       <%# Nav Item - Dashboard  %>
       <li class="nav-item">
-        <a class="nav-link" href="index.html">
+        <a class="nav-link" href="/dashboard/mydashboard/<%= currentLogin.uuid %>">
           <i class="fas fa-fw fa-tachometer-alt"></i>
           <span>Dashboard</span></a>
       </li>
@@ -71,7 +71,7 @@
       </div>
 
       <%# Nav Item - Pages Collapse Menu  %>
-      <% if (loginType === "superadmin") { %>
+      <% if (currentLoginType === "superadmin") { %>
       <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
           <i class="fas fa-fw fa-clinic-medical"></i>
@@ -100,7 +100,7 @@
       <% } %>
 
       <%# Nav Item - Utilities Collapse Menu  %>
-      <% if (loginType != "user") { %>
+      <% if (currentLoginType != "user") { %>
       <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities" aria-expanded="true" aria-controls="collapseUtilities">
           <i class="fas fa-fw fa-users"></i>

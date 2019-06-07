@@ -62,6 +62,11 @@ router.get("/logged_in_as/:id", async function(req, res) {
   res.render("headerForLoggedinTBD", { token: token, uuid: uuid });
 });
 
+router.get("/dashboard/mydashboard/:uuid", async function(req, res) {
+  dataModel.currentShow = null;
+  res.redirect(`/dashboard/${req.params.uuid}`);
+});
+
 // =========================
 // AUTH ROUTES
 // =========================
