@@ -110,6 +110,10 @@ router.get("/dashboard/:uuid", async function(req, res) {
   } catch (ex) {
     // await client.query('ROLLBACK')
     console.log(`something went wrong ${ex}`);
+    dataModel.currentShow = null;
+    setTimeout(function redirect() {
+      res.redirect(`/dashboard/${req.params.uuid}`);
+    }, 5000);
   } finally {
     await client.release();
     console.log("Client disconnected");
