@@ -78,26 +78,24 @@ router.get("/dashboard/:uuid", async function(req, res) {
     // ========================== Get Orglist & UserList end =============================
     // ========================== DASHBOARD CONTENTS start ===============================
     // fetch the number cards data that belongs to the account
-    // for await (let card of dataModel.cards[
-    //   `for${dataModel.currentLoginType}`
-    // ]) {
-    //   let resCard;
-    //   condition1 ? value1
-    //      : condition2 ? value2
-    //      : condition3 ? value3
-    //      : value4
-    //   dataModel.currentLoginType === "superadmin"
-    //     ? (resCard = await client.query(card.query))
-    //     : dataModel.currentLoginType === "admin"
-    //     ? (resCard = await client.query(card.query, [thisOrg.rows[0].id]));
-    //   card.number = resCard.rowCount;
-    // }
+    for await (let card of dataModel.cards[`for${dataModel.currentShowType}`]) {
+      let resCard;
+      if (dataModel.currentShowType === "superadmin") {
+        resCard = await client.query(card.query);
+      } else if (dataModel.currentShowType === "admin") {
+        resCard = await client.query(card.query, [currentShow.o_id]);
+      } else if (dataModel.currentShowType === "user") {
+        console.log("user card ----");
+        resCard = await client.query(card.query, [currentShow.uuid]);
+      }
+      card.number = resCard.rowCount;
+    }
     // resBar = await client.query(dataModel.bar.find)
     // ========================== DASHBOARD CONTENTS end =============================
     let data = {
       currentLogin: currentLogin,
-      currentLoginType: dataModel.currentLoginType
-      // cards: dataModel.cards[`for${dataModel.currentLoginType}`]
+      currentLoginType: dataModel.currentLoginType,
+      cards: dataModel.cards[`for${dataModel.currentShowType}`]
     };
     if (typeof resOrgList != "undefined") data["orgs"] = resOrgList.rows;
     if (typeof resUserList != "undefined") data["users"] = resUserList.rows;
