@@ -35,23 +35,28 @@ router.get("/dashboard/:uuid", async function(req, res) {
   if (dataModel.currentShow === null) {
     dataModel.currentShow = currentLogin; // always gets data along with user_uuid
   } else {
-    // check if the params.uuid is org's or user's
+    // check if the params.uuid is from org or user
     dataModel.currentShow = await client.query(
       `${dataModel.userList.findAll.query} WHERE u.uuid = $1`,
       [req.params.uuid]
     );
-    console.log("thisthisthis: ", dataModel.currentShow.rowCount);
-    if (dataModel.currentLoginType === "superadmin") {
-      if (dataModel.currentShow.rowCount === 0) {
-        dataModel.currentShow = await client.query(
-          `${dataModel.userList.findAll.query} WHERE o.uuid = $1`,
-          [req.params.uuid]
-        );
-        console.log("this2this22222: ", dataModel.currentShow.rowCount);
-      }
+    console.log("1st currentShow.rowCount: ", dataModel.currentShow.rowCount);
+    if (
+      dataModel.currentLoginType === "superadmin" &&
+      dataModel.currentShow.rowCount === 0
+    ) {
+      // if there's no data found from the query above, the previously picked one should be org. Then, get the org's users data.
+      dataModel.currentShow = await client.query(
+        `${dataModel.userList.findAll.query} WHERE o.uuid = $1`,
+        [req.params.uuid]
+      );
+      console.log(
+        "AFTER 1st currentShow.rowCount: ",
+        dataModel.currentShow.rowCount
+      );
     }
   }
-  let currentShow = dataModel.currentShow;
+  let currentShow = dataModel.currentShow; // finally gets my currentShow
   console.log("currentShow: ", currentShow);
   // ======================= Get CURRENT SHOW end =========================
 
