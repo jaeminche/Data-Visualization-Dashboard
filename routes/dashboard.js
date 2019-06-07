@@ -15,52 +15,60 @@ pool.on("error", (err, client) => {
 
 router.get("/dashboard/:uuid", async function(req, res) {
   const client = await pool.connect();
-  console.log("dataModel.jwt: ", dataModel.jwt);
-  console.log("dataModel.currentLogin: ", dataModel.currentLogin);
-  // ======================= Get CURRENT LOGIN start ======================
-  let currentLogin = dataModel.currentLogin;
-  if (currentLogin.superadmin === true && currentLogin.admin === true) {
-    // prompt and get input by asking which one of superadmin and user the user wants
-    dataModel.currentLoginType = "superadmin";
-  } else if (currentLogin.superadmin === false && currentLogin.admin === true) {
-    // prompt and get input by asking which one of org and user the user wants
-    dataModel.currentLoginType = "admin";
-  } else {
-    dataModel.currentLoginType = "user";
-  }
-  console.log("currentLoginType", dataModel.currentLoginType);
-  // ======================= Get CURRENT LOGIN end ========================
-
-  // ======================= Get CURRENT SHOW start =======================
-  if (dataModel.currentShow === null) {
-    dataModel.currentShow = currentLogin; // always gets data along with user_uuid
-  } else {
-    // check if the params.uuid is from org or user
-    dataModel.currentShow = await client.query(
-      `${dataModel.userList.findAll.query} WHERE u.uuid = $1`,
-      [req.params.uuid]
-    );
-    console.log("1st currentShow.rowCount: ", dataModel.currentShow.rowCount);
-    if (
-      dataModel.currentLoginType === "superadmin" &&
-      dataModel.currentShow.rowCount === 0
+  try {
+    console.log("================ dashboard pg starts ===============");
+    console.log("dataModel.jwt: ", dataModel.jwt);
+    console.log("dataModel.currentLogin: ", dataModel.currentLogin);
+    // =============================== Get CURRENT LOGIN start ==============================
+    let currentLogin = dataModel.currentLogin;
+    if (currentLogin.superadmin === true && currentLogin.admin === true) {
+      // prompt and get input by asking which one of superadmin and user the user wants
+      dataModel.currentLoginType = "superadmin";
+    } else if (
+      currentLogin.superadmin === false &&
+      currentLogin.admin === true
     ) {
-      // if there's no data found from the query above, the previously picked one should be org. Then, get the org's users data.
-      dataModel.currentShow = await client.query(
-        `${dataModel.userList.findAll.query} WHERE o.uuid = $1`,
+      // prompt and get input by asking which one of org and user the user wants
+      dataModel.currentLoginType = "admin";
+    } else {
+      dataModel.currentLoginType = "user";
+    }
+    console.log("currentLoginType", dataModel.currentLoginType);
+    // =============================== Get CURRENT LOGIN end ================================
+
+    // =============================== Get CURRENT SHOW start ===============================
+    let currentShow;
+    if (dataModel.currentShow === null) {
+      // when initial launch on the app
+      dataModel.currentShow = currentLogin; // always gets data along with user_uuid
+    } else {
+      // from second launch on the app
+      // check if the params.uuid is from org or user, if not user case, continue on to if block
+      let { rows } = await client.query(
+        `${dataModel.userList.findAll.query} WHERE u.uuid = $1`,
         [req.params.uuid]
       );
-      console.log(
-        "AFTER 1st currentShow.rowCount: ",
-        dataModel.currentShow.rowCount
-      );
+      dataModel.currentShow = rows[0]; // store in dataModel only the rows
+      console.log("2nd currentShow: ", dataModel.currentShow);
+      if (
+        dataModel.currentLoginType === "superadmin" &&
+        typeof dataModel.currentShow === "undefined"
+      ) {
+        // this is org's case. if there's no data found from the query above,
+        // the previously picked one should be org. Then, get all the org's users data IN AN ARRAY.
+        let { rows } = await client.query(
+          `${dataModel.userList.findAll.query} WHERE o.uuid = $1`,
+          [req.params.uuid]
+        );
+        dataModel.currentShow = rows[0];
+        console.log("rows: ", rows);
+        console.log("rows length: ", rows.length);
+      }
     }
-  }
-  let currentShow = dataModel.currentShow; // finally gets my currentShow
-  console.log("currentShow: ", currentShow);
-  // ======================= Get CURRENT SHOW end =========================
+    currentShow = dataModel.currentShow; // get my currentShow FOR INDEX
+    console.log("currentShow: ", currentShow);
+    // =============================== Get CURRENT SHOW end =================================
 
-  try {
     let data;
     let resOrgList, resUserList;
     let resPie;
@@ -79,54 +87,28 @@ router.get("/dashboard/:uuid", async function(req, res) {
     //   card.number = resCard.rowCount;
     // }
 
+    // ========================== Get Orglist & UserList start =============================
     if (dataModel.currentLoginType === "superadmin") {
-      // let currentShow = dataModel.currentShow;
-      // try {
-      //   console.log("req.params: ", req.params);
-      //   currentShow = await client.query(
-      //     `${dataModel.userList.findAll.query} WHERE u.uuid = $1`,
-      //     [req.params.uuid]
-      //   );
-      // } catch (ex) {
-      //   // await client.query('ROLLBACK')
-      //   console.log(`something went wrong ${ex}`);
-      // } finally {
-      //   // await client.release();
-      //   // console.log("Client disconnected");
-      // }
-
       resOrgList = await client.query(dataModel.orgList.findAll.query);
-      // resUserList = await client.query(
-      //   dataModel.userList.findAllForAdmin.query,
-      //   [currentShow.o_id]
-      // );
-      // console.log("resUserList: ", resUserList);
+      resUserList = await client.query(
+        dataModel.userList.findAllForAdmin.query,
+        [currentShow.o_id]
+      );
       // fetch top 10 votes' rows in sharedroutes table for pie graph
       resPie = await client.query(dataModel.pie.query);
     } else if (dataModel.currentLoginType === "admin") {
-      // resOrgList = await client.query(dataModel.orgList.findOne.query, [
-      //   currentLogin.o_id
-      // ]);
       resUserList = await client.query(
         dataModel.userList.findAllForAdmin.query,
         [currentLogin.o_id]
       );
-    } else {
-      // resOrgList = await client.query(dataModel.orgList.findOne.query, [
-      //   currentLogin.o_id
-      // ]);
-      // resUserList = await client.query(dataModel.userList.findOne.query, [
-      //   currentLogin.uuid]);
     }
+    // ========================== Get Orglist & UserList end =============================
 
     // resBar = await client.query(dataModel.bar.find)
-
-    // console.log("resUserList", resUserList);
 
     data = {
       currentLogin: currentLogin,
       loginType: dataModel.currentLoginType
-      // thisOrg: thisOrg.rows[0],
       // cards: dataModel.cards[`for${dataModel.currentLoginType}`]
     };
     if (typeof resOrgList != "undefined") data["orgs"] = resOrgList.rows;
@@ -137,6 +119,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
     }
     console.log("req.user: ", req.user);
     console.log("req.params: ", req.params);
+    console.log("================ dashboard pg ends ===============");
     res.render("dashboard", data);
   } catch (ex) {
     // await client.query('ROLLBACK')
