@@ -209,12 +209,13 @@ const dataModel = {
     // findAll is not likely to be used often
     findAll: {
       query:
-        "SELECT u.name as name, u.id as id, u.uuid as uuid, organisation as o_id, u.admin as admin, o.uuid as o_uuid FROM public.users u LEFT JOIN public.organisations o ON organisation = o.id",
+        "SELECT u.name, u.id, u.uuid as uuid, u.admin, o.name as o_name, u.organisation as o_id, o.uuid as o_uuid, o.superadmin FROM public.users u LEFT JOIN organisations o ON organisation = o.id",
+
       auth: ["superadmin"]
     },
     findAllForAdmin: {
       query:
-        "SELECT u.name as name, u.id as id, u.uuid as uuid, organisation as o_id, u.admin as admin, o.uuid as o_uuid FROM public.users u LEFT JOIN public.organisations o ON organisation = o.id WHERE o.id = $1",
+        "SELECT u.name, u.id, u.uuid as uuid, u.admin, o.name as o_name, u.organisation as o_id, o.uuid as o_uuid, o.superadmin FROM public.users u LEFT JOIN organisations o ON organisation = o.id WHERE o.id = $1",
       auth: ["admin", "superadmin"]
     },
     findOne: {
