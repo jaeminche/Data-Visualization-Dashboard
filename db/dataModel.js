@@ -30,6 +30,7 @@ const dataModel = {
       {
         name: "NO. OF ORGANIZATIONS LOGGED IN TODAY",
         number: 0,
+        cyclingTimeCal: false,
         color: "primary",
         fa: "sign-in-alt",
         query:
@@ -39,6 +40,7 @@ const dataModel = {
       {
         name: "NO. OF ORGANIZATIONS LOGGED IN THIS MONTH",
         number: 0,
+        cyclingTimeCal: false,
         color: "info",
         fa: "sign-in-alt",
         query:
@@ -48,6 +50,7 @@ const dataModel = {
       {
         name: "TOTAL NO. OF ORGANIZATIONS",
         number: 0,
+        cyclingTimeCal: false,
         color: "warning",
         fa: "user",
         query: "SELECT * FROM public.organisations",
@@ -56,6 +59,7 @@ const dataModel = {
       {
         name: "TOTAL NO. OF USERS",
         number: 0,
+        cyclingTimeCal: false,
         color: "warning",
         fa: "users",
         query: "SELECT * FROM public.users",
@@ -64,6 +68,7 @@ const dataModel = {
       {
         name: "NO. OF ACTIVE USERS TODAY",
         number: 0,
+        cyclingTimeCal: false,
         color: "primary",
         fa: "bicycle",
         query:
@@ -74,6 +79,7 @@ const dataModel = {
         // TODO: add query condition for this month
         name: "NO. OF ACTIVE USERS THIS MONTH",
         number: 0,
+        cyclingTimeCal: false,
         color: "info",
         fa: "bicycle",
         query: "SELECT userid FROM public.log_startcycling GROUP BY userid",
@@ -83,6 +89,7 @@ const dataModel = {
         // TODO: add query condition for this week
         name: "AVERAGE CYCLING TIME THIS WEEK",
         number: 0,
+        cyclingTimeCal: false,
         color: "success",
         fa: "stopwatch",
         //   todo:
@@ -93,6 +100,7 @@ const dataModel = {
         // TODO: add query condition for this month
         name: "AVERAGE CYCLING TIME THIS MONTH",
         number: 0,
+        cyclingTimeCal: false,
         color: "success",
         fa: "stopwatch",
         //   todo:
@@ -105,6 +113,7 @@ const dataModel = {
         // TODO: add query condition for today
         name: "NO. OF ACTIVE USERS TODAY",
         number: 0,
+        cyclingTimeCal: false,
         color: "primary",
         fa: "bicycle",
         query:
@@ -115,6 +124,7 @@ const dataModel = {
         // TODO: add query condition for this month
         name: "NO. OF ACTIVE USERS THIS MONTH",
         number: 0,
+        cyclingTimeCal: false,
         color: "info",
         fa: "bicycle",
         query:
@@ -125,6 +135,7 @@ const dataModel = {
         // TODO: add query condition for this week
         name: "AVERAGE CYCLING TIME THIS WEEK",
         number: 0,
+        cyclingTimeCal: false,
         color: "success",
         fa: "stopwatch",
         //   todo:
@@ -135,6 +146,7 @@ const dataModel = {
         // TODO: add query condition for this month
         name: "AVERAGE CYCLING TIME THIS MONTH",
         number: 0,
+        cyclingTimeCal: false,
         color: "success",
         fa: "stopwatch",
         //   todo:
@@ -144,6 +156,7 @@ const dataModel = {
       {
         name: "TOTAL NO. OF USERS",
         number: 0,
+        cyclingTimeCal: false,
         color: "warning",
         fa: "users",
         query: "SELECT * FROM public.users WHERE organisation = $1",
@@ -155,6 +168,7 @@ const dataModel = {
         // TODO: add query condition for this week
         name: "CYCLING TIME TODAY",
         number: 0,
+        cyclingTimeCal: true,
         color: "success",
         fa: "stopwatch",
         //   todo:

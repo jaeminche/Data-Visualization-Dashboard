@@ -78,6 +78,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
     // ========================== Get Orglist & UserList end =============================
     // ========================== DASHBOARD CONTENTS start ===============================
     // fetch the number cards data that belongs to the account
+    let totalCyclMilliSec = 0;
     for await (let card of dataModel.cards[`for${dataModel.currentShowType}`]) {
       let resCard;
       if (dataModel.currentShowType === "superadmin") {
@@ -87,8 +88,23 @@ router.get("/dashboard/:uuid", async function(req, res) {
       } else if (dataModel.currentShowType === "user") {
         console.log("user card ----");
         resCard = await client.query(card.query, [currentShow.uuid]);
+        console.log("resCard: ", resCard.rows);
+
+        for (let i = 0; i < resCard.rows.length; i++) {
+          if (resCard.rows[i].start_cycling != null) {
+            let cyclMilliSec = getTimeDiff(
+              resCard.rows[i].packet_generated,
+              resCard.rows[i].start_cycling
+            );
+            totalCyclMilliSec = totalCyclMilliSec + cyclMilliSec;
+          }
+        }
       }
-      card.number = resCard.rowCount;
+      if (card.cyclingTimeCal === true) {
+        card.number = convertMillisec(totalCyclMilliSec);
+      } else {
+        card.number = resCard.rowCount;
+      }
     }
     // resBar = await client.query(dataModel.bar.find)
     // ========================== DASHBOARD CONTENTS end =============================
@@ -121,6 +137,24 @@ router.get("/dashboard/:uuid", async function(req, res) {
     console.log("Client disconnected");
   }
 });
+
+function getTimeDiff(date1, date2) {
+  let big = new Date(date1);
+  let small = new Date(date2);
+  return big - small;
+}
+
+function convertMillisec(milliseconds) {
+  var day, hour, minute, seconds;
+  seconds = Math.floor(milliseconds / 1000);
+  minute = Math.floor(seconds / 60);
+  seconds = seconds % 60;
+  hour = Math.floor(minute / 60);
+  minute = minute % 60;
+  day = Math.floor(hour / 24);
+  hour = hour % 24;
+  return `${day} day ${hour}hr ${minute}m ${seconds}sec`;
+}
 
 function getCurrentType(data, key) {
   if (data.superadmin === true && data.admin === true) {
