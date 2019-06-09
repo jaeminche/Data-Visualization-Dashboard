@@ -33,7 +33,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
       getCurrentType(dataModel.currentShow, "currentShowType");
     } else {
       // from second launch on the app
-      // check if the params.uuid is from org or user, if not user case, continue on to if block
+      // check if the params.uuid is from org or user, if not the case of user, continue on to the if's block
       let { rows } = await client.query(
         `${dataModel.userList.findAll.query} WHERE u.uuid = $1`,
         [req.params.uuid]
@@ -76,7 +76,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
       );
     }
     // ========================== Get Orglist & UserList end =============================
-    // ========================== DASHBOARD CONTENTS start ===============================
+    // ======================= DASHBOARD CONTENTS - CARD - start =========================
     // fetch the number cards data that belongs to the account
     for await (let card of dataModel.cards[`for${dataModel.currentShowType}`]) {
       let resCard;
@@ -108,7 +108,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
       }
     }
     // resBar = await client.query(dataModel.bar.find)
-    // ========================== DASHBOARD CONTENTS end =============================
+    // ======================== DASHBOARD CONTENTS - CARD - end ==========================
     let data = {
       currentLogin: currentLogin,
       currentLoginType: dataModel.currentLoginType,
