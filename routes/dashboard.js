@@ -78,15 +78,16 @@ router.get("/dashboard/:uuid", async function(req, res) {
     // ========================== Get Orglist & UserList end =============================
     // ========================== DASHBOARD CONTENTS start ===============================
     // fetch the number cards data that belongs to the account
-    let totalCyclMilliSec = 0;
     for await (let card of dataModel.cards[`for${dataModel.currentShowType}`]) {
       let resCard;
+      let totalCyclMilliSec;
       if (dataModel.currentShowType === "superadmin") {
         resCard = await client.query(card.query);
       } else if (dataModel.currentShowType === "admin") {
         resCard = await client.query(card.query, [currentShow.o_id]);
       } else if (dataModel.currentShowType === "user") {
         console.log("user card ----");
+        totalCyclMilliSec = 0;
         resCard = await client.query(card.query, [currentShow.uuid]);
         console.log("resCard: ", resCard.rows);
 
