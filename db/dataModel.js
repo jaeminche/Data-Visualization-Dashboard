@@ -28,6 +28,7 @@ const dataModel = {
   cards: {
     forsuperadmin: [
       {
+        id: 1,
         name: "NO. OF ORGANIZATIONS LOGGED IN TODAY",
         number: 0,
         cyclingTimeCal: false,
@@ -38,6 +39,7 @@ const dataModel = {
         auth: ["superadmin"]
       },
       {
+        id: 2,
         name: "NO. OF ORGANIZATIONS LOGGED IN THIS MONTH",
         number: 0,
         cyclingTimeCal: false,
@@ -48,6 +50,7 @@ const dataModel = {
         auth: ["superadmin"]
       },
       {
+        id: 3,
         name: "TOTAL NO. OF ORGANIZATIONS",
         number: 0,
         cyclingTimeCal: false,
@@ -57,6 +60,7 @@ const dataModel = {
         auth: ["superadmin"]
       },
       {
+        id: 4,
         name: "TOTAL NO. OF USERS",
         number: 0,
         cyclingTimeCal: false,
@@ -66,6 +70,7 @@ const dataModel = {
         auth: ["superadmin"]
       },
       {
+        id: 5,
         name: "NO. OF ACTIVE USERS TODAY",
         number: 0,
         cyclingTimeCal: false,
@@ -77,6 +82,7 @@ const dataModel = {
       },
       {
         // TODO: add query condition for this month
+        id: 6,
         name: "NO. OF ACTIVE USERS THIS MONTH",
         number: 0,
         cyclingTimeCal: false,
@@ -87,6 +93,7 @@ const dataModel = {
       },
       {
         // TODO: add query condition for this week
+        id: 7,
         name: "AVERAGE CYCLING TIME THIS WEEK",
         number: 0,
         cyclingTimeCal: false,
@@ -98,6 +105,7 @@ const dataModel = {
       },
       {
         // TODO: add query condition for this month
+        id: 8,
         name: "AVERAGE CYCLING TIME THIS MONTH",
         number: 0,
         cyclingTimeCal: false,
@@ -111,6 +119,7 @@ const dataModel = {
     foradmin: [
       {
         // TODO: add query condition for today
+        id: 1,
         name: "NO. OF ACTIVE USERS TODAY",
         number: 0,
         cyclingTimeCal: false,
@@ -122,6 +131,7 @@ const dataModel = {
       },
       {
         // TODO: add query condition for this month
+        id: 2,
         name: "NO. OF ACTIVE USERS THIS MONTH",
         number: 0,
         cyclingTimeCal: false,
@@ -133,6 +143,7 @@ const dataModel = {
       },
       {
         // TODO: add query condition for this week
+        id: 3,
         name: "AVERAGE CYCLING TIME THIS WEEK",
         number: 0,
         cyclingTimeCal: false,
@@ -144,6 +155,7 @@ const dataModel = {
       },
       {
         // TODO: add query condition for this month
+        id: 4,
         name: "AVERAGE CYCLING TIME THIS MONTH",
         number: 0,
         cyclingTimeCal: false,
@@ -154,6 +166,7 @@ const dataModel = {
         auth: ["superadmin", "admin"]
       },
       {
+        id: 5,
         name: "TOTAL NO. OF USERS",
         number: 0,
         cyclingTimeCal: false,
@@ -165,15 +178,35 @@ const dataModel = {
     ],
     foruser: [
       {
+        // TODO: when deployment, change the date to current_date
+        id: 1,
+        name: "CYCLING TIME THIS WEEK",
+        number: 0,
+        cyclingTimeCal: true,
+        color: "warning",
+        fa: "stopwatch",
+        get query() {
+          return `${
+            dataModel.qr.cyclingTime
+          } WHERE u.uuid = $1 AND date(packet_generated) > date '2017-01-29' - interval '7 days' AND date(packet_generated) < date '2017-01-28' + interval '1 day'`;
+        },
+        auth: ["superadmin", "admin", "user"]
+      },
+      {
         // TODO: add query condition for this week
+        // TODO: when deployment, change the date to current_date
+        id: 2,
         name: "CYCLING TIME TODAY",
         number: 0,
         cyclingTimeCal: true,
         color: "success",
         fa: "stopwatch",
         //   todo:
-        query:
-          "SELECT e.start_id, e.event_id, e.packet_id, e.packet_len, e.start_userid, e.event_userid, u.uuid AS uuid, e.event_orgid, e.event_type, e.event_data, e.start_cycling, e.event_time, e.packet_generated, e.locationid, e.routeid, e.location FROM (SELECT d.id AS start_id, c.event_id, c.packet_id, c.packet_len, d.userid AS start_userid, c.userid AS event_userid, c.orgid AS event_orgid, c.event_type, c.event_data, d.client_timestamp AS start_cycling, c.event_time, c.packet_generated, d.locationid, d.routeid, d.location FROM (SELECT a.id AS event_id, b.id AS packet_id, length AS packet_len, userid, orgid, event_type, event_data, event_time, b.client_timestamp AS packet_generated FROM log_cycling a FULL OUTER JOIN log_cycling_packets b ON a.packet_id = b.id ORDER BY packet_generated, event_time) c FULL OUTER JOIN log_startcycling d ON d.client_timestamp = c.event_time AND d.userid = c.userid ORDER BY COALESCE(packet_generated, d.client_timestamp), event_time) e LEFT JOIN users u ON e.event_userid = u.id WHERE u.uuid = $1 AND date(packet_generated) = '2017-01-28'",
+        get query() {
+          return `${
+            dataModel.qr.cyclingTime
+          } WHERE u.uuid = $1 AND date(packet_generated) = date '2017-01-29'`;
+        },
         auth: ["superadmin", "admin", "user"]
       }
     ]
@@ -197,8 +230,11 @@ const dataModel = {
   },
   bar: {
     findOne: {
-      query:
-        "SELECT e.start_id, e.event_id, e.packet_id, e.packet_len, e.start_userid, e.event_userid, u.uuid as uuid, e.event_orgid, e.event_type, e.event_data, e.start_cycling, e.event_time, e.packet_generated, e.locationid, e.routeid, e.location, u.name from (select d.id as start_id, c.event_id, c.packet_id, c.packet_len, d.userid as start_userid, c.userid as event_userid, c.orgid as event_orgid, c.event_type, c.event_data, d.client_timestamp as start_cycling, c.event_time, c.packet_generated, d.locationid, d.routeid, d.location from (select a.id as event_id, b.id as packet_id, length as packet_len, userid, orgid, event_type, event_data, event_time, b.client_timestamp as packet_generated from log_cycling a full outer join log_cycling_packets b on a.packet_id = b.id order by packet_generated, event_time) c full outer join log_startcycling d on d.client_timestamp = c.event_time and d.userid = c.userid order by COALESCE(packet_generated, d.client_timestamp), event_time) e left join users u ON e.event_userid = u.id WHERE event_userid = $1"
+      get query() {
+        return `${dataModel.qr.cyclingTime} WHERE event_userid = $1`;
+      }
+      // query:
+      // "SELECT e.start_id, e.event_id, e.packet_id, e.packet_len, e.start_userid, e.event_userid, u.uuid as uuid, e.event_orgid, e.event_type, e.event_data, e.start_cycling, e.event_time, e.packet_generated, e.locationid, e.routeid, e.location, u.name from (select d.id as start_id, c.event_id, c.packet_id, c.packet_len, d.userid as start_userid, c.userid as event_userid, c.orgid as event_orgid, c.event_type, c.event_data, d.client_timestamp as start_cycling, c.event_time, c.packet_generated, d.locationid, d.routeid, d.location from (select a.id as event_id, b.id as packet_id, length as packet_len, userid, orgid, event_type, event_data, event_time, b.client_timestamp as packet_generated from log_cycling a full outer join log_cycling_packets b on a.packet_id = b.id order by packet_generated, event_time) c full outer join log_startcycling d on d.client_timestamp = c.event_time and d.userid = c.userid order by COALESCE(packet_generated, d.client_timestamp), event_time) e left join users u ON e.event_userid = u.id WHERE event_userid = $1"
     }
   },
   orgList: {
@@ -212,7 +248,6 @@ const dataModel = {
     }
   },
   userList: {
-    // findAll is not likely to be used often
     findAll: {
       query:
         "SELECT u.name, u.id, u.uuid as uuid, u.admin, o.name as o_name, u.organisation as o_id, o.uuid as o_uuid, o.superadmin FROM public.users u LEFT JOIN organisations o ON organisation = o.id",
@@ -229,6 +264,10 @@ const dataModel = {
         "SELECT name, id, uuid, organisation, admin FROM public.users WHERE uuid = $1",
       auth: ["user", "admin", "superadmin"]
     }
+  },
+  qr: {
+    cyclingTime:
+      "SELECT e.start_id, e.event_id, e.packet_id, e.packet_len, e.start_userid, e.event_userid, u.uuid AS uuid, e.event_orgid, e.event_type, e.event_data, e.start_cycling, e.event_time, e.packet_generated, e.locationid, e.routeid, e.location FROM (SELECT d.id AS start_id, c.event_id, c.packet_id, c.packet_len, d.userid AS start_userid, c.userid AS event_userid, c.orgid AS event_orgid, c.event_type, c.event_data, d.client_timestamp AS start_cycling, c.event_time, c.packet_generated, d.locationid, d.routeid, d.location FROM (SELECT a.id AS event_id, b.id AS packet_id, length AS packet_len, userid, orgid, event_type, event_data, event_time, b.client_timestamp AS packet_generated FROM log_cycling a FULL OUTER JOIN log_cycling_packets b ON a.packet_id = b.id ORDER BY packet_generated, event_time) c FULL OUTER JOIN log_startcycling d ON d.client_timestamp = c.event_time AND d.userid = c.userid ORDER BY COALESCE(packet_generated, d.client_timestamp), event_time) e LEFT JOIN users u ON e.event_userid = u.id"
   }
 
   // ,names: [
