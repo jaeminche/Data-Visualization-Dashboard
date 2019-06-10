@@ -189,7 +189,7 @@ const m = {
         get query() {
           return `${
             m.qr.cyclingTime
-          } WHERE u.uuid = $1 AND date(packet_generated) > date '2017-01-29' - interval '7 days' AND date(packet_generated) < date '2017-01-28' + interval '1 day'`;
+          } WHERE u.uuid = $1 AND date(packet_generated) > date '2017-01-29' - interval '7 days' AND date(packet_generated) < date '2017-01-29' + interval '1 day'`;
         },
         auth: ["superadmin", "admin", "user"]
       },
@@ -269,6 +269,36 @@ const m = {
   qr: {
     cyclingTime:
       "SELECT e.start_id, e.event_id, e.packet_id, e.packet_len, e.start_userid, e.event_userid, u.uuid AS uuid, e.event_orgid, e.event_type, e.event_data, e.start_cycling, e.event_time, e.packet_generated, e.locationid, e.routeid, e.location FROM (SELECT d.id AS start_id, c.event_id, c.packet_id, c.packet_len, d.userid AS start_userid, c.userid AS event_userid, c.orgid AS event_orgid, c.event_type, c.event_data, d.client_timestamp AS start_cycling, c.event_time, c.packet_generated, d.locationid, d.routeid, d.location FROM (SELECT a.id AS event_id, b.id AS packet_id, length AS packet_len, userid, orgid, event_type, event_data, event_time, b.client_timestamp AS packet_generated FROM log_cycling a FULL OUTER JOIN log_cycling_packets b ON a.packet_id = b.id ORDER BY packet_generated, event_time) c FULL OUTER JOIN log_startcycling d ON d.client_timestamp = c.event_time AND d.userid = c.userid ORDER BY COALESCE(packet_generated, d.client_timestamp), event_time) e LEFT JOIN users u ON e.event_userid = u.id"
+  },
+  area: {
+    labels: {
+      week: ["Mon", "Tues", "Wed", "Thur", "Fri", "Sat", "Sun"],
+      months: [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec"
+      ]
+    },
+    datasets: {
+      week: [
+        // { date: "2017-01-26", label: "Mon", time: 50 },
+        // { date: "2017-01-27", label: "Tues", time: 40 },
+        // { date: "2017-01-28", label: "Wed", time: 60 },
+        // { date: "2017-01-26", label: "Thur", time: 100 },
+        // { date: "2017-01-27", label: "Fri", time: 10 },
+        // { date: "2017-01-28", label: "Sat", time: 10 },
+        // { date: "2017-01-29", label: "Sun", time: 30 }
+      ]
+    }
   }
 
   // ,names: [

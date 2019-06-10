@@ -19,6 +19,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
   const client = await pool.connect();
   // TODO: later connect this with db.query > const query = client.query.bind(client);
   try {
+    c.init();
     console.log("================ dashboard pg starts ===============");
     // console.log("m.jwt: ", m.jwt);
     console.log("m.currentLogin: ", m.currentLogin);
@@ -80,6 +81,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
     }
     // ========== DASHBOARD CONTENTS - CARD - start ==========
     // fetch the number cards data that belongs to the account
+    let resArea = undefined;
     for await (let card of m.cards[`for${m.currentShowType}`]) {
       let resCard, timeCycledInMilSec;
       switch (m.currentShowType) {
@@ -93,12 +95,61 @@ router.get("/dashboard/:uuid", async function(req, res) {
           console.log("user card ----");
           resCard = await client.query(card.query, [m.currentShow.uuid]);
           timeCycledInMilSec = c.getTimeCycledInMilSec(resCard.rows);
+          if (
+            card.name === "CYCLING TIME THIS WEEK" &&
+            timeCycledInMilSec != 0
+          ) {
+            resArea = resCard.rows;
+          }
           break;
       }
       card.cyclingTimeCal
         ? (card.number = c.convertMillisec(timeCycledInMilSec))
         : (card.number = resCard.rowCount);
     }
+
+    // ========== DASHBOARD CONTENTS - AREA-CHART - start =======
+    // console.log("resArea: ", resArea);
+    if (
+      typeof resArea != "undefined" &&
+      typeof resArea[0].packet_generated != "undefined" &&
+      resArea.length > 0
+    ) {
+      let prevDate = new Date(resArea[0].packet_generated).getDate();
+      let indexForResAreaByDay = 0;
+
+      let resAreaByDay = [[], [], [], [], [], [], []];
+      resArea.forEach(r => {
+        if (new Date(r.packet_generated).getDate() === prevDate) {
+          resAreaByDay[indexForResAreaByDay].push(r);
+        } else {
+          prevDate = new Date(r.packet_generated).getDate();
+          indexForResAreaByDay++;
+          resAreaByDay[indexForResAreaByDay].push(r);
+        }
+      });
+      // console.log(resAreaByDay);
+
+      const dataForArea = [];
+      resAreaByDay.forEach(dataForOneDay => {
+        let dataset;
+        if (dataForOneDay.length > 0) {
+          dataset = {
+            date: new Date(dataForOneDay[0].packet_generated).getDate(),
+            label: c.convertDay(
+              new Date(dataForOneDay[0].packet_generated).getDay()
+            ),
+            time: c.getTimeCycledInMilSec(dataForOneDay)
+          };
+        }
+        if (dataset != undefined) {
+          dataForArea.push(dataset);
+        }
+      });
+      m.area.datasets.week = dataForArea;
+      console.log("m.area.datasets.week: ", m.area.datasets.week);
+    }
+
     // resBar = await client.query(m.bar.find)
     // ======================== DASHBOARD CONTENTS - CARD - end ==========================
     let data = {
@@ -106,7 +157,8 @@ router.get("/dashboard/:uuid", async function(req, res) {
       currentLoginType: m.currentLoginType,
       currentShow: m.currentShow,
       currentShowType: m.currentShowType,
-      cards: m.cards[`for${m.currentShowType}`]
+      cards: m.cards[`for${m.currentShowType}`],
+      m: m
     };
     if (typeof m.resOrgList != "undefined") data["orgs"] = m.resOrgList;
     if (typeof m.resUserList != "undefined") data["users"] = m.resUserList;
@@ -115,8 +167,8 @@ router.get("/dashboard/:uuid", async function(req, res) {
       data["pieData"] = m.pie;
     }
     // console.log("req.user: ", req.user);
-    console.log("req.params: ", req.params);
-    console.log("================ dashboard pg ends ===============");
+    // console.log("req.params: ", req.params);
+    // console.log("================ dashboard pg ends ===============");
     m.pgload++;
     res.render("dashboard", data);
   } catch (ex) {

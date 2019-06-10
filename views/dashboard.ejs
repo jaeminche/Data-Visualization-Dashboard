@@ -32,13 +32,13 @@
 
   <%# Content Row %>
   <div class="row">
-    <%# if (typeof area !== "undefined") { %>
+    <% if (m.area.datasets.week.length > 0) { %>
       <% include ./partials/chart_area %>
-    <%# } %>
+    <% } %>
 
     <% if (typeof pie !== "undefined") { %>
       <% if (pieData.auth.includes(currentLoginType)) { %>
-        <% include ./partials/chart_pie %>
+      <% include ./partials/chart_pie %>
       <% } %>
     <% } %>
 

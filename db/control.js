@@ -2,6 +2,10 @@ const m = require("./dataModel");
 const v = require("./view");
 
 const c = {
+  init: function() {
+    m.area.datasets.week = [];
+  },
+
   setCurrentLoginType: function() {
     this.setCurrentType(m.currentLogin, "currentLoginType");
   },
@@ -53,7 +57,37 @@ const c = {
     let big = new Date(date1);
     let small = new Date(date2);
     return big - small;
+  },
+
+  convertDay: function(number) {
+    switch (number) {
+      case 0:
+        return "Sun";
+        break;
+      case 1:
+        return "Mon";
+        break;
+      case 2:
+        return "Tues";
+        break;
+      case 3:
+        return "Wed";
+        break;
+      case 4:
+        return "Thur";
+        break;
+      case 5:
+        return "Fri";
+        break;
+      case 6:
+        return "Sat";
+        break;
+    }
   }
+
+  // sortDateArr: function(arr) {
+  //   arr.
+  // }
 };
 
 module.exports = c;

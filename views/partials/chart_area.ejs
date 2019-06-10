@@ -59,20 +59,7 @@
             var myLineChart = new Chart(ctx, {
               type: "line",
               data: {
-                labels: [
-                  "Jan",
-                  "Feb",
-                  "Mar",
-                  "Apr",
-                  "May",
-                  "Jun",
-                  "Jul",
-                  "Aug",
-                  "Sep",
-                  "Oct",
-                  "Nov",
-                  "Dec"
-                ],
+                labels: <%- JSON.stringify(m.area.datasets.week.map(set => set.label)) %>,
                 datasets: [
                   {
                     label: "Time",
@@ -87,7 +74,7 @@
                     pointHoverBorderColor: "rgba(78, 115, 223, 1)",
                     pointHitRadius: 10,
                     pointBorderWidth: 2,
-                    data: [0, 30, 50, 150, 100, 200, 220, 250, 200, 300, 280, 370]
+                    data: <%- JSON.stringify(m.area.datasets.week.map(set => set.time)) %>
                   }
                 ]
               },
