@@ -83,26 +83,32 @@ router.get("/dashboard/:uuid", async function(req, res) {
     for await (let card of m.cards[`for${m.currentShowType}`]) {
       let resCard;
       let totalCyclMilliSec;
-      if (m.currentShowType === "superadmin") {
-        resCard = await client.query(card.query);
-      } else if (m.currentShowType === "admin") {
-        resCard = await client.query(card.query, [m.currentShow.o_id]);
-      } else if (m.currentShowType === "user") {
-        console.log("user card ----");
-        totalCyclMilliSec = 0;
-        resCard = await client.query(card.query, [m.currentShow.uuid]);
-        console.log("resCard: ", resCard.rows);
 
-        for (let i = 0; i < resCard.rows.length; i++) {
-          if (resCard.rows[i].start_cycling != null) {
-            let cyclMilliSec = c.getTimeDiff(
-              resCard.rows[i].packet_generated,
-              resCard.rows[i].start_cycling
-            );
-            totalCyclMilliSec = totalCyclMilliSec + cyclMilliSec;
+      switch (m.currentShowType) {
+        case "superadmin":
+          resCard = await client.query(card.query);
+          break;
+        case "admin":
+          resCard = await client.query(card.query, [m.currentShow.o_id]);
+          break;
+        case "user":
+          console.log("user card ----");
+          totalCyclMilliSec = 0;
+          resCard = await client.query(card.query, [m.currentShow.uuid]);
+          console.log("resCard: ", resCard.rows);
+
+          for (let i = 0; i < resCard.rows.length; i++) {
+            if (resCard.rows[i].start_cycling != null) {
+              let cyclMilliSec = c.getTimeDiff(
+                resCard.rows[i].packet_generated,
+                resCard.rows[i].start_cycling
+              );
+              totalCyclMilliSec = totalCyclMilliSec + cyclMilliSec;
+            }
           }
-        }
+          break;
       }
+
       if (card.cyclingTimeCal === true) {
         card.number = c.convertMillisec(totalCyclMilliSec);
       } else {
