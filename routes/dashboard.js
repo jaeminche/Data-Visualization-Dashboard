@@ -20,12 +20,11 @@ router.get("/dashboard/:uuid", async function(req, res) {
   // TODO: later connect this with db.query > const query = client.query.bind(client);
   try {
     console.log("================ dashboard pg starts ===============");
-    console.log("m.jwt: ", m.jwt);
+    // console.log("m.jwt: ", m.jwt);
     console.log("m.currentLogin: ", m.currentLogin);
     // =========== Set CURRENT LOGIN & currentLoginType start ===========
     c.setCurrentLoginType();
     // console.log("currentLoginType", m.currentLoginType);
-    // =========== Set CURRENT LOGIN & currentLoginType end =============
     // =========== Set CURRENT SHOW & currentShowType start =============
     if (m.currentShow === null) {
       // when initial launch on the app
@@ -54,9 +53,8 @@ router.get("/dashboard/:uuid", async function(req, res) {
         m.currentShowType = "admin";
       }
     }
-    // console.log("currentShow: ", m.currentShow);
-    // console.log("currentShowType: ", m.currentShowType);
-    // ========== Set CURRENT SHOW & currentShowType end =======
+    console.log("currentShow: ", m.currentShow);
+    console.log("currentShowType: ", m.currentShowType);
     // ========== Set Orglist & UserList start =================
     let resOrgList, resUserList, resPie;
     switch (m.currentLoginType) {
@@ -80,8 +78,6 @@ router.get("/dashboard/:uuid", async function(req, res) {
       // default:
       //   break;
     }
-
-    // ========== Set Orglist & UserList end =================
     // ========== DASHBOARD CONTENTS - CARD - start ==========
     // fetch the number cards data that belongs to the account
     for await (let card of m.cards[`for${m.currentShowType}`]) {
