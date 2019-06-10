@@ -4,7 +4,7 @@ const router = express.Router({ mergeParams: true });
 // const User = require("../models/user");
 const { Pool, Client } = require("pg");
 const client_config = require("../config/client");
-const dataModel = require("../db/dataModel");
+const m = require("../db/dataModel");
 const db = require("../db/index");
 
 const pool = new Pool(client_config);
@@ -48,13 +48,13 @@ router.get("/logged_in_as/:id", async function(req, res) {
   let uuid = resLoggedInUser.rows[0].uuid;
   let o_id = resLoggedInUser.rows[0].o_id;
   let admin = resLoggedInUser.rows[0].admin;
-  dataModel.currentLogin = resLoggedInUser.rows[0];
+  m.currentLogin = resLoggedInUser.rows[0];
   const date = new Date();
-  dataModel.jwt.u = JSON.parse(req.params.id);
-  dataModel.jwt.o = o_id;
-  dataModel.jwt.a = admin;
-  dataModel.jwt.d = date.toUTCString();
-  let token = dataModel.jwt;
+  m.jwt.u = JSON.parse(req.params.id);
+  m.jwt.o = o_id;
+  m.jwt.a = admin;
+  m.jwt.d = date.toUTCString();
+  let token = m.jwt;
   console.log(token);
   console.log("currentLogin: ", resLoggedInUser.rows[0]);
   console.log("================logged page ends ===============");
@@ -63,7 +63,8 @@ router.get("/logged_in_as/:id", async function(req, res) {
 });
 
 router.get("/dashboard/mydashboard/:uuid", async function(req, res) {
-  dataModel.currentShow = null;
+  m.currentShow = null;
+  m.pgload = 1;
   res.redirect(`/dashboard/${req.params.uuid}`);
 });
 

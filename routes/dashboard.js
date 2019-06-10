@@ -2,7 +2,9 @@ const express = require("express");
 const router = express.Router({ mergeParams: true });
 const { Pool, Client } = require("pg");
 const client_config = require("../config/client");
-const dataModel = require("../db/dataModel");
+const m = require("../db/dataModel");
+const c = require("../db/control");
+const v = require("../db/view");
 const db = require("../db/index");
 
 const pool = new Pool(client_config);
@@ -18,82 +20,86 @@ router.get("/dashboard/:uuid", async function(req, res) {
   // TODO: later connect this with db.query > const query = client.query.bind(client);
   try {
     console.log("================ dashboard pg starts ===============");
-    console.log("dataModel.jwt: ", dataModel.jwt);
-    console.log("dataModel.currentLogin: ", dataModel.currentLogin);
-    // =========================== Get CURRENT LOGIN & currentLoginType start =========================
-    let currentLogin = dataModel.currentLogin;
-    getCurrentType(currentLogin, "currentLoginType");
-    console.log("currentLoginType", dataModel.currentLoginType);
-    // =========================== Get CURRENT LOGIN & currentLoginType end ===========================
-    // =========================== Get CURRENT SHOW & currentShowType start ===========================
-    let currentShow;
-    if (dataModel.currentShow === null) {
+    console.log("m.jwt: ", m.jwt);
+    console.log("m.currentLogin: ", m.currentLogin);
+    // =========== Set CURRENT LOGIN & currentLoginType start ===========
+    c.setCurrentLoginType();
+    // console.log("currentLoginType", m.currentLoginType);
+    // =========== Set CURRENT LOGIN & currentLoginType end =============
+    // =========== Set CURRENT SHOW & currentShowType start =============
+    if (m.currentShow === null) {
       // when initial launch on the app
-      dataModel.currentShow = currentLogin; // always gets data along with user_uuid
-      getCurrentType(dataModel.currentShow, "currentShowType");
+      m.currentShow = m.currentLogin; // always gets data along with user_uuid
+      c.setCurrentType(m.currentShow, "currentShowType");
     } else {
       // from second launch on the app
       // check if the params.uuid is from org or user, if not the case of user, continue on to the if's block
       let { rows } = await client.query(
-        `${dataModel.userList.findAll.query} WHERE u.uuid = $1`,
+        `${m.userList.findAll.query} WHERE u.uuid = $1`,
         [req.params.uuid]
       );
-      dataModel.currentShow = rows[0]; // store in dataModel only the rows
-      dataModel.currentShowType = "user";
+      m.currentShow = rows[0]; // store in m only the rows
+      m.currentShowType = "user";
       if (
-        dataModel.currentLoginType === "superadmin" &&
-        typeof dataModel.currentShow === "undefined"
+        m.currentLoginType === "superadmin" &&
+        typeof m.currentShow === "undefined"
       ) {
         // this is org's case. if there's no data found from the query above,
         // the previously picked one should be org. Then, get all the org's users data IN AN ARRAY.
         let { rows } = await client.query(
-          `${dataModel.userList.findAll.query} WHERE o.uuid = $1`,
+          `${m.userList.findAll.query} WHERE o.uuid = $1`,
           [req.params.uuid]
         );
-        dataModel.currentShow = rows[0];
-        dataModel.currentShowType = "admin";
+        m.currentShow = rows[0];
+        m.currentShowType = "admin";
       }
     }
-    currentShow = dataModel.currentShow; // get my currentShow FOR INDEX
-    console.log("currentShow: ", currentShow);
-    console.log("currentShowType: ", dataModel.currentShowType);
-    // ========================== Get CURRENT SHOW & currentShowType end ===========================
-    // ========================== Get Orglist & UserList start =============================
-    let resOrgList, resUserList;
-    let resPie;
-    if (dataModel.currentLoginType === "superadmin") {
-      resOrgList = await client.query(dataModel.orgList.findAll.query);
-      resUserList = await client.query(
-        dataModel.userList.findAllForAdmin.query,
-        [currentShow.o_id]
-      );
-      // fetch top 10 votes' rows in sharedroutes table for pie graph
-      resPie = await client.query(dataModel.pie.query);
-    } else if (dataModel.currentLoginType === "admin") {
-      resUserList = await client.query(
-        dataModel.userList.findAllForAdmin.query,
-        [currentLogin.o_id]
-      );
+    // console.log("currentShow: ", m.currentShow);
+    // console.log("currentShowType: ", m.currentShowType);
+    // ========== Set CURRENT SHOW & currentShowType end =======
+    // ========== Set Orglist & UserList start =================
+    let resOrgList, resUserList, resPie;
+    switch (m.currentLoginType) {
+      case "superadmin":
+        resOrgList = await client.query(m.orgList.findAll.query);
+        resUserList = await client.query(m.userList.findAllForAdmin.query, [
+          m.currentShow.o_id
+        ]);
+        m.resOrgList = resOrgList.rows;
+        m.resUserList = resUserList.rows;
+        // fetch top 10 votes' rows in sharedroutes table for pie graph
+        resPie = await client.query(m.pie.query);
+        m.resPie = resPie.rows;
+        break;
+      case "admin":
+        resUserList = await client.query(m.userList.findAllForAdmin.query, [
+          m.currentLogin.o_id
+        ]);
+        m.resUserList = resUserList.rows;
+        break;
+      // default:
+      //   break;
     }
-    // ========================== Get Orglist & UserList end =============================
-    // ======================= DASHBOARD CONTENTS - CARD - start =========================
+
+    // ========== Set Orglist & UserList end =================
+    // ========== DASHBOARD CONTENTS - CARD - start ==========
     // fetch the number cards data that belongs to the account
-    for await (let card of dataModel.cards[`for${dataModel.currentShowType}`]) {
+    for await (let card of m.cards[`for${m.currentShowType}`]) {
       let resCard;
       let totalCyclMilliSec;
-      if (dataModel.currentShowType === "superadmin") {
+      if (m.currentShowType === "superadmin") {
         resCard = await client.query(card.query);
-      } else if (dataModel.currentShowType === "admin") {
-        resCard = await client.query(card.query, [currentShow.o_id]);
-      } else if (dataModel.currentShowType === "user") {
+      } else if (m.currentShowType === "admin") {
+        resCard = await client.query(card.query, [m.currentShow.o_id]);
+      } else if (m.currentShowType === "user") {
         console.log("user card ----");
         totalCyclMilliSec = 0;
-        resCard = await client.query(card.query, [currentShow.uuid]);
+        resCard = await client.query(card.query, [m.currentShow.uuid]);
         console.log("resCard: ", resCard.rows);
 
         for (let i = 0; i < resCard.rows.length; i++) {
           if (resCard.rows[i].start_cycling != null) {
-            let cyclMilliSec = getTimeDiff(
+            let cyclMilliSec = c.getTimeDiff(
               resCard.rows[i].packet_generated,
               resCard.rows[i].start_cycling
             );
@@ -102,134 +108,38 @@ router.get("/dashboard/:uuid", async function(req, res) {
         }
       }
       if (card.cyclingTimeCal === true) {
-        card.number = convertMillisec(totalCyclMilliSec);
+        card.number = c.convertMillisec(totalCyclMilliSec);
       } else {
         card.number = resCard.rowCount;
       }
     }
-    // resBar = await client.query(dataModel.bar.find)
+    // resBar = await client.query(m.bar.find)
     // ======================== DASHBOARD CONTENTS - CARD - end ==========================
     let data = {
-      currentLogin: currentLogin,
-      currentLoginType: dataModel.currentLoginType,
-      currentShow: currentShow,
-      currentShowType: dataModel.currentShowType,
-      cards: dataModel.cards[`for${dataModel.currentShowType}`]
+      currentLogin: m.currentLogin,
+      currentLoginType: m.currentLoginType,
+      currentShow: m.currentShow,
+      currentShowType: m.currentShowType,
+      cards: m.cards[`for${m.currentShowType}`]
     };
-    if (typeof resOrgList != "undefined") data["orgs"] = resOrgList.rows;
-    if (typeof resUserList != "undefined") data["users"] = resUserList.rows;
-    if (typeof resPie != "undefined") {
-      data["pie"] = resPie.rows;
-      data["pieData"] = dataModel.pie;
+    if (typeof m.resOrgList != "undefined") data["orgs"] = m.resOrgList;
+    if (typeof m.resUserList != "undefined") data["users"] = m.resUserList;
+    if (typeof m.resPie != "undefined") {
+      data["pie"] = m.resPie;
+      data["pieData"] = m.pie;
     }
     // console.log("req.user: ", req.user);
     console.log("req.params: ", req.params);
     console.log("================ dashboard pg ends ===============");
+    m.pgload++;
     res.render("dashboard", data);
   } catch (ex) {
     // await client.query('ROLLBACK')
     console.log(`something went wrong ${ex}`);
-    dataModel.currentShow = null;
+    m.currentShow = null;
     setTimeout(function redirect() {
       res.redirect(`/dashboard/${req.params.uuid}`);
     }, 5000);
-  } finally {
-    await client.release();
-    console.log("Client disconnected");
-  }
-});
-
-function getTimeDiff(date1, date2) {
-  let big = new Date(date1);
-  let small = new Date(date2);
-  return big - small;
-}
-
-function convertMillisec(milliseconds) {
-  var day, hour, minute, seconds;
-  seconds = Math.floor(milliseconds / 1000);
-  minute = Math.floor(seconds / 60);
-  seconds = seconds % 60;
-  hour = Math.floor(minute / 60);
-  minute = minute % 60;
-  day = Math.floor(hour / 24);
-  hour = hour % 24;
-  return `${day} day ${hour}hr ${minute}m ${seconds}sec`;
-}
-
-function getCurrentType(data, key) {
-  if (data.superadmin === true && data.admin === true) {
-    // TODO: prompt and get input by asking which one of superadmin and user the user wants
-    dataModel[key] = "superadmin";
-  } else if (data.superadmin === false && data.admin === true) {
-    // TODO: prompt and get input by asking which one of org and user the user wants
-    dataModel[key] = "admin";
-  } else {
-    dataModel[key] = "user";
-  }
-}
-
-router.get("/dashboard/:uuid/:user_uuid", async function(req, res) {
-  const client = await pool.connect();
-  try {
-    let resOrgList;
-    // fetch the account's organisation data, and check if it's superadmin.
-    // TODO: later connect this with db.query > const query = client.query.bind(client);
-    // TODO: this, yet, is only for organization logins including superadmin and orgs, but not users' logins.
-    const thisOrg = await client.query(
-      "SELECT uuid, id, name, language, img, active, superadmin FROM public.organisations WHERE uuid = $1",
-      [req.params.uuid]
-    );
-    if (thisOrg.rows[0].superadmin === false) {
-      dataModel.currentLoginType = "org";
-    } else {
-      dataModel.currentLoginType = "superadmin";
-    }
-    console.log(dataModel.currentLoginType);
-
-    // fetch the number cards data that belongs to the account
-    for await (let card of dataModel.cards[
-      `for${dataModel.currentLoginType}`
-    ]) {
-      let resCard;
-      dataModel.currentLoginType === "superadmin"
-        ? (resCard = await client.query(card.query))
-        : (resCard = await client.query(card.query, [thisOrg.rows[0].id]));
-      card.number = resCard.rowCount;
-    }
-
-    // fetch top 10 votes' rows in sharedroutes table for pie graph
-    const resPie = await client.query(dataModel.pie[0].query);
-
-    // fetch organisations' list in accordance with the account's currentLogintype
-    // TODO: make this session-able and change it to if (this session's id != superadmin && ~~~)
-    if (dataModel.currentLoginType === "org") {
-      resOrgList = await client.query(dataModel.orgList.findOne.query, [
-        req.params.uuid
-      ]);
-    } else {
-      resOrgList = await client.query(dataModel.orgList.findAll.query);
-    }
-    // fetch users' list that belongs only to the specific(uuid) org account
-    resUserList = await client.query(dataModel.userList.findAllForOrg.query, [
-      req.params.uuid
-    ]);
-    console.log("resUserList", resUserList);
-
-    let data = {
-      loginType: dataModel.currentLoginType,
-      cards: dataModel.cards[`for${dataModel.currentLoginType}`],
-      pie: resPie.rows,
-      pieData: dataModel.pie[0],
-      orgs: resOrgList.rows,
-      users: resUserList.rows
-    };
-    console.log("req.user: ", req.user);
-    console.log("req.params: ", req.params);
-    res.render("dashboard", data);
-  } catch (ex) {
-    // await client.query('ROLLBACK')
-    console.log(`something went wrong ${ex}`);
   } finally {
     await client.release();
     console.log("Client disconnected");
@@ -245,82 +155,13 @@ router.get("/dashboard/usernameupdate", async function(req, res) {
     let rowid = row.id;
     let roworgid = row.organisation;
     client.query("UPDATE users SET name = $1 WHERE id = $2", [
-      `${roworgid.toString()}_${dataModel.names[index]}_${rowid.toString()}`,
+      `${roworgid.toString()}_${m.names[index]}_${rowid.toString()}`,
       rowid
     ]);
     index++;
   }
   res.redirect("/dashboard/5cce22c0-8bac-4662-b52c-cfa0504ec987");
 });
-
-// for (let i = 0; i < resOrgList.rows.length; i++) {
-//   if (resOrgList.rows[i].uuid === req.params.uuid) {
-//     break;
-//   }
-// }
-
-// router.get("/dashboard_org/:uuid", async function(req, res) {
-//   const client = await pool.connect();
-//   try {
-//     state = "orgAdmin";
-//     for await (let card of dataModel.cards) {
-//       // queries
-//       if (card.auth === "orgAdmin") {
-//         let resCard = await client.query(card.query);
-//         card.number = resCard.rowCount;
-//       }
-//     }
-
-//     const resOrgList = await client.query(dataModel.listOrg);
-
-//     // const resOrg = await client.query("");
-//     // let orgName;
-//     for (let i = 0; i < resOrgList.rows.length; i++) {
-//       if (resOrgList.rows[i].uuid === req.params.uuid) {
-//         break;
-//       }
-//     }
-//     res.render("dashboard_org", {
-//       state: state,
-//       cards: dataModel.cards,
-//       orgs: resOrgList.rows
-//       // org: resOrg.rows
-//     });
-//   } catch (ex) {
-//     console.log(`something went wrong ${ex}`);
-//   } finally {
-//     await client.release();
-//     console.log("Client disconnected");
-//   }
-// });
-
-// router.get("/dashboard_org/:id", async function(req, res) {
-//   try {
-//     //   const dataModel = {
-//     //     "version": "0.2.0",
-//     //     "array": [
-//     //         {
-//     //             "type": "node",
-//     //             "request": "launch",
-//     //             "name": "Launch Program",
-//     //             "program": "${workspaceFolder}\\app.js"
-//     //         }
-//     //     ]
-//     // };
-//     await client.connect();
-//     console.log("Connected successfully");
-//     const noOfOrgLogInToday = await client.query(
-//       "select orgid, count(orgid) from public.log_login where date(client_timestamp) = '2017-01-28' group by orgid"
-//     );
-//     console.table(noOfOrgLogInToday.rows);
-//     res.render("dashboard_org", { dataModelData: noOfOrgLogInToday.rowCount });
-//   } catch (ex) {
-//     console.log(`something went wrong ${ex}`);
-//   } finally {
-//     await client.end();
-//     console.log("Client disconnected");
-//   }
-// });
 
 module.exports = router;
 
