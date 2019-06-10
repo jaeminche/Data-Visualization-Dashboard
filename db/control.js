@@ -17,6 +17,20 @@ const c = {
     }
   },
 
+  getTimeCycledInMilSec: function(resCard) {
+    let total = 0;
+    for (let i = 0; i < resCard.length; i++) {
+      if (resCard[i].start_cycling != null) {
+        let timeCycled = this.getTimeDiff(
+          resCard[i].packet_generated,
+          resCard[i].start_cycling
+        );
+        total = total + timeCycled;
+      }
+    }
+    return total;
+  },
+
   convertMillisec: function(milliseconds) {
     var day, hour, minute, seconds;
     seconds = Math.floor(milliseconds / 1000);
@@ -26,9 +40,15 @@ const c = {
     minute = minute % 60;
     day = Math.floor(hour / 24);
     hour = hour % 24;
-    return `${day} day ${hour}hr ${minute}m ${seconds}sec`;
+
+    var dDisplay = day > 0 ? day + (day == 1 ? " day" : " days") : "";
+    var hDisplay = hour > 0 ? hour + " hr" : "";
+    var mDisplay = minute > 0 ? minute + " m" : "";
+
+    return `${dDisplay} ${hDisplay} ${mDisplay} ${seconds} sec`;
   },
 
+  // takes params and returns as millisec.
   getTimeDiff: function(date1, date2) {
     let big = new Date(date1);
     let small = new Date(date2);

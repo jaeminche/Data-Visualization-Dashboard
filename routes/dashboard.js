@@ -33,11 +33,11 @@ router.get("/dashboard/:uuid", async function(req, res) {
     } else {
       // from second launch on the app
       // check if the params.uuid is from org or user, if not the case of user, continue on to the if's block
-      let { rows } = await client.query(
+      let currentShow = await client.query(
         `${m.userList.findAll.query} WHERE u.uuid = $1`,
         [req.params.uuid]
       );
-      m.currentShow = rows[0]; // store in m only the rows
+      m.currentShow = currentShow.rows[0]; // store in m only the rows
       m.currentShowType = "user";
       if (
         m.currentLoginType === "superadmin" &&
@@ -45,11 +45,11 @@ router.get("/dashboard/:uuid", async function(req, res) {
       ) {
         // this is org's case. if there's no data found from the query above,
         // the previously picked one should be org. Then, get all the org's users data IN AN ARRAY.
-        let { rows } = await client.query(
+        currentShow = await client.query(
           `${m.userList.findAll.query} WHERE o.uuid = $1`,
           [req.params.uuid]
         );
-        m.currentShow = rows[0];
+        m.currentShow = currentShow.rows[0];
         m.currentShowType = "admin";
       }
     }
@@ -81,9 +81,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
     // ========== DASHBOARD CONTENTS - CARD - start ==========
     // fetch the number cards data that belongs to the account
     for await (let card of m.cards[`for${m.currentShowType}`]) {
-      let resCard;
-      let totalCyclMilliSec;
-
+      let resCard, timeCycledInMilSec;
       switch (m.currentShowType) {
         case "superadmin":
           resCard = await client.query(card.query);
@@ -93,27 +91,13 @@ router.get("/dashboard/:uuid", async function(req, res) {
           break;
         case "user":
           console.log("user card ----");
-          totalCyclMilliSec = 0;
           resCard = await client.query(card.query, [m.currentShow.uuid]);
-          console.log("resCard: ", resCard.rows);
-
-          for (let i = 0; i < resCard.rows.length; i++) {
-            if (resCard.rows[i].start_cycling != null) {
-              let cyclMilliSec = c.getTimeDiff(
-                resCard.rows[i].packet_generated,
-                resCard.rows[i].start_cycling
-              );
-              totalCyclMilliSec = totalCyclMilliSec + cyclMilliSec;
-            }
-          }
+          timeCycledInMilSec = c.getTimeCycledInMilSec(resCard.rows);
           break;
       }
-
-      if (card.cyclingTimeCal === true) {
-        card.number = c.convertMillisec(totalCyclMilliSec);
-      } else {
-        card.number = resCard.rowCount;
-      }
+      card.cyclingTimeCal
+        ? (card.number = c.convertMillisec(timeCycledInMilSec))
+        : (card.number = resCard.rowCount);
     }
     // resBar = await client.query(m.bar.find)
     // ======================== DASHBOARD CONTENTS - CARD - end ==========================
