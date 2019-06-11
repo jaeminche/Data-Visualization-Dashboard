@@ -145,7 +145,6 @@ router.get("/dashboard/:uuid", async function(req, res) {
         } else {
           let date1 = new Date(dataForArea[0].date);
           date1.setDate(date1.getDate() - dayBeforeIndex);
-          // print (date1.toISOString());
           dataset = {
             date: date1,
             label: c.convertDay(new Date(date1).getDay()),
@@ -164,6 +163,16 @@ router.get("/dashboard/:uuid", async function(req, res) {
       console.log("m.area.datasets.week: ", m.area.datasets.week);
     }
 
+    // ======================== DASHBOARD CONTENTS - BAR - start ==========================
+    if (typeof m.resUserList != "undefined") {
+      let resBar;
+      for await (let user of m.resUserList) {
+        resBar = await client.query(m.bar.findOne.query, [user.id]);
+        timeCycledInMilSec = c.getTimeCycledInMilSec(resBar.rows);
+        user.time = c.convertMillisec(timeCycledInMilSec);
+        user.min = c.convertIntoMin(timeCycledInMilSec);
+      }
+    }
     // resBar = await client.query(m.bar.find)
     // ======================== DASHBOARD CONTENTS - CARD - end ==========================
     let data = {
