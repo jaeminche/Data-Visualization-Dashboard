@@ -35,6 +35,17 @@ const c = {
     return total;
   },
 
+  convertIntoMin: function(millisec) {
+    var minute, seconds;
+    seconds = Math.floor(millisec / 1000);
+    minute = Math.floor(seconds / 60);
+    seconds = seconds % 60;
+    if (seconds >= 30) {
+      minute += 1;
+    }
+    return minute;
+  },
+
   convertMillisec: function(milliseconds) {
     var day, hour, minute, seconds;
     seconds = Math.floor(milliseconds / 1000);

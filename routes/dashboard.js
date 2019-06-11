@@ -131,20 +131,34 @@ router.get("/dashboard/:uuid", async function(req, res) {
       // console.log(resAreaByDay);
 
       const dataForArea = [];
+      let dayBeforeIndex = 1;
       resAreaByDay.forEach(dataForOneDay => {
         let dataset;
         if (dataForOneDay.length > 0) {
           dataset = {
-            date: new Date(dataForOneDay[0].packet_generated).getDate(),
+            date: new Date(dataForOneDay[0].packet_generated),
             label: c.convertDay(
               new Date(dataForOneDay[0].packet_generated).getDay()
             ),
-            time: c.getTimeCycledInMilSec(dataForOneDay)
+            time: c.convertIntoMin(c.getTimeCycledInMilSec(dataForOneDay))
           };
+        } else {
+          let date1 = new Date(dataForArea[0].date);
+          date1.setDate(date1.getDate() - dayBeforeIndex);
+          // print (date1.toISOString());
+          dataset = {
+            date: date1,
+            label: c.convertDay(new Date(date1).getDay()),
+            time: 0
+          };
+          dayBeforeIndex++;
         }
-        if (dataset != undefined) {
-          dataForArea.push(dataset);
-        }
+        // if (dataset != undefined) {
+        dataForArea.push(dataset);
+        // }
+      });
+      dataForArea.sort(function(a, b) {
+        return new Date(a.date).getDate() - new Date(b.date).getDate();
       });
       m.area.datasets.week = dataForArea;
       console.log("m.area.datasets.week: ", m.area.datasets.week);
