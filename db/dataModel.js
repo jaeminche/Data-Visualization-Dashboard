@@ -1,4 +1,5 @@
 const m = {
+  today: "'2017-01-29'",
   pgload: 1,
   jwt: {
     o: null,
@@ -35,8 +36,11 @@ const m = {
         cyclingTimeCal: false,
         color: "primary",
         fa: "sign-in-alt",
-        query:
-          "select orgid, count(orgid) from public.log_login where date(client_timestamp) = '2017-01-29' GROUP BY orgid",
+        get query() {
+          return `select orgid, count(orgid) from public.log_login where date(client_timestamp) = ${
+            m.today
+          } GROUP BY orgid`;
+        },
         auth: ["superadmin"]
       },
       {
@@ -77,8 +81,11 @@ const m = {
         cyclingTimeCal: false,
         color: "primary",
         fa: "bicycle",
-        query:
-          "SELECT userid FROM public.log_startcycling WHERE date(client_timestamp) = '2017-01-30' GROUP BY userid",
+        get query() {
+          return `SELECT userid FROM public.log_startcycling WHERE date(client_timestamp) = ${
+            m.today
+          } GROUP BY userid`;
+        },
         auth: ["superadmin"]
       },
       {
@@ -126,8 +133,11 @@ const m = {
         cyclingTimeCal: false,
         color: "primary",
         fa: "bicycle",
-        query:
-          "SELECT userid FROM public.log_startcycling WHERE date(client_timestamp) = '2017-01-28' and orgid = $1 GROUP BY userid",
+        get query() {
+          return `SELECT userid FROM public.log_startcycling WHERE date(client_timestamp) = ${
+            m.today
+          } and orgid = $1 GROUP BY userid`;
+        },
         auth: ["superadmin", "admin"]
       },
       {
@@ -189,7 +199,11 @@ const m = {
         get query() {
           return `${
             m.qr.cyclingTime
-          } WHERE u.uuid = $1 AND date(packet_generated) > date '2017-01-29' - interval '7 days' AND date(packet_generated) < date '2017-01-29' + interval '1 day'`;
+          } WHERE u.uuid = $1 AND date(packet_generated) > date ${
+            m.today
+          } - interval '7 days' AND date(packet_generated) < date ${
+            m.today
+          } + interval '1 day'`;
         },
         auth: ["superadmin", "admin", "user"]
       },
@@ -206,7 +220,7 @@ const m = {
         get query() {
           return `${
             m.qr.cyclingTime
-          } WHERE u.uuid = $1 AND date(packet_generated) = date '2017-01-29'`;
+          } WHERE u.uuid = $1 AND date(packet_generated) = date ${m.today}`;
         },
         auth: ["superadmin", "admin", "user"]
       }
@@ -234,7 +248,11 @@ const m = {
       get query() {
         return `${
           m.qr.cyclingTime
-        } WHERE event_userid = $1 AND date(packet_generated) > date '2017-01-29' - interval '30 days' AND date(packet_generated) < date '2017-01-29' + interval '1 day'`;
+        } WHERE event_userid = $1 AND date(packet_generated) > date ${
+          m.today
+        } - interval '30 days' AND date(packet_generated) < date ${
+          m.today
+        } + interval '1 day'`;
       }
       // query:
       // "SELECT e.start_id, e.event_id, e.packet_id, e.packet_len, e.start_userid, e.event_userid, u.uuid as uuid, e.event_orgid, e.event_type, e.event_data, e.start_cycling, e.event_time, e.packet_generated, e.locationid, e.routeid, e.location, u.name from (select d.id as start_id, c.event_id, c.packet_id, c.packet_len, d.userid as start_userid, c.userid as event_userid, c.orgid as event_orgid, c.event_type, c.event_data, d.client_timestamp as start_cycling, c.event_time, c.packet_generated, d.locationid, d.routeid, d.location from (select a.id as event_id, b.id as packet_id, length as packet_len, userid, orgid, event_type, event_data, event_time, b.client_timestamp as packet_generated from log_cycling a full outer join log_cycling_packets b on a.packet_id = b.id order by packet_generated, event_time) c full outer join log_startcycling d on d.client_timestamp = c.event_time and d.userid = c.userid order by COALESCE(packet_generated, d.client_timestamp), event_time) e left join users u ON e.event_userid = u.id WHERE event_userid = $1"
