@@ -260,7 +260,9 @@ const m = {
   },
   orgList: {
     findAll: {
-      query: "SELECT name, id, uuid FROM public.organisations ORDER BY name",
+      // query: "SELECT name, id, uuid FROM public.organisations ORDER BY name",
+      query:
+        "SELECT DISTINCT o.name, o.id, o.uuid FROM public.organisations o JOIN users u ON o.id = u.organisation ORDER BY o.name",
       auth: ["superadmin"]
     },
     findOne: {
