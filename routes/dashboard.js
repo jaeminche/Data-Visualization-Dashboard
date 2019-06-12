@@ -23,10 +23,14 @@ router.get("/dashboard/:uuid", async function(req, res) {
     console.log("================ dashboard pg starts ===============");
     // console.log("m.jwt: ", m.jwt);
     console.log("m.currentLogin: ", m.currentLogin);
-    // =========== Set CURRENT LOGIN & currentLoginType start ===========
+    // =========================================================
+    // | Set CURRENT LOGIN & currentLoginType start |
+    // =========================================================
     c.setCurrentLoginType();
     // console.log("currentLoginType", m.currentLoginType);
-    // =========== Set CURRENT SHOW & currentShowType start =============
+    // =========================================================
+    // | Set CURRENT SHOW & currentShowType start |
+    // =========================================================
     if (m.currentShow === null) {
       // when initial launch on the app
       m.currentShow = m.currentLogin; // always gets data along with user_uuid
@@ -56,7 +60,9 @@ router.get("/dashboard/:uuid", async function(req, res) {
     }
     console.log("currentShow: ", m.currentShow);
     console.log("currentShowType: ", m.currentShowType);
-    // ========== Set Orglist & UserList start =================
+    // =========================================================
+    // | Set ORGLIST & USERLIST start |
+    // =========================================================
     let resOrgList, resUserList, resPie;
     switch (m.currentLoginType) {
       case "superadmin":
@@ -79,7 +85,9 @@ router.get("/dashboard/:uuid", async function(req, res) {
       // default:
       //   break;
     }
-    // ========== DASHBOARD CONTENTS - CARD - start ==========
+    // =========================================================
+    // | DASHBOARD CONTENTS - CARD - start |
+    // =========================================================
     // fetch the number cards data that belongs to the account
     let resArea = undefined;
     for await (let card of m.cards[`for${m.currentShowType}`]) {
@@ -108,7 +116,9 @@ router.get("/dashboard/:uuid", async function(req, res) {
         : (card.number = resCard.rowCount);
     }
 
-    // ========== DASHBOARD CONTENTS - AREA-CHART - start =======
+    // =========================================================
+    // | DASHBOARD CONTENTS - AREA-CHART - start |
+    // =========================================================
     // console.log("resArea: ", resArea);
     if (
       typeof resArea != "undefined" &&
@@ -163,7 +173,9 @@ router.get("/dashboard/:uuid", async function(req, res) {
       console.log("m.area.datasets.week: ", m.area.datasets.week);
     }
 
-    // ======================== DASHBOARD CONTENTS - BAR - start ==========================
+    // =========================================================
+    // | DASHBOARD CONTENTS - BAR - start |
+    // =========================================================
     if (typeof m.resUserList != "undefined") {
       let resBar;
       for await (let user of m.resUserList) {
@@ -174,7 +186,9 @@ router.get("/dashboard/:uuid", async function(req, res) {
       }
     }
     // resBar = await client.query(m.bar.find)
-    // ======================== DASHBOARD CONTENTS - CARD - end ==========================
+    // =========================================================
+    // | DASHBOARD CONTENTS - CARD - end |
+    // =========================================================
     let data = {
       currentLogin: m.currentLogin,
       currentLoginType: m.currentLoginType,
