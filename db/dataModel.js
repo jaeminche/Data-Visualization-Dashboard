@@ -91,12 +91,18 @@ const m = {
       {
         // TODO: add query condition for this month
         id: 6,
-        name: "NO. OF ACTIVE USERS THIS MONTH",
+        name: "NO. OF ACTIVE USERS THIS WEEK",
         number: 0,
         cyclingTimeCal: false,
         color: "info",
         fa: "bicycle",
-        query: "SELECT userid FROM public.log_startcycling GROUP BY userid",
+        get query() {
+          return `SELECT userid FROM log_startcycling WHERE date(client_timestamp) > date(${
+            m.today
+          }) - interval '7 days' AND date(client_timestamp) < date(${
+            m.today
+          }) + interval '1 day' GROUP BY userid  `;
+        },
         auth: ["superadmin"]
       },
       {
@@ -148,36 +154,33 @@ const m = {
         cyclingTimeCal: false,
         color: "info",
         fa: "bicycle",
-        query:
-          "SELECT userid FROM public.log_startcycling WHERE orgid = $1 GROUP BY userid",
-        auth: ["superadmin", "admin"]
-      },
-      {
-        // TODO: add query condition for this week
-        id: 3,
-        name: "AVERAGE CYCLING TIME THIS WEEK",
-        number: 0,
-        cyclingTimeCal: false,
-        color: "success",
-        fa: "stopwatch",
-        //   todo:
-        query: "SELECT * FROM public.users WHERE organisation = $1",
+        get query() {
+          return `SELECT userid FROM log_startcycling WHERE orgid = $1 AND date(client_timestamp) > date(${
+            m.today
+          }) - interval '7 days' AND date(client_timestamp) < date(${
+            m.today
+          }) + interval '1 day' GROUP BY userid  `;
+        },
         auth: ["superadmin", "admin"]
       },
       {
         // TODO: add query condition for this month
-        id: 4,
-        name: "AVERAGE CYCLING TIME THIS MONTH",
+        id: 3,
+        name: "USERS' DAILY AVERAGE CYCLING TIME THIS MONTH",
+        // get number() {
+        //   return m.average.admin_monthly.usersDailyAvgThisMonth;
+        // },
         number: 0,
         cyclingTimeCal: false,
         color: "success",
         fa: "stopwatch",
         //   todo:
-        query: "SELECT * FROM public.users WHERE organisation = $1",
+        query: null,
+        // query: "SELECT * FROM public.users WHERE organisation = $1",
         auth: ["superadmin", "admin"]
       },
       {
-        id: 5,
+        id: 4,
         name: "TOTAL NO. OF USERS",
         number: 0,
         cyclingTimeCal: false,
@@ -244,6 +247,7 @@ const m = {
     auth: ["superadmin"]
   },
   bar: {
+    // data for the last 30 days
     findOne: {
       get query() {
         return `${
@@ -321,6 +325,9 @@ const m = {
         // { date: "2017-01-29", label: "Sun", time: 30 }
       ]
     }
+  },
+  average: {
+    admin_monthly: { o_id: null, usersDailyAvgThisMonth: 0 }
   }
 
   // ,names: [

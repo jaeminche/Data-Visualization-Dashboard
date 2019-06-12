@@ -85,6 +85,31 @@ router.get("/dashboard/:uuid", async function(req, res) {
       // default:
       //   break;
     }
+
+    // =========================================================
+    // | DASHBOARD CONTENTS - BAR - start |
+    // =========================================================
+    let usersDailyAvgThisMonth;
+    if (typeof m.resUserList != "undefined") {
+      let resBar;
+      let sumAllUsers = 0;
+      for await (let user of m.resUserList) {
+        // get accumulated data for one user for the last 30 days
+        resBar = await client.query(m.bar.findOne.query, [user.id]);
+        timeCycledInMilSec = c.getTimeCycledInMilSec(resBar.rows);
+        user.time = c.convertMillisec(timeCycledInMilSec);
+        user.min = c.convertIntoMin(timeCycledInMilSec);
+        user.average = user.time / 30;
+        sumAllUsers = sumAllUsers + timeCycledInMilSec;
+      }
+      console.log("sumbAllUsers: ", sumAllUsers);
+      usersDailyAvgThisMonth = sumAllUsers / m.resUserList.length / 30;
+      m.average.admin_monthly.o_id = m.currentShow.o_id;
+      m.average.admin_monthly.usersDailyAvgThisMonth = c.convertMillisec(
+        usersDailyAvgThisMonth
+      );
+    }
+
     // =========================================================
     // | DASHBOARD CONTENTS - CARD - start |
     // =========================================================
@@ -94,14 +119,16 @@ router.get("/dashboard/:uuid", async function(req, res) {
       let resCard, timeCycledInMilSec;
       switch (m.currentShowType) {
         case "superadmin":
-          resCard = await client.query(card.query);
+          if (card.query != null) resCard = await client.query(card.query);
           break;
         case "admin":
-          resCard = await client.query(card.query, [m.currentShow.o_id]);
+          if (card.query != null)
+            resCard = await client.query(card.query, [m.currentShow.o_id]);
           break;
         case "user":
           console.log("user card ----");
-          resCard = await client.query(card.query, [m.currentShow.uuid]);
+          if (card.query != null)
+            resCard = await client.query(card.query, [m.currentShow.uuid]);
           timeCycledInMilSec = c.getTimeCycledInMilSec(resCard.rows);
           if (
             card.name === "CYCLING TIME THIS WEEK" &&
@@ -111,9 +138,16 @@ router.get("/dashboard/:uuid", async function(req, res) {
           }
           break;
       }
-      card.cyclingTimeCal
-        ? (card.number = c.convertMillisec(timeCycledInMilSec))
-        : (card.number = resCard.rowCount);
+      if (card.query == null) {
+        card.number = m.average.admin_monthly.usersDailyAvgThisMonth;
+      } else if (card.query != null && card.cyclingTimeCal) {
+        card.number = c.convertMillisec(timeCycledInMilSec);
+      } else if (card.query != null && !card.cyclingTimeCal) {
+        card.number = resCard.rowCount;
+      }
+      // card.query != null && card.cyclingTimeCal
+      //   ? (card.number = c.convertMillisec(timeCycledInMilSec))
+      //   : (card.number = resCard.rowCount);
     }
 
     // =========================================================
@@ -173,21 +207,9 @@ router.get("/dashboard/:uuid", async function(req, res) {
       console.log("m.area.datasets.week: ", m.area.datasets.week);
     }
 
-    // =========================================================
-    // | DASHBOARD CONTENTS - BAR - start |
-    // =========================================================
-    if (typeof m.resUserList != "undefined") {
-      let resBar;
-      for await (let user of m.resUserList) {
-        resBar = await client.query(m.bar.findOne.query, [user.id]);
-        timeCycledInMilSec = c.getTimeCycledInMilSec(resBar.rows);
-        user.time = c.convertMillisec(timeCycledInMilSec);
-        user.min = c.convertIntoMin(timeCycledInMilSec);
-      }
-    }
     // resBar = await client.query(m.bar.find)
     // =========================================================
-    // | DASHBOARD CONTENTS - CARD - end |
+    // | DASHBOARD CONTENTS - end |
     // =========================================================
     let data = {
       currentLogin: m.currentLogin,
