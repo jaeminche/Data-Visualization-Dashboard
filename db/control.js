@@ -21,13 +21,13 @@ const c = {
     }
   },
 
-  getTimeCycledInMilSec: function(resCard) {
+  getTimeCycledInMilSec: function(resRow) {
     let total = 0;
-    for (let i = 0; i < resCard.length; i++) {
-      if (resCard[i].start_cycling != null) {
+    for (let i = 0; i < resRow.length; i++) {
+      if (resRow[i].start_cycling != null) {
         let timeCycled = this.getTimeDiff(
-          resCard[i].packet_generated,
-          resCard[i].start_cycling
+          resRow[i].packet_generated,
+          resRow[i].start_cycling
         );
         total = total + timeCycled;
       }
