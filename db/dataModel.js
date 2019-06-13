@@ -167,10 +167,9 @@ const m = {
         // TODO: add query condition for this month
         id: 3,
         name: "USERS' DAILY AVERAGE CYCLING TIME THIS MONTH",
-        // get number() {
-        //   return m.average.admin_monthly.usersDailyAvgThisMonth;
-        // },
-        number: 0,
+        get number() {
+          return m.average.admin_monthly.usersDailyAvgThisMonth;
+        },
         cyclingTimeCal: false,
         color: "success",
         fa: "stopwatch",

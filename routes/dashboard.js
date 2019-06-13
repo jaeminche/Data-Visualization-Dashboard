@@ -99,10 +99,13 @@ router.get("/dashboard/:uuid", async function(req, res) {
         timeCycledInMilSec = c.getTimeCycledInMilSec(resBar.rows);
         user.time = c.convertMillisec(timeCycledInMilSec);
         user.min = c.convertIntoMin(timeCycledInMilSec);
+        // =========================================================
+        // | DASHBOARD - CARD(w/out query) - USERS' DAILY AVERAGE THIS MONTH |
+        // =========================================================
         user.average = user.time / 30;
         sumAllUsers = sumAllUsers + timeCycledInMilSec;
       }
-      console.log("sumbAllUsers: ", sumAllUsers);
+      console.log("sumAllUsers: ", sumAllUsers);
       usersDailyAvgThisMonth = sumAllUsers / m.resUserList.length / 30;
       m.average.admin_monthly.o_id = m.currentShow.o_id;
       m.average.admin_monthly.usersDailyAvgThisMonth = c.convertMillisec(
@@ -111,38 +114,36 @@ router.get("/dashboard/:uuid", async function(req, res) {
     }
 
     // =========================================================
-    // | DASHBOARD CONTENTS - CARD - start |
+    // | DASHBOARD CONTENTS - CARD(only w/ query) - start | defines card.number
     // =========================================================
-    // fetch the number cards data that belongs to the account
     let resArea = undefined;
     for await (let card of m.cards[`for${m.currentShowType}`]) {
       let resCard, timeCycledInMilSec;
       switch (m.currentShowType) {
         case "superadmin":
-          if (card.query != null) resCard = await client.query(card.query);
+          if (!!card.query) resCard = await client.query(card.query);
           break;
         case "admin":
-          if (card.query != null)
+          if (!!card.query)
             resCard = await client.query(card.query, [m.currentShow.o_id]);
           break;
         case "user":
           console.log("user card ----");
-          if (card.query != null)
+          if (!!card.query) {
             resCard = await client.query(card.query, [m.currentShow.uuid]);
-          timeCycledInMilSec = c.getTimeCycledInMilSec(resCard.rows);
-          if (
-            card.name === "CYCLING TIME THIS WEEK" &&
-            timeCycledInMilSec != 0
-          ) {
-            resArea = resCard.rows;
+            timeCycledInMilSec = c.getTimeCycledInMilSec(resCard.rows);
+            if (
+              card.name === "CYCLING TIME THIS WEEK" &&
+              timeCycledInMilSec != 0
+            ) {
+              resArea = resCard.rows;
+            }
           }
           break;
       }
-      if (card.query == null) {
-        card.number = m.average.admin_monthly.usersDailyAvgThisMonth;
-      } else if (card.query != null && card.cyclingTimeCal) {
+      if (!!card.query && card.cyclingTimeCal) {
         card.number = c.convertMillisec(timeCycledInMilSec);
-      } else if (card.query != null && !card.cyclingTimeCal) {
+      } else if (!!card.query && !card.cyclingTimeCal) {
         card.number = resCard.rowCount;
       }
       // card.query != null && card.cyclingTimeCal
