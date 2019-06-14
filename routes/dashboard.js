@@ -26,7 +26,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
     // =========================================================
     // | Set CURRENT LOGIN & currentLoginType start |
     // =========================================================
-    c.setCurrentLoginType();
+    c.setCurrentType(m.currentLogin, "currentLoginType");
     // console.log("currentLoginType", m.currentLoginType);
     // =========================================================
     // | Set CURRENT SHOW & currentShowType start |
@@ -37,7 +37,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
       c.setCurrentType(m.currentShow, "currentShowType");
     } else {
       // from second launch on the app
-      // check if the params.uuid is from org or user, if not the case of user, continue on to the if's block
+      // check if the params.uuid is from org or user, if not the case of user, try fetching res with params.o.uuid in the next if-block.
       let currentShow = await client.query(
         `${m.userList.findAll.query} WHERE u.uuid = $1`,
         [req.params.uuid]

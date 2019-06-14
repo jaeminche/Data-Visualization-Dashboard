@@ -12,9 +12,9 @@ const c = {
     m.resPie = null;
   },
 
-  setCurrentLoginType: function() {
-    this.setCurrentType(m.currentLogin, "currentLoginType");
-  },
+  // setCurrentLoginType: function() {
+  //   this.setCurrentType(m.currentLogin, "currentLoginType");
+  // },
 
   setCurrentType: function(data, key) {
     if (data.superadmin === true && data.admin === true) {
