@@ -5,6 +5,8 @@ const router = express.Router({ mergeParams: true });
 const { Pool, Client } = require("pg");
 const client_config = require("../config/client");
 const m = require("../db/dataModel");
+const c = require("../db/control");
+const v = require("../db/view");
 const db = require("../db/index");
 
 const pool = new Pool(client_config);
@@ -26,6 +28,7 @@ router.get("/logged_in_as/:id", async function(req, res) {
   const client = await pool.connect();
   let resLoggedInUser;
   try {
+    c.init_login_show();
     resLoggedInUser = await client.query(
       "SELECT u.name, u.id, u.uuid as uuid, u.admin, o.name as o_name, u.organisation as o_id, o.uuid as o_uuid, o.superadmin FROM public.users u LEFT JOIN organisations o ON organisation = o.id WHERE u.id =  $1",
       [req.params.id]
@@ -42,9 +45,6 @@ router.get("/logged_in_as/:id", async function(req, res) {
     console.log("Client disconnected");
   }
 
-  function getSuperadmin() {}
-
-  // let uuid = row.uuid;
   let uuid = resLoggedInUser.rows[0].uuid;
   let o_id = resLoggedInUser.rows[0].o_id;
   let admin = resLoggedInUser.rows[0].admin;
@@ -63,6 +63,7 @@ router.get("/logged_in_as/:id", async function(req, res) {
 });
 
 router.get("/dashboard/mydashboard/:uuid", async function(req, res) {
+  // init only the currentShow, keeping the current login
   m.currentShow = null;
   m.pgload = 1;
   res.redirect(`/dashboard/${req.params.uuid}`);

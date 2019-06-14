@@ -2,6 +2,11 @@ const m = require("./dataModel");
 const v = require("./view");
 
 const c = {
+  init_login_show: function() {
+    m.currentLogin = null;
+    m.currentShow = null;
+  },
+
   init: function() {
     m.area.datasets.week = [];
   },
