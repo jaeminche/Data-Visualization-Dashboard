@@ -68,6 +68,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
       case "superadmin":
         resOrgList = await client.query(m.orgList.findAll.query);
         resUserList = await client.query(m.userList.findAllForAdmin.query, [
+          // for deployment, change the following line to m.currentLogin.o_id for superadmin's restricted authorization according to GDPR
           m.currentShow.o_id
         ]);
         m.resOrgList = resOrgList.rows;
