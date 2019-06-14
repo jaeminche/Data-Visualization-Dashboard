@@ -9,6 +9,7 @@ const c = {
 
   init: function() {
     m.area.datasets.week = [];
+    m.resPie = null;
   },
 
   setCurrentLoginType: function() {

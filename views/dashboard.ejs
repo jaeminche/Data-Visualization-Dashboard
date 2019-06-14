@@ -37,7 +37,7 @@
     <% } %>
 
     <% if (typeof pie !== "undefined") { %>
-      <% if (pieData.auth.includes(currentLoginType)) { %>
+      <% if (!!m.resPie) { %>
       <% include ./partials/chart_pie %>
       <% } %>
     <% } %>

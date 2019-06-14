@@ -72,9 +72,11 @@ router.get("/dashboard/:uuid", async function(req, res) {
         ]);
         m.resOrgList = resOrgList.rows;
         m.resUserList = resUserList.rows;
-        // fetch top 10 votes' rows in sharedroutes table for pie graph
-        resPie = await client.query(m.pie.query);
-        m.resPie = resPie.rows;
+        // Only when showType, fetch top 10 votes' rows in sharedroutes table for pie graph
+        if (m.currentShowType === "superadmin") {
+          resPie = await client.query(m.pie.query);
+          m.resPie = resPie.rows;
+        }
         break;
       case "admin":
         resUserList = await client.query(m.userList.findAllForAdmin.query, [
