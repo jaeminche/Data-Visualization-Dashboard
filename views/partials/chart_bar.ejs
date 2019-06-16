@@ -6,9 +6,9 @@
         <div class="card-body">
 
           <% users.forEach(user => { %>
-          <h4 class="small font-weight-bold"><%= user.name %><span class="float-right"><%= user.time %></span></h4>
+          <h4 class="small font-weight-bold"><%= user.name %><span class="float-right"><%= user.dpTime %></span></h4>
           <div class="progress mb-4">
-            <div class="progress-bar bg-danger" role="progressbar" style="width: <%= user.min %>%" aria-valuenow="<%= user.min %>" aria-valuemin="0" aria-valuemax="100"></div>
+            <div class="progress-bar bg-danger" role="progressbar" style="width: <%= user.timeCycledInMin %>%" aria-valuenow="<%= user.timeCycledInMin %>" aria-valuemin="0" aria-valuemax="100"></div>
           </div>
           <% }) %>
         </div>

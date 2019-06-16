@@ -41,7 +41,7 @@ const c = {
     return total;
   },
 
-  convertIntoMin: function(millisec) {
+  convToMin: function(millisec) {
     var minute, seconds;
     seconds = Math.floor(millisec / 1000);
     minute = Math.floor(seconds / 60);
@@ -52,7 +52,7 @@ const c = {
     return minute;
   },
 
-  convertMillisec: function(milliseconds) {
+  convMilSecToFin: function(milliseconds) {
     var day, hour, minute, seconds;
     seconds = Math.floor(milliseconds / 1000);
     minute = Math.floor(seconds / 60);

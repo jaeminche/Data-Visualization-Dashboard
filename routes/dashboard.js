@@ -100,20 +100,22 @@ router.get("/dashboard/:uuid", async function(req, res) {
         // get accumulated data for one user for the last 30 days
         resBar = await client.query(m.bar.findOne.query, [user.id]);
         timeCycledInMilSec = c.getTimeCycledInMilSec(resBar.rows);
-        user.time = c.convertMillisec(timeCycledInMilSec);
-        user.min = c.convertIntoMin(timeCycledInMilSec);
+
         // =========================================================
         // | DASHBOARD - CARD(w/out query) - USERS' DAILY AVERAGE THIS MONTH |
         // =========================================================
-        user.average = user.time / 30;
+        user.dpTime = c.convMilSecToFin(timeCycledInMilSec);
+        user.timeCycledInMin = c.convToMin(timeCycledInMilSec);
+        user.dpMonthlyAvgTCycled = c.convMilSecToFin(timeCycledInMilSec / 30);
         sumAllUsers = sumAllUsers + timeCycledInMilSec;
       }
       console.log("sumAllUsers: ", sumAllUsers);
       usersDailyAvgThisMonth = sumAllUsers / m.resUserList.length / 30;
       m.average.admin_monthly.o_id = m.currentShow.o_id;
-      m.average.admin_monthly.usersDailyAvgThisMonth = c.convertMillisec(
+      m.average.admin_monthly.usersDailyAvgThisMonth = c.convMilSecToFin(
         usersDailyAvgThisMonth
       );
+      console.log(m.average.admin_monthly.usersDailyAvgThisMonth);
     }
 
     // =========================================================
@@ -145,12 +147,12 @@ router.get("/dashboard/:uuid", async function(req, res) {
           break;
       }
       if (!!card.query && card.cyclingTimeCal) {
-        card.number = c.convertMillisec(timeCycledInMilSec);
+        card.number = c.convMilSecToFin(timeCycledInMilSec);
       } else if (!!card.query && !card.cyclingTimeCal) {
         card.number = resCard.rowCount;
       }
       // card.query != null && card.cyclingTimeCal
-      //   ? (card.number = c.convertMillisec(timeCycledInMilSec))
+      //   ? (card.number = c.convMilSecToFin(timeCycledInMilSec))
       //   : (card.number = resCard.rowCount);
     }
 
@@ -188,7 +190,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
             label: c.convertDay(
               new Date(dataForOneDay[0].packet_generated).getDay()
             ),
-            time: c.convertIntoMin(c.getTimeCycledInMilSec(dataForOneDay))
+            time: c.convToMin(c.getTimeCycledInMilSec(dataForOneDay))
           };
         } else {
           let date1 = new Date(dataForArea[0].date);
