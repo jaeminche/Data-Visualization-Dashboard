@@ -32,6 +32,7 @@ const m = {
       {
         id: 1,
         name: "NO. OF ORGANIZATIONS LOGGED IN TODAY",
+        classname: "sa",
         number: 0,
         cyclingTimeCal: false,
         color: "primary",
