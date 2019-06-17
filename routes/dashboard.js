@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router({ mergeParams: true });
 const { Pool, Client } = require("pg");
 const client_config = require("../config/client");
+const Chart = require("chart.js");
 const m = require("../db/dataModel");
 const c = require("../db/control");
 const v = require("../db/view");

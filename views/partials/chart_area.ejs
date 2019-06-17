@@ -57,7 +57,7 @@
             // Area Chart Example
             var ctx = document.getElementById("myAreaChart");
             var myLineChart = new Chart(ctx, {
-              type: "line",
+              type: "bar",
               data: {
                 labels: <%- JSON.stringify(m.area.datasets.week.map(set => set.label)) %>,
                 datasets: [
