@@ -162,8 +162,8 @@ router.get("/dashboard/:uuid", async function(req, res) {
     // console.log("resArea: ", resArea);
     if (
       typeof resArea != "undefined" &&
-      typeof resArea[0].packet_generated != "undefined" &&
-      resArea.length > 0
+      typeof resArea[0].packet_generated != "undefined"
+      // && resArea.length > 0
     ) {
       let prevDate = new Date(resArea[0].packet_generated).getDate();
       let indexForResAreaByDay = 0;
