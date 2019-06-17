@@ -55,45 +55,49 @@
             }
 
             // Area Chart Example
-            var ctx = document.getElementById("myAreaChart");
+            var ctx = document.getElementById("myAreaChart")
+            // .getContext('2d');
             var myLineChart = new Chart(ctx, {
               type: "bar",
               data: {
                 labels: <%- JSON.stringify(m.area.datasets.week.map(set => set.label)) %>,
                 datasets: [
                   {
-                    label: "Time",
-                    lineTension: 0.3,
-                    backgroundColor: "rgba(78, 115, 223, 0.05)",
-                    borderColor: "rgba(78, 115, 223, 1)",
-                    pointRadius: 3,
-                    pointBackgroundColor: "rgba(78, 115, 223, 1)",
-                    pointBorderColor: "rgba(78, 115, 223, 1)",
-                    pointHoverRadius: 3,
-                    pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
-                    pointHoverBorderColor: "rgba(78, 115, 223, 1)",
-                    pointHitRadius: 10,
-                    pointBorderWidth: 2,
-                    data: <%- JSON.stringify(m.area.datasets.week.map(set => set.time)) %>
+                    label: "Cycling Time",
+                    data: <%- JSON.stringify(m.area.datasets.week.map(set => set.time)) %>,
+                    backgroundColor: "rgb(187,181,153, 1)"
+                    // borderColor: "rgba(78, 115, 223, 1)"
+                  }, 
+                  {
+                    label: "Taximode",
+                    data: <%- JSON.stringify(m.area.datasets.week.map(set => set.time)) %>,
+                    backgroundColor: "rgb(187,181,153, 0.5)"
                   }
                 ]
               },
               options: {
+                // responsive: true,
+                title: {
+                  display: false,
+                  text: 'Bar Chart - Stacked'
+                },
                 maintainAspectRatio: false,
                 layout: {
                   padding: {
                     left: 10,
                     right: 25,
-                    top: 25,
+                    top: 0,
                     bottom: 0
                   }
                 },
                 scales: {
                   xAxes: [
                     {
+                      stacked: true,
                       time: {
                         unit: "date"
                       },
+                      // TODO: check and delete if not needed
                       gridLines: {
                         display: false,
                         drawBorder: false
@@ -105,6 +109,7 @@
                   ],
                   yAxes: [
                     {
+                      stacked: true,
                       ticks: {
                         maxTicksLimit: 5,
                         padding: 10,
@@ -113,6 +118,7 @@
                           return number_format(value) + "min.";
                         }
                       },
+                      // TODO: check and delete if not needed                      
                       gridLines: {
                         color: "rgb(234, 236, 244)",
                         zeroLineColor: "rgb(234, 236, 244)",
@@ -124,7 +130,7 @@
                   ]
                 },
                 legend: {
-                  display: false
+                  display: true
                 },
                 tooltips: {
                   backgroundColor: "rgb(255,255,255)",
@@ -152,6 +158,18 @@
                 }
               }
             });
+
+            // TODO: Reference to async updates
+            // document
+            //   .getElementById("randomizeData")
+            //   .addEventListener("click", function() {
+            //     barChartData.datasets.forEach(function(dataset) {
+            //       dataset.data = dataset.data.map(function() {
+            //         return randomScalingFactor();
+            //       });
+            //     });
+            //     window.myBar.update();
+            //   });
             </script>
 
 
