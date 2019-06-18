@@ -1,4 +1,4 @@
-const m = {
+const vm = {
   today: "'2017-01-29'",
   pgload: 1,
   jwt: {
@@ -39,7 +39,7 @@ const m = {
         fa: "sign-in-alt",
         get query() {
           return `select orgid, count(orgid) from public.log_login where date(client_timestamp) = ${
-            m.today
+            vm.today
           } GROUP BY orgid`;
         },
         auth: ["superadmin"]
@@ -84,7 +84,7 @@ const m = {
         fa: "bicycle",
         get query() {
           return `SELECT userid FROM public.log_startcycling WHERE date(client_timestamp) = ${
-            m.today
+            vm.today
           } GROUP BY userid`;
         },
         auth: ["superadmin"]
@@ -99,9 +99,9 @@ const m = {
         fa: "bicycle",
         get query() {
           return `SELECT userid FROM log_startcycling WHERE date(client_timestamp) > date(${
-            m.today
+            vm.today
           }) - interval '7 days' AND date(client_timestamp) < date(${
-            m.today
+            vm.today
           }) + interval '1 day' GROUP BY userid  `;
         },
         auth: ["superadmin"]
@@ -142,7 +142,7 @@ const m = {
         fa: "bicycle",
         get query() {
           return `SELECT userid FROM public.log_startcycling WHERE date(client_timestamp) = ${
-            m.today
+            vm.today
           } and orgid = $1 GROUP BY userid`;
         },
         auth: ["superadmin", "admin"]
@@ -157,9 +157,9 @@ const m = {
         fa: "bicycle",
         get query() {
           return `SELECT userid FROM log_startcycling WHERE orgid = $1 AND date(client_timestamp) > date(${
-            m.today
+            vm.today
           }) - interval '7 days' AND date(client_timestamp) < date(${
-            m.today
+            vm.today
           }) + interval '1 day' GROUP BY userid  `;
         },
         auth: ["superadmin", "admin"]
@@ -169,7 +169,7 @@ const m = {
         id: 3,
         name: "USERS' DAILY AVERAGE CYCLING TIME THIS MONTH",
         get number() {
-          return m.average.admin_monthly.usersDailyAvgThisMonth;
+          return vm.average.admin_monthly.usersDailyAvgThisMonth;
         },
         cyclingTimeCal: false,
         color: "success",
@@ -201,11 +201,11 @@ const m = {
         fa: "stopwatch",
         get query() {
           return `${
-            m.qr.cyclingTime
+            vm.qr.cyclingTime
           } WHERE u.uuid = $1 AND date(packet_generated) > date ${
-            m.today
+            vm.today
           } - interval '7 days' AND date(packet_generated) < date ${
-            m.today
+            vm.today
           } + interval '1 day'`;
         },
         auth: ["superadmin", "admin", "user"]
@@ -222,8 +222,8 @@ const m = {
         //   todo:
         get query() {
           return `${
-            m.qr.cyclingTime
-          } WHERE u.uuid = $1 AND date(packet_generated) = date ${m.today}`;
+            vm.qr.cyclingTime
+          } WHERE u.uuid = $1 AND date(packet_generated) = date ${vm.today}`;
         },
         auth: ["superadmin", "admin", "user"]
       }
@@ -251,11 +251,11 @@ const m = {
     findOne: {
       get query() {
         return `${
-          m.qr.cyclingTime
+          vm.qr.cyclingTime
         } WHERE event_userid = $1 AND date(packet_generated) > date ${
-          m.today
+          vm.today
         } - interval '30 days' AND date(packet_generated) < date ${
-          m.today
+          vm.today
         } + interval '1 day'`;
       }
       // query:
@@ -546,4 +546,4 @@ const m = {
   // getOrg: "SELECT "
 };
 
-module.exports = m;
+module.exports = vm;

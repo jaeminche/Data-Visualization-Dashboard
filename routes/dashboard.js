@@ -3,7 +3,7 @@ const router = express.Router({ mergeParams: true });
 const { Pool, Client } = require("pg");
 const client_config = require("../config/client");
 const Chart = require("chart.js");
-const m = require("../db/dataModel");
+const vm = require("../db/dataModel");
 const c = require("../db/control");
 const v = require("../db/view");
 const db = require("../db/index");
@@ -23,68 +23,68 @@ router.get("/dashboard/:uuid", async function(req, res) {
     c.init();
     console.log("================ dashboard pg starts ===============");
     // console.log("m.jwt: ", m.jwt);
-    console.log("m.currentLogin: ", m.currentLogin);
+    console.log("m.currentLogin: ", vm.currentLogin);
     // =========================================================
     // | Set CURRENT LOGIN & currentLoginType start |
     // =========================================================
-    c.setCurrentType(m.currentLogin, "currentLoginType");
+    c.setCurrentType(vm.currentLogin, "currentLoginType");
     // console.log("currentLoginType", m.currentLoginType);
     // =========================================================
     // | Set CURRENT SHOW & currentShowType start |
     // =========================================================
-    if (m.currentShow === null) {
+    if (vm.currentShow === null) {
       // when initial launch on the app
-      m.currentShow = m.currentLogin; // always gets data along with user_uuid
-      c.setCurrentType(m.currentShow, "currentShowType");
+      vm.currentShow = vm.currentLogin; // always gets data along with user_uuid
+      c.setCurrentType(vm.currentShow, "currentShowType");
     } else {
       // from second launch on the app
       // check if the params.uuid is from org or user, if not the case of user, try fetching res with params.o.uuid in the next if-block.
       let currentShow = await client.query(
-        `${m.userList.findAll.query} WHERE u.uuid = $1`,
+        `${vm.userList.findAll.query} WHERE u.uuid = $1`,
         [req.params.uuid]
       );
-      m.currentShow = currentShow.rows[0]; // store in m only the rows
-      m.currentShowType = "user";
+      vm.currentShow = currentShow.rows[0]; // store in m only the rows
+      vm.currentShowType = "user";
       if (
-        m.currentLoginType === "superadmin" &&
-        typeof m.currentShow === "undefined"
+        vm.currentLoginType === "superadmin" &&
+        typeof vm.currentShow === "undefined"
       ) {
         // this is org's case. if there's no data found from the query above,
         // the previously picked one should be org. Then, get all the org's users data IN AN ARRAY.
         currentShow = await client.query(
-          `${m.userList.findAll.query} WHERE o.uuid = $1`,
+          `${vm.userList.findAll.query} WHERE o.uuid = $1`,
           [req.params.uuid]
         );
-        m.currentShow = currentShow.rows[0];
-        m.currentShowType = "admin";
+        vm.currentShow = currentShow.rows[0];
+        vm.currentShowType = "admin";
       }
     }
-    console.log("currentShow: ", m.currentShow);
-    console.log("currentShowType: ", m.currentShowType);
+    console.log("currentShow: ", vm.currentShow);
+    console.log("currentShowType: ", vm.currentShowType);
     // =========================================================
     // | Set ORGLIST & USERLIST start |
     // =========================================================
     let resOrgList, resUserList, resPie;
-    switch (m.currentLoginType) {
+    switch (vm.currentLoginType) {
       case "superadmin":
-        resOrgList = await client.query(m.orgList.findAll.query);
-        resUserList = await client.query(m.userList.findAllForAdmin.query, [
+        resOrgList = await client.query(vm.orgList.findAll.query);
+        resUserList = await client.query(vm.userList.findAllForAdmin.query, [
           // TODO: for deployment, change the following line to m.currentLogin.o_id for superadmin's restricted authorization according to GDPR
-          m.currentShow.o_id
+          vm.currentShow.o_id
         ]);
-        m.resOrgList = resOrgList.rows;
-        m.resUserList = resUserList.rows;
+        vm.resOrgList = resOrgList.rows;
+        vm.resUserList = resUserList.rows;
         // Only when showType, fetch top 10 votes' rows in sharedroutes table for pie graph
-        if (m.currentShowType === "superadmin") {
-          resPie = await client.query(m.pie.query);
-          m.resPie = resPie.rows;
+        if (vm.currentShowType === "superadmin") {
+          resPie = await client.query(vm.pie.query);
+          vm.resPie = resPie.rows;
         }
         break;
       case "admin":
-        resUserList = await client.query(m.userList.findAllForAdmin.query, [
-          m.currentLogin.o_id
+        resUserList = await client.query(vm.userList.findAllForAdmin.query, [
+          vm.currentLogin.o_id
         ]);
-        m.resUserList = resUserList.rows;
+        vm.resUserList = resUserList.rows;
         break;
       // default:
       //   break;
@@ -94,12 +94,12 @@ router.get("/dashboard/:uuid", async function(req, res) {
     // | DASHBOARD CONTENTS - BAR - start |
     // =========================================================
     let usersDailyAvgThisMonth;
-    if (typeof m.resUserList != "undefined") {
+    if (typeof vm.resUserList != "undefined") {
       let resBar;
       let sumAllUsers = 0;
-      for await (let user of m.resUserList) {
+      for await (let user of vm.resUserList) {
         // get accumulated data for one user for the last 30 days
-        resBar = await client.query(m.bar.findOne.query, [user.id]);
+        resBar = await client.query(vm.bar.findOne.query, [user.id]);
         timeCycledInMilSec = c.getTimeCycledInMilSec(resBar.rows);
 
         // =========================================================
@@ -111,32 +111,32 @@ router.get("/dashboard/:uuid", async function(req, res) {
         sumAllUsers = sumAllUsers + timeCycledInMilSec;
       }
       console.log("sumAllUsers: ", sumAllUsers);
-      usersDailyAvgThisMonth = sumAllUsers / m.resUserList.length / 30;
-      m.average.admin_monthly.o_id = m.currentShow.o_id;
-      m.average.admin_monthly.usersDailyAvgThisMonth = c.convMilSecToFin(
+      usersDailyAvgThisMonth = sumAllUsers / vm.resUserList.length / 30;
+      vm.average.admin_monthly.o_id = vm.currentShow.o_id;
+      vm.average.admin_monthly.usersDailyAvgThisMonth = c.convMilSecToFin(
         usersDailyAvgThisMonth
       );
-      console.log(m.average.admin_monthly.usersDailyAvgThisMonth);
+      console.log(vm.average.admin_monthly.usersDailyAvgThisMonth);
     }
 
     // =========================================================
     // | DASHBOARD CONTENTS - CARD(only w/ query) - start | defines card.number
     // =========================================================
     let resArea = undefined;
-    for await (let card of m.cards[`for${m.currentShowType}`]) {
+    for await (let card of vm.cards[`for${vm.currentShowType}`]) {
       let resCard, timeCycledInMilSec;
-      switch (m.currentShowType) {
+      switch (vm.currentShowType) {
         case "superadmin":
           if (!!card.query) resCard = await client.query(card.query);
           break;
         case "admin":
           if (!!card.query)
-            resCard = await client.query(card.query, [m.currentShow.o_id]);
+            resCard = await client.query(card.query, [vm.currentShow.o_id]);
           break;
         case "user":
           console.log("user card ----");
           if (!!card.query) {
-            resCard = await client.query(card.query, [m.currentShow.uuid]);
+            resCard = await client.query(card.query, [vm.currentShow.uuid]);
             timeCycledInMilSec = c.getTimeCycledInMilSec(resCard.rows);
             if (
               card.name === "CYCLING TIME THIS WEEK" &&
@@ -210,8 +210,8 @@ router.get("/dashboard/:uuid", async function(req, res) {
       dataForArea.sort(function(a, b) {
         return new Date(a.date).getDate() - new Date(b.date).getDate();
       });
-      m.area.datasets.week = dataForArea;
-      console.log("m.area.datasets.week: ", m.area.datasets.week);
+      vm.area.datasets.week = dataForArea;
+      console.log("m.area.datasets.week: ", vm.area.datasets.week);
     }
 
     // resBar = await client.query(m.bar.find)
@@ -219,28 +219,28 @@ router.get("/dashboard/:uuid", async function(req, res) {
     // | DASHBOARD CONTENTS - end |
     // =========================================================
     let data = {
-      currentLogin: m.currentLogin,
-      currentLoginType: m.currentLoginType,
-      currentShow: m.currentShow,
-      currentShowType: m.currentShowType,
-      cards: m.cards[`for${m.currentShowType}`],
-      m: m
+      currentLogin: vm.currentLogin,
+      currentLoginType: vm.currentLoginType,
+      currentShow: vm.currentShow,
+      currentShowType: vm.currentShowType,
+      cards: vm.cards[`for${vm.currentShowType}`],
+      m: vm
     };
-    if (typeof m.resOrgList != "undefined") data["orgs"] = m.resOrgList;
-    if (typeof m.resUserList != "undefined") data["users"] = m.resUserList;
-    if (typeof m.resPie != "undefined") {
-      data["pie"] = m.resPie;
-      data["pieData"] = m.pie;
+    if (typeof vm.resOrgList != "undefined") data["orgs"] = vm.resOrgList;
+    if (typeof vm.resUserList != "undefined") data["users"] = vm.resUserList;
+    if (typeof vm.resPie != "undefined") {
+      data["pie"] = vm.resPie;
+      data["pieData"] = vm.pie;
     }
     // console.log("req.user: ", req.user);
     // console.log("req.params: ", req.params);
     // console.log("================ dashboard pg ends ===============");
-    m.pgload++;
+    vm.pgload++;
     res.render("dashboard", data);
   } catch (ex) {
     // await client.query('ROLLBACK')
     console.log(`something went wrong ${ex}`);
-    m.currentShow = null;
+    vm.currentShow = null;
     setTimeout(function redirect() {
       res.redirect(`/dashboard/${req.params.uuid}`);
     }, 5000);
@@ -259,7 +259,7 @@ router.get("/dashboard/usernameupdate", async function(req, res) {
     let rowid = row.id;
     let roworgid = row.organisation;
     client.query("UPDATE users SET name = $1 WHERE id = $2", [
-      `${roworgid.toString()}_${m.names[index]}_${rowid.toString()}`,
+      `${roworgid.toString()}_${vm.names[index]}_${rowid.toString()}`,
       rowid
     ]);
     index++;

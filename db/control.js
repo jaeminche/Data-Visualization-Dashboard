@@ -1,15 +1,15 @@
-const m = require("./dataModel");
+const vm = require("./dataModel");
 const v = require("./view");
 
 const c = {
   init_login_show: function() {
-    m.currentLogin = null;
-    m.currentShow = null;
+    vm.currentLogin = null;
+    vm.currentShow = null;
   },
 
   init: function() {
-    m.area.datasets.week = [];
-    m.resPie = null;
+    vm.area.datasets.week = [];
+    vm.resPie = null;
   },
 
   // setCurrentLoginType: function() {
@@ -19,11 +19,11 @@ const c = {
   setCurrentType: function(data, key) {
     if (data.superadmin === true && data.admin === true) {
       // TODO: prompt and get input by asking which one of superadmin and user the user wants
-      m[key] = "superadmin";
+      vm[key] = "superadmin";
     } else if (data.superadmin === false && data.admin === true) {
-      m[key] = "admin";
+      vm[key] = "admin";
     } else {
-      m[key] = "user";
+      vm[key] = "user";
     }
   },
 
