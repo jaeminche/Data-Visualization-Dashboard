@@ -32,12 +32,12 @@
 
   <%# Content Row %>
   <div class="row">
-    <% if (m.area.datasets.week.length > 0) { %>
+    <% if (vm.area.datasets.week.length > 0) { %>
       <% include ./partials/chart_area %>
     <% } %>
 
     <% if (typeof pie !== "undefined") { %>
-      <% if (!!m.resPie) { %>
+      <% if (!!vm.resPie) { %>
       <% include ./partials/chart_pie %>
       <% } %>
     <% } %>

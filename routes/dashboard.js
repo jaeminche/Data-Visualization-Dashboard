@@ -3,7 +3,7 @@ const router = express.Router({ mergeParams: true });
 const { Pool, Client } = require("pg");
 const client_config = require("../config/client");
 const Chart = require("chart.js");
-const vm = require("../db/dataModel");
+const vm = require("../db/viewmodel");
 const c = require("../db/control");
 const v = require("../db/view");
 const db = require("../db/index");
@@ -224,7 +224,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
       currentShow: vm.currentShow,
       currentShowType: vm.currentShowType,
       cards: vm.cards[`for${vm.currentShowType}`],
-      m: vm
+      vm: vm
     };
     if (typeof vm.resOrgList != "undefined") data["orgs"] = vm.resOrgList;
     if (typeof vm.resUserList != "undefined") data["users"] = vm.resUserList;

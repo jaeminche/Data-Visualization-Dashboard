@@ -1,4 +1,4 @@
-const vm = require("./dataModel");
+const vm = require("./viewmodel");
 const v = require("./view");
 
 const c = {

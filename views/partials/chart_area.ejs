@@ -60,17 +60,17 @@
             var myLineChart = new Chart(ctx, {
               type: "bar",
               data: {
-                labels: <%- JSON.stringify(m.area.datasets.week.map(set => set.label)) %>,
+                labels: <%- JSON.stringify(vm.area.datasets.week.map(set => set.label)) %>,
                 datasets: [
                   {
                     label: "Cycling Time",
-                    data: <%- JSON.stringify(m.area.datasets.week.map(set => set.time)) %>,
+                    data: <%- JSON.stringify(vm.area.datasets.week.map(set => set.time)) %>,
                     backgroundColor: "rgb(187,181,153, 1)"
                     // borderColor: "rgba(78, 115, 223, 1)"
                   }, 
                   {
                     label: "Taximode",
-                    data: <%- JSON.stringify(m.area.datasets.week.map(set => set.time)) %>,
+                    data: <%- JSON.stringify(vm.area.datasets.week.map(set => set.time)) %>,
                     backgroundColor: "rgb(187,181,153, 0.5)"
                   }
                 ]
