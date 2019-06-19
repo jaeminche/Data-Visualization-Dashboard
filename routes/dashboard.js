@@ -123,6 +123,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
     // | DASHBOARD CONTENTS - CARD(only w/ query) - start | defines card.number
     // =========================================================
     let resArea = undefined;
+    let wm_or_y;
     for await (let card of vm.cards[`for${vm.currentShowType}`]) {
       let resCard, timeCycledInMilSec;
       switch (vm.currentShowType) {
@@ -143,6 +144,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
               timeCycledInMilSec != 0
             ) {
               resArea = resCard.rows;
+              wm_or_y = card.type;
             }
           }
           break;
@@ -168,15 +170,17 @@ router.get("/dashboard/:uuid", async function(req, res) {
       // && resArea.length > 0
     ) {
       let prevDate = new Date(resArea[0].packet_generated).getDate();
-      let indexForResAreaByDay = 0;
+      let cMonth = new Date(resArea[0].packet_generated).getMonth();
+      let cYear = new Date(resArea[0].packet_generated).getFullYear();
+      let indexForResAreaByDay = prevDate - 1;
 
-      let resAreaByDay = [[], [], [], [], [], [], []];
+      let resAreaByDay = c.genNestedArr(wm_or_y, cMonth, cYear);
       resArea.forEach(r => {
         if (new Date(r.packet_generated).getDate() === prevDate) {
           resAreaByDay[indexForResAreaByDay].push(r);
         } else {
           prevDate = new Date(r.packet_generated).getDate();
-          indexForResAreaByDay++;
+          indexForResAreaByDay = prevDate - 1;
           resAreaByDay[indexForResAreaByDay].push(r);
         }
       });
@@ -184,33 +188,38 @@ router.get("/dashboard/:uuid", async function(req, res) {
 
       const dataForArea = [];
       let dayBeforeIndex = 1;
-      resAreaByDay.forEach(dataForOneDay => {
+      resAreaByDay.forEach((dataForOneDay, index) => {
         let dataset;
-        if (dataForOneDay.length > 0) {
+        if (!!dataForOneDay && dataForOneDay.length > 0) {
           dataset = {
             date: new Date(dataForOneDay[0].packet_generated),
-            label: c.convertDay(
-              new Date(dataForOneDay[0].packet_generated).getDay()
-            ),
+            label: new Date(dataForOneDay[0].packet_generated),
             time: c.convToMin(c.getTimeCycledInMilSec(dataForOneDay))
           };
         } else {
-          let date1 = new Date(dataForArea[0].date);
-          date1.setDate(date1.getDate() - dayBeforeIndex);
+          // let date1 = new Date(dataForArea[0].date);
+          // date1.setDate(date1.getDate() - dayBeforeIndex);
           dataset = {
-            date: date1,
-            label: c.convertDay(new Date(date1).getDay()),
+            // date: date1,
+            // label: new Date(date1),
+            date: cMonth.toString() + (index + 1).toString(),
+            label: cMonth.toString() + (index + 1).toString(),
             time: 0
           };
-          dayBeforeIndex++;
+          // dayBeforeIndex++;
         }
         // if (dataset != undefined) {
         dataForArea.push(dataset);
         // }
       });
-      dataForArea.sort(function(a, b) {
-        return new Date(a.date).getDate() - new Date(b.date).getDate();
-      });
+      // dataForArea.forEach(dataForOneDay => {
+      //   if (dataForOneDay.date === null) {
+
+      //   }
+      // })
+      // dataForArea.sort(function(a, b) {
+      //   return new Date(a.date).getDate() - new Date(b.date).getDate();
+      // });
       vm.area.datasets = dataForArea;
       // console.log("m.area.datasets: ", vm.area.datasets);
     }

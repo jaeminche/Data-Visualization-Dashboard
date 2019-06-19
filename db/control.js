@@ -100,6 +100,20 @@ const c = {
         return "Sat";
         break;
     }
+  },
+
+  genNestedArr: function(type, m, y) {
+    const array = [];
+    if (type === "month") {
+      for (let i = 0; i < this.daysInMonth(m, y); i++) {
+        array.push([]);
+      }
+    }
+    return array;
+  },
+
+  daysInMonth: function(month, year) {
+    return new Date(year, month, 0).getDate();
   }
 
   // sortDateArr: function(arr) {

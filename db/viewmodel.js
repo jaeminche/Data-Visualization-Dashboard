@@ -195,6 +195,7 @@ const vm = {
       {
         id: 21,
         name: "ACTIVE DAYS THIS MONTH",
+        type: "month",
         number: 0,
         cyclingTimeCal: false,
         color: "warning",
@@ -209,6 +210,7 @@ const vm = {
       {
         id: 22,
         name: "ACTIVE TIME THIS MONTH",
+        type: "month",
         number: 0,
         cyclingTimeCal: true,
         color: "warning",
@@ -225,6 +227,7 @@ const vm = {
       {
         id: 22,
         name: "ACTIVE TIME FOR THE LAST 7 DAYS",
+        type: "week",
         number: 0,
         cyclingTimeCal: true,
         color: "warning",
@@ -245,6 +248,7 @@ const vm = {
         // TODO: when deployment, change the date to current_date
         id: 23,
         name: "ACTIVE TIME TODAY",
+        type: "today",
         number: 0,
         cyclingTimeCal: true,
         color: "success",
