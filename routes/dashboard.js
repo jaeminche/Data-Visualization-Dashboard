@@ -136,10 +136,10 @@ router.get("/dashboard/:uuid", async function(req, res) {
         case "user":
           console.log("user card ----");
           if (!!card.query) {
-            resCard = await client.query(card.query, [vm.currentShow.uuid]);
+            resCard = await client.query(card.query, [vm.currentShow.id]);
             timeCycledInMilSec = c.getTimeCycledInMilSec(resCard.rows);
             if (
-              card.name === "CYCLING TIME THIS WEEK" &&
+              card.name === "ACTIVE TIME THIS MONTH" &&
               timeCycledInMilSec != 0
             ) {
               resArea = resCard.rows;
@@ -147,6 +147,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
           }
           break;
       }
+      // if card.number should be resCard.rowCount, cyclingTimeCal is set to false
       if (!!card.query && card.cyclingTimeCal) {
         card.number = c.convMilSecToFin(timeCycledInMilSec);
       } else if (!!card.query && !card.cyclingTimeCal) {
@@ -160,7 +161,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
     // =========================================================
     // | DASHBOARD CONTENTS - AREA-CHART - start |
     // =========================================================
-    // console.log("resArea: ", resArea);
+    console.log("resArea: ", resArea);
     if (
       typeof resArea != "undefined" &&
       typeof resArea[0].packet_generated != "undefined"
@@ -179,7 +180,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
           resAreaByDay[indexForResAreaByDay].push(r);
         }
       });
-      console.log("resAreaByDay: ", resAreaByDay);
+      // console.log("resAreaByDay: ", resAreaByDay);
 
       const dataForArea = [];
       let dayBeforeIndex = 1;
@@ -211,7 +212,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
         return new Date(a.date).getDate() - new Date(b.date).getDate();
       });
       vm.area.datasets = dataForArea;
-      console.log("m.area.datasets: ", vm.area.datasets);
+      // console.log("m.area.datasets: ", vm.area.datasets);
     }
 
     // resBar = await client.query(m.bar.find)

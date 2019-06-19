@@ -1,4 +1,5 @@
 const vm = {
+  // TODO: when deployment, change the date to current_date
   today: "'2017-01-29'",
   pgload: 1,
   jwt: {
@@ -134,7 +135,7 @@ const vm = {
     foradmin: [
       {
         // TODO: add query condition for today
-        id: 1,
+        id: 11,
         name: "NO. OF ACTIVE USERS TODAY",
         number: 0,
         cyclingTimeCal: false,
@@ -149,7 +150,7 @@ const vm = {
       },
       {
         // TODO: add query condition for this month
-        id: 2,
+        id: 12,
         name: "NO. OF ACTIVE USERS THIS MONTH",
         number: 0,
         cyclingTimeCal: false,
@@ -166,7 +167,7 @@ const vm = {
       },
       {
         // TODO: add query condition for this month
-        id: 3,
+        id: 13,
         name: "USERS' DAILY AVERAGE CYCLING TIME THIS MONTH",
         get number() {
           return vm.average.admin_monthly.usersDailyAvgThisMonth;
@@ -180,7 +181,7 @@ const vm = {
         auth: ["superadmin", "admin"]
       },
       {
-        id: 4,
+        id: 14,
         name: "TOTAL NO. OF USERS",
         number: 0,
         cyclingTimeCal: false,
@@ -192,9 +193,22 @@ const vm = {
     ],
     foruser: [
       {
-        // TODO: when deployment, change the date to current_date
-        id: 1,
-        name: "CYCLING TIME THIS WEEK",
+        id: 21,
+        name: "ACTIVE DAYS THIS MONTH",
+        number: 0,
+        cyclingTimeCal: false,
+        color: "warning",
+        fa: "stopwatch",
+        get query() {
+          return `SELECT DISTINCT ON (created_on) date_trunc('day', client_timestamp) AS created_on FROM log_startcycling WHERE userid = $1 AND client_timestamp >= date_trunc('month', date(${
+            vm.today
+          }))`;
+        },
+        auth: ["superadmin", "admin", "user"]
+      },
+      {
+        id: 22,
+        name: "ACTIVE TIME THIS MONTH",
         number: 0,
         cyclingTimeCal: true,
         color: "warning",
@@ -202,7 +216,23 @@ const vm = {
         get query() {
           return `${
             vm.qr.cyclingTime
-          } WHERE u.uuid = $1 AND date(packet_generated) > date ${
+          } WHERE event_userid = $1 AND packet_generated >= date_trunc('month', date(${
+            vm.today
+          }))`;
+        },
+        auth: ["superadmin", "admin", "user"]
+      },
+      {
+        id: 22,
+        name: "ACTIVE TIME FOR THE LAST 7 DAYS",
+        number: 0,
+        cyclingTimeCal: true,
+        color: "warning",
+        fa: "stopwatch",
+        get query() {
+          return `${
+            vm.qr.cyclingTime
+          } WHERE u.id = $1 AND date(packet_generated) > date ${
             vm.today
           } - interval '7 days' AND date(packet_generated) < date ${
             vm.today
@@ -213,17 +243,16 @@ const vm = {
       {
         // TODO: add query condition for this week
         // TODO: when deployment, change the date to current_date
-        id: 2,
-        name: "CYCLING TIME TODAY",
+        id: 23,
+        name: "ACTIVE TIME TODAY",
         number: 0,
         cyclingTimeCal: true,
         color: "success",
         fa: "stopwatch",
-        //   todo:
         get query() {
           return `${
             vm.qr.cyclingTime
-          } WHERE u.uuid = $1 AND date(packet_generated) = date ${vm.today}`;
+          } WHERE u.id = $1 AND date(packet_generated) = date ${vm.today}`;
         },
         auth: ["superadmin", "admin", "user"]
       }
