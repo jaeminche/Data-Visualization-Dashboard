@@ -8,7 +8,7 @@ const c = {
   },
 
   init: function() {
-    vm.area.datasets.week = [];
+    vm.area.datasets = [];
     vm.resPie = null;
   },
 
@@ -102,14 +102,66 @@ const c = {
     }
   },
 
-  genNestedArr: function(type, m, y) {
-    const array = [];
-    if (type === "month") {
-      for (let i = 0; i < this.daysInMonth(m, y); i++) {
-        array.push([]);
+  createBarChart: function(res, calendarType) {
+    let cMonth, cYear;
+    let prevDate = new Date(res[0].packet_generated).getDate();
+    cMonth = new Date(res[0].packet_generated).getMonth();
+    cYear = new Date(res[0].packet_generated).getFullYear();
+    let indexForResByDay = prevDate - 1;
+
+    // generate as many nested array as the calendarType,
+    // and organize the res data day by day.
+    let resByDay = this.genNestedArr(calendarType, cMonth, cYear);
+    res.forEach(row => {
+      if (new Date(row.packet_generated).getDate() === prevDate) {
+        resByDay[indexForResByDay].push(row);
+      } else {
+        prevDate = new Date(row.packet_generated).getDate();
+        indexForResByDay = prevDate - 1;
+        resByDay[indexForResByDay].push(row);
       }
+    });
+
+    // manipulate the res data into dataset
+    const dataForArea = [];
+    resByDay.forEach((dataForOneDay, index) => {
+      let dataset;
+      if (!!dataForOneDay && dataForOneDay.length > 0) {
+        let date = new Date(dataForOneDay[0].packet_generated).toDateString();
+        dataset = {
+          date: date,
+          label: date,
+          time: this.convToMin(this.getTimeCycledInMilSec(dataForOneDay))
+        };
+      } else {
+        let date = new Date(cYear, cMonth, index + 1).toDateString();
+        dataset = {
+          date: date,
+          label: date,
+          time: 0
+        };
+      }
+      dataForArea.push(dataset);
+    });
+    vm.area.datasets = dataForArea;
+  },
+
+  genNestedArr: function(type, m, y) {
+    const nestedArray = [];
+    let no_x_axis;
+    if (type === "monthly") {
+      no_x_axis = this.daysInMonth(m, y);
+    } else if (type === "yearly") {
+      no_x_axis = 12;
+    } else if (type === "weekly") {
+      no_x_axis = 7;
+    } else if (type === "daily") {
+      no_x_axis = 24;
     }
-    return array;
+    for (let i = 0; i < no_x_axis; i++) {
+      nestedArray.push([]);
+    }
+    return nestedArray;
   },
 
   daysInMonth: function(month, year) {

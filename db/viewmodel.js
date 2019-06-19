@@ -91,7 +91,6 @@ const vm = {
         auth: ["superadmin"]
       },
       {
-        // TODO: add query condition for this month
         id: 6,
         name: "NO. OF ACTIVE USERS THIS WEEK",
         number: 0,
@@ -108,7 +107,6 @@ const vm = {
         auth: ["superadmin"]
       },
       {
-        // TODO: add query condition for this week
         id: 7,
         name: "AVERAGE CYCLING TIME THIS WEEK",
         number: 0,
@@ -120,7 +118,6 @@ const vm = {
         auth: ["superadmin"]
       },
       {
-        // TODO: add query condition for this month
         id: 8,
         name: "AVERAGE CYCLING TIME THIS MONTH",
         number: 0,
@@ -134,7 +131,6 @@ const vm = {
     ],
     foradmin: [
       {
-        // TODO: add query condition for today
         id: 11,
         name: "NO. OF ACTIVE USERS TODAY",
         number: 0,
@@ -149,7 +145,6 @@ const vm = {
         auth: ["superadmin", "admin"]
       },
       {
-        // TODO: add query condition for this month
         id: 12,
         name: "NO. OF ACTIVE USERS THIS MONTH",
         number: 0,
@@ -166,7 +161,6 @@ const vm = {
         auth: ["superadmin", "admin"]
       },
       {
-        // TODO: add query condition for this month
         id: 13,
         name: "USERS' DAILY AVERAGE CYCLING TIME THIS MONTH",
         get number() {
@@ -195,7 +189,7 @@ const vm = {
       {
         id: 21,
         name: "ACTIVE DAYS THIS MONTH",
-        type: "month",
+        type: "monthly",
         number: 0,
         cyclingTimeCal: false,
         color: "warning",
@@ -210,7 +204,7 @@ const vm = {
       {
         id: 22,
         name: "ACTIVE TIME THIS MONTH",
-        type: "month",
+        type: "monthly",
         number: 0,
         cyclingTimeCal: true,
         color: "warning",
@@ -225,9 +219,9 @@ const vm = {
         auth: ["superadmin", "admin", "user"]
       },
       {
-        id: 22,
+        id: 23,
         name: "ACTIVE TIME FOR THE LAST 7 DAYS",
-        type: "week",
+        type: "weekly",
         number: 0,
         cyclingTimeCal: true,
         color: "warning",
@@ -244,11 +238,9 @@ const vm = {
         auth: ["superadmin", "admin", "user"]
       },
       {
-        // TODO: add query condition for this week
-        // TODO: when deployment, change the date to current_date
-        id: 23,
+        id: 24,
         name: "ACTIVE TIME TODAY",
-        type: "today",
+        type: "daily",
         number: 0,
         cyclingTimeCal: true,
         color: "success",
