@@ -179,7 +179,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
           resAreaByDay[indexForResAreaByDay].push(r);
         }
       });
-      // console.log(resAreaByDay);
+      console.log("resAreaByDay: ", resAreaByDay);
 
       const dataForArea = [];
       let dayBeforeIndex = 1;
@@ -210,8 +210,8 @@ router.get("/dashboard/:uuid", async function(req, res) {
       dataForArea.sort(function(a, b) {
         return new Date(a.date).getDate() - new Date(b.date).getDate();
       });
-      vm.area.datasets.week = dataForArea;
-      console.log("m.area.datasets.week: ", vm.area.datasets.week);
+      vm.area.datasets = dataForArea;
+      console.log("m.area.datasets: ", vm.area.datasets);
     }
 
     // resBar = await client.query(m.bar.find)
