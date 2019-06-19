@@ -164,14 +164,15 @@ router.get("/dashboard/:uuid", async function(req, res) {
     // | DASHBOARD CONTENTS - AREA-CHART - start |
     // =========================================================
     console.log("resArea: ", resArea);
+    let cMonth, cYear;
     if (
       typeof resArea != "undefined" &&
       typeof resArea[0].packet_generated != "undefined"
       // && resArea.length > 0
     ) {
       let prevDate = new Date(resArea[0].packet_generated).getDate();
-      let cMonth = new Date(resArea[0].packet_generated).getMonth();
-      let cYear = new Date(resArea[0].packet_generated).getFullYear();
+      cMonth = new Date(resArea[0].packet_generated).getMonth();
+      cYear = new Date(resArea[0].packet_generated).getFullYear();
       let indexForResAreaByDay = prevDate - 1;
 
       let resAreaByDay = c.genNestedArr(wm_or_y, cMonth, cYear);
@@ -191,19 +192,21 @@ router.get("/dashboard/:uuid", async function(req, res) {
       resAreaByDay.forEach((dataForOneDay, index) => {
         let dataset;
         if (!!dataForOneDay && dataForOneDay.length > 0) {
+          let date = new Date(dataForOneDay[0].packet_generated).toDateString();
           dataset = {
-            date: new Date(dataForOneDay[0].packet_generated),
-            label: new Date(dataForOneDay[0].packet_generated),
+            date: date,
+            label: date,
             time: c.convToMin(c.getTimeCycledInMilSec(dataForOneDay))
           };
         } else {
           // let date1 = new Date(dataForArea[0].date);
           // date1.setDate(date1.getDate() - dayBeforeIndex);
+          let date = new Date(cYear, cMonth, index + 1).toDateString();
           dataset = {
             // date: date1,
             // label: new Date(date1),
-            date: cMonth.toString() + (index + 1).toString(),
-            label: cMonth.toString() + (index + 1).toString(),
+            date: date,
+            label: date,
             time: 0
           };
           // dayBeforeIndex++;
