@@ -102,48 +102,84 @@ const c = {
     }
   },
 
-  createBarChart: function(res, calendarType) {
+  getDateDayMonth: function(timestamp, type) {
+    if (type === "monthly") {
+      return new Date(timestamp).getDate();
+    } else if (type === "yearly") {
+      return new Date(timestamp).getMonth();
+    } else if (type === "weekly") {
+      let day = new Date(timestamp).getDay();
+      if (day === 0) {
+        day = 7;
+      }
+      return day;
+    } else if (type === "daily") {
+      return new Date(timestamp).getHours();
+    }
+  },
+
+  createBarChart: function(res, calendarType, firstDayOfWeek) {
+    console.log(firstDayOfWeek);
     let cMonth, cYear;
-    let prevDate = new Date(res[0].packet_generated).getDate();
-    cMonth = new Date(res[0].packet_generated).getMonth();
-    cYear = new Date(res[0].packet_generated).getFullYear();
-    let indexForResByDay = prevDate - 1;
+    let timestamp = res[0].packet_generated;
+    let prevNo = this.getDateDayMonth(timestamp, calendarType);
+    cMonth = new Date(timestamp).getMonth();
+    cYear = new Date(timestamp).getFullYear();
+    let indexForResByDay = prevNo - 1;
 
     // generate as many nested array as the calendarType,
     // and organize the res data day by day.
     let resByDay = this.genNestedArr(calendarType, cMonth, cYear);
     res.forEach(row => {
-      if (new Date(row.packet_generated).getDate() === prevDate) {
+      if (this.getDateDayMonth(row.packet_generated, calendarType) === prevNo) {
         resByDay[indexForResByDay].push(row);
       } else {
-        prevDate = new Date(row.packet_generated).getDate();
-        indexForResByDay = prevDate - 1;
+        prevNo = this.getDateDayMonth(row.packet_generated, calendarType);
+        indexForResByDay = prevNo - 1;
         resByDay[indexForResByDay].push(row);
       }
     });
 
     // manipulate the res data into dataset
-    const dataForArea = [];
+    const dataForBarChart = [];
     resByDay.forEach((dataForOneDay, index) => {
-      let dataset;
+      let dataset, date;
       if (!!dataForOneDay && dataForOneDay.length > 0) {
-        let date = new Date(dataForOneDay[0].packet_generated).toDateString();
+        date = new Date(dataForOneDay[0].packet_generated).toDateString();
         dataset = {
           date: date,
           label: date,
           time: this.convToMin(this.getTimeCycledInMilSec(dataForOneDay))
         };
       } else {
-        let date = new Date(cYear, cMonth, index + 1).toDateString();
+        date = getXaxisDates(
+          calendarType,
+          cYear,
+          cMonth,
+          index,
+          firstDayOfWeek
+        ).toDateString();
         dataset = {
           date: date,
           label: date,
           time: 0
         };
       }
-      dataForArea.push(dataset);
+      dataForBarChart.push(dataset);
     });
-    vm.area.datasets = dataForArea;
+    vm.area.datasets = dataForBarChart;
+
+    function getXaxisDates(type, cYear, cMonth, index, day) {
+      let nextDay;
+      // TODO: add yearly and daily, and delete 'ly's
+      if (type === "monthly") {
+        return new Date(cYear, cMonth, index + 1);
+      } else if (type === "weekly") {
+        nextDay = new Date(day);
+        nextDay.setDate(nextDay.getDate() + index);
+        return nextDay;
+      }
+    }
   },
 
   genNestedArr: function(type, m, y) {

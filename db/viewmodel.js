@@ -220,6 +220,23 @@ const vm = {
       },
       {
         id: 23,
+        name: "ACTIVE TIME THIS WEEK",
+        type: "weekly",
+        number: 0,
+        cyclingTimeCal: true,
+        color: "warning",
+        fa: "stopwatch",
+        get query() {
+          return `${
+            vm.qr.cyclingTime
+          } WHERE event_userid = $1 AND packet_generated >= date_trunc('week', date(${
+            vm.today
+          }))`;
+        },
+        auth: ["superadmin", "admin", "user"]
+      },
+      {
+        id: 23,
         name: "ACTIVE TIME FOR THE LAST 7 DAYS",
         type: "weekly",
         number: 0,

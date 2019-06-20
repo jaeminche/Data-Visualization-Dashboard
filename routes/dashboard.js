@@ -140,7 +140,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
             resCard = await client.query(card.query, [vm.currentShow.id]);
             timeCycledInMilSec = c.getTimeCycledInMilSec(resCard.rows);
             if (
-              card.name === "ACTIVE TIME THIS MONTH" &&
+              card.name === "ACTIVE TIME THIS WEEK" &&
               timeCycledInMilSec != 0
             ) {
               resArea = resCard.rows;
@@ -168,7 +168,14 @@ router.get("/dashboard/:uuid", async function(req, res) {
       typeof resArea != "undefined" &&
       typeof resArea[0].packet_generated != "undefined"
     ) {
-      c.createBarChart(resArea, calendarType);
+      let firstDayOfWeek = await client.query(
+        `select * from date_trunc('week', date(${vm.today}))`
+      );
+      c.createBarChart(
+        resArea,
+        calendarType,
+        firstDayOfWeek.rows[0].date_trunc
+      );
     }
 
     // resBar = await client.query(m.bar.find)
