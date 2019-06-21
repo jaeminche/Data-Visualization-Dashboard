@@ -6,14 +6,14 @@
           <h6 class="m-0 font-weight-bold text-primary">Cycling Time Weekly Overview</h6>
 
           <ul class="nav nav-tabs my-tab">
-            <li class="nav-item">
-              <a class="nav-link active" href="#">W</a>
+            <li class="nav-item chart-tab-week">
+              <a class="nav-link active">W</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">M</a>
+            <li class="nav-item chart-tab-month">
+              <a class="nav-link">M</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Y</a>
+            <li class="nav-item chart-tab-year">
+              <a class="nav-link">Y</a>
             </li>
           </ul>
 
@@ -77,7 +77,7 @@
             // Area Chart Example
             var ctx = document.getElementById("myAreaChart")
             // .getContext('2d');
-            var myLineChart = new Chart(ctx, {
+            var myBarChart = new Chart(ctx, {
               type: "bar",
               data: {
                 labels: <%- JSON.stringify(vm.area.datasets.map(set => set.label)) %>,

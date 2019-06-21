@@ -145,6 +145,12 @@ router.get("/dashboard/:uuid", async function(req, res) {
             ) {
               resArea = resCard.rows;
               calendarType = card.type;
+            } else if (
+              card.name === "ACTIVE TIME THIS MONTH" &&
+              timeCycledInMilSec != 0
+            ) {
+              vm.tempResAreaM = resCard.rows;
+              vm.tempCalendarTypeM = card.type;
             }
           }
           break;
@@ -177,7 +183,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
         firstDayOfWeek.rows[0].date_trunc
       );
     }
-
+    console.log("TCL: vm.area.datasets", vm.area.datasets);
     // resBar = await client.query(m.bar.find)
     // =========================================================
     // | DASHBOARD CONTENTS - end |
@@ -201,6 +207,32 @@ router.get("/dashboard/:uuid", async function(req, res) {
     // console.log("================ dashboard pg ends ===============");
     vm.pgload++;
     res.render("dashboard", data);
+  } catch (ex) {
+    // await client.query('ROLLBACK')
+    console.log(`something went wrong ${ex}`);
+    vm.currentShow = null;
+    setTimeout(function redirect() {
+      res.redirect(`/dashboard/${req.params.uuid}`);
+    }, 5000);
+  } finally {
+    await client.release();
+    console.log("Client disconnected");
+  }
+});
+router.get("/barchart", async function(req, res) {
+  const client = await pool.connect();
+  try {
+    let resArea = vm.tempResAreaM;
+    let calendarType = vm.tempCalendarTypeM;
+    c.createBarChart(resArea, calendarType);
+    let labels = [],
+      data = [];
+    vm.area.datasets.forEach(dataset => {
+      labels.push(dataset.label);
+      data.push(dataset.time);
+    });
+    let result = { labels: labels, data: data };
+    res.send(result);
   } catch (ex) {
     // await client.query('ROLLBACK')
     console.log(`something went wrong ${ex}`);

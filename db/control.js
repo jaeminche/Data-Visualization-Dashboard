@@ -119,7 +119,7 @@ const c = {
   },
 
   createBarChart: function(res, calendarType, firstDayOfWeek) {
-    console.log(firstDayOfWeek);
+    // console.log(firstDayOfWeek);
     let cMonth, cYear;
     let timestamp = res[0].packet_generated;
     let prevNo = this.getDateDayMonth(timestamp, calendarType);
@@ -202,6 +202,22 @@ const c = {
 
   daysInMonth: function(month, year) {
     return new Date(year, month, 0).getDate();
+  },
+
+  addData: function(chart, label, data) {
+    chart.data.labels.push(label);
+    chart.data.datasets.forEach(dataset => {
+      dataset.data.push(data);
+    });
+    chart.update();
+  },
+
+  removeData: function(chart) {
+    chart.data.labels.pop();
+    chart.data.datasets.forEach(dataset => {
+      dataset.data.pop();
+    });
+    chart.update();
   }
 
   // sortDateArr: function(arr) {
