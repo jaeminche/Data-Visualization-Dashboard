@@ -17,17 +17,22 @@ pool.on("error", (err, client) => {
   process.exit(-1);
 });
 
+let stateFlag = "";
+
 router.get("/dashboard/:uuid", async function(req, res) {
   const client = await pool.connect();
   // TODO: later connect this with db.query > const query = client.query.bind(client);
+  stateFlag = "0000";
   try {
     c.init();
+    stateFlag = "0001";
     console.log("================ dashboard pg starts ===============");
     // console.log("m.jwt: ", m.jwt);
     console.log("m.currentLogin: ", vm.currentLogin);
     // =========================================================
     // | Set CURRENT LOGIN & currentLoginType start |
     // =========================================================
+    stateFlag = "0010";
     c.setCurrentType(vm.currentLogin, "currentLoginType");
     // console.log("currentLoginType", m.currentLoginType);
     // =========================================================
@@ -35,11 +40,13 @@ router.get("/dashboard/:uuid", async function(req, res) {
     // =========================================================
     if (vm.currentShow === null) {
       // when initial launch on the app
+      stateFlag = "0020";
       vm.currentShow = vm.currentLogin; // always gets data along with user_uuid
       c.setCurrentType(vm.currentShow, "currentShowType");
     } else {
       // from second launch on the app
       // check if the params.uuid is from org or user, if not the case of user, try fetching res with params.o.uuid in the next if-block.
+      stateFlag = "0025";
       let currentShow = await client.query(
         `${vm.userList.findAll.query} WHERE u.uuid = $1`,
         [req.params.uuid]
@@ -52,6 +59,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
       ) {
         // this is org's case. if there's no data found from the query above,
         // the previously picked one should be org. Then, get all the org's users data IN AN ARRAY.
+        stateFlag = "0030";
         currentShow = await client.query(
           `${vm.userList.findAll.query} WHERE o.uuid = $1`,
           [req.params.uuid]
@@ -66,8 +74,10 @@ router.get("/dashboard/:uuid", async function(req, res) {
     // | Set ORGLIST & USERLIST start |
     // =========================================================
     let resOrgList, resUserList, resPie;
+    stateFlag = "0100";
     switch (vm.currentLoginType) {
       case "superadmin":
+        stateFlag = "0110";
         resOrgList = await client.query(vm.orgList.findAll.query);
         resUserList = await client.query(vm.userList.findAllForAdmin.query, [
           // TODO: for deployment, change the following line to m.currentLogin.o_id for superadmin's restricted authorization according to GDPR
@@ -77,11 +87,13 @@ router.get("/dashboard/:uuid", async function(req, res) {
         vm.resUserList = resUserList.rows;
         // Only when showType, fetch top 10 votes' rows in sharedroutes table for pie graph
         if (vm.currentShowType === "superadmin") {
+          stateFlag = "0115";
           resPie = await client.query(vm.pie.query);
           vm.resPie = resPie.rows;
         }
         break;
       case "admin":
+        stateFlag = "0120";
         resUserList = await client.query(vm.userList.findAllForAdmin.query, [
           vm.currentLogin.o_id
         ]);
@@ -96,6 +108,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
     // =========================================================
     let usersDailyAvgThisMonth;
     if (typeof vm.resUserList != "undefined") {
+      stateFlag = "0150";
       let resBar;
       let sumAllUsers = 0;
       for await (let user of vm.resUserList) {
@@ -111,12 +124,14 @@ router.get("/dashboard/:uuid", async function(req, res) {
         user.dpMonthlyAvgTCycled = c.convMilSecToFin(timeCycledInMilSec / 30);
         sumAllUsers = sumAllUsers + timeCycledInMilSec;
       }
+      stateFlag = "0160";
       console.log("sumAllUsers: ", sumAllUsers);
       usersDailyAvgThisMonth = sumAllUsers / vm.resUserList.length / 30;
       vm.average.admin_monthly.o_id = vm.currentShow.o_id;
       vm.average.admin_monthly.usersDailyAvgThisMonth = c.convMilSecToFin(
         usersDailyAvgThisMonth
       );
+      stateFlag = "0170";
       console.log(vm.average.admin_monthly.usersDailyAvgThisMonth);
     }
 
@@ -125,42 +140,49 @@ router.get("/dashboard/:uuid", async function(req, res) {
     // =========================================================
     let resArea = undefined;
     let calendarType;
+    stateFlag = "0200";
     for await (let card of vm.cards[`for${vm.currentShowType}`]) {
       let resCard, timeCycledInMilSec;
       switch (vm.currentShowType) {
         case "superadmin":
+          stateFlag = "0210";
           if (!!card.query) resCard = await client.query(card.query);
           break;
         case "admin":
+          stateFlag = "0220";
           if (!!card.query)
             resCard = await client.query(card.query, [vm.currentShow.o_id]);
           break;
         case "user":
           console.log("user card ----");
           if (!!card.query) {
+            stateFlag = "0230";
             resCard = await client.query(card.query, [vm.currentShow.id]);
             timeCycledInMilSec = c.getTimeCycledInMilSec(resCard.rows);
             if (
               card.name === "ACTIVE TIME THIS MONTH" &&
               timeCycledInMilSec != 0
             ) {
+              stateFlag = "0240";
               resArea = resCard.rows;
-              calendarType = card.type;
+              calendarType = card.periodTab;
             }
             // else if (
             //   card.name === "ACTIVE TIME THIS WEEK" &&
             //   timeCycledInMilSec != 0
             // ) {
             //   vm.tempResArea = resCard.rows;
-            //   vm.tempCalendarType = card.type;
+            //   vm.tempCalendarType = card.periodTab;
             // }
           }
           break;
       }
       // if card.number should be resCard.rowCount, cyclingTimeCal is set to false
       if (!!card.query && card.cyclingTimeCal) {
+        stateFlag = "0250";
         card.number = c.convMilSecToFin(timeCycledInMilSec);
       } else if (!!card.query && !card.cyclingTimeCal) {
+        stateFlag = "0260";
         card.number = resCard.rowCount;
       }
       // card.query != null && card.cyclingTimeCal
@@ -176,6 +198,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
       typeof resArea != "undefined" &&
       typeof resArea[0].packet_generated != "undefined"
     ) {
+      stateFlag = "0300";
       c.createBarChart(resArea, calendarType);
     }
     console.log("TCL: vm.area.datasets", vm.area.datasets);
@@ -191,6 +214,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
       cards: vm.cards[`for${vm.currentShowType}`],
       vm: vm
     };
+    stateFlag = "0310";
     if (typeof vm.resOrgList != "undefined") data["orgs"] = vm.resOrgList;
     if (typeof vm.resUserList != "undefined") data["users"] = vm.resUserList;
     if (typeof vm.resPie != "undefined") {
@@ -201,10 +225,11 @@ router.get("/dashboard/:uuid", async function(req, res) {
     // console.log("req.params: ", req.params);
     // console.log("================ dashboard pg ends ===============");
     vm.pgload++;
+    stateFlag = "0320";
     res.render("dashboard", data);
   } catch (ex) {
     // await client.query('ROLLBACK')
-    console.log(`something went wrong ${ex}`);
+    console.log(`something went wrong ${ex} at ${stateFlag}`);
     vm.currentShow = null;
     setTimeout(function redirect() {
       res.redirect(`/dashboard/${req.params.uuid}`);
@@ -217,40 +242,46 @@ router.get("/dashboard/:uuid", async function(req, res) {
 
 router.post("/barchart", async function(req, res) {
   const client = await pool.connect();
+  stateFlag = "0500";
   try {
     let resCard, resArea;
-    userPickedCalType = req.body.type;
-    console.log("TCL: userPickedCalType", userPickedCalType);
+    userPickedPeriodTab = req.body.periodTab;
+    console.log("TCL: userPickedPeriodTab", userPickedPeriodTab);
     console.log("vm.currentShowType:", vm.currentShowType);
+    stateFlag = "0501";
     for await (let card of vm.cards[`for${vm.currentShowType}`]) {
-      if (card.type === userPickedCalType) {
+      if (card.periodTab === userPickedPeriodTab) {
         resCard = await client.query(card.query, [vm.currentShow.id]);
         resArea = resCard.rows;
         // break;
       }
     }
+    stateFlag = "0510";
     // let resArea = vm.tempResArea;
     let firstDayOfWeek = await client.query(
       `select * from date_trunc('week', date(${vm.today}))`
     );
+    stateFlag = "0520";
     c.createBarChart(
       resArea,
-      userPickedCalType,
+      userPickedPeriodTab,
       firstDayOfWeek.rows[0].date_trunc
     );
     let labels = [],
       data = [];
+    stateFlag = "0600";
     vm.area.datasets.forEach(dataset => {
       labels.push(dataset.label);
       data.push(dataset.time);
     });
+    stateFlag = "0650";
     let result = { labels: labels, data: data };
-    console.log("============1000==========");
     res.send(result);
   } catch (ex) {
     // await client.query('ROLLBACK')
-    console.log(`something went wrong ${ex}`);
+    console.log(`something went wrong ${ex} at ${stateFlag}`);
     vm.currentShow = null;
+    // TODO: modify redirect destination
     setTimeout(function redirect() {
       res.redirect(`/dashboard/${req.params.uuid}`);
     }, 5000);

@@ -10,7 +10,7 @@ Array.prototype.forEach.call(chartTabs, function(tab) {
     console.log("value: ", this.getAttribute("value"));
     let tabValue = this.getAttribute("value");
     h.removeData(myBarChart);
-    postData("/barchart", { type: tabValue })
+    postData("/barchart", { periodTab: tabValue })
       .then(data => console.log(data)) // JSON-string from `response.json()` call
       .catch(error => console.error(error));
   });
@@ -43,42 +43,6 @@ function postData(url = "", data = {}) {
       h.overwriteData(myBarChart, labelArray, dataArray);
     }); // parses JSON response into native Javascript objects
 }
-
-// let chartTab = document.getElementsByClassName("chart-tab-week")[0];
-// chartTab.type = "button";
-// let defaultChartData;
-// chartTab.addEventListener("click", function(e) {
-//   defaultChartData = myBarChart;
-//   helper.removeData(myBarChart);
-//   // get resArea
-//   const Url = "/barchart";
-//   const data = { type: "week" };
-//   const otherParam = {
-//     headers: { "Content-type": "application/json; charset=UTF-8" },
-//     body: data,
-//     method: "POST"
-//   };
-//   fetch(Url, otherParam)
-//     .then(function(response) {
-//       return response.json();
-//     })
-//     .then(function(myJson) {
-//       console.log(JSON.stringify(myJson));
-//       let labelArray = myJson.labels;
-//       let dataArray = myJson.data;
-//       helper.overwriteData(myBarChart, labelArray, dataArray);
-//     });
-//   // if (
-//   //   typeof resArea != "undefined" &&
-//   //   typeof resArea[0].packet_generated != "undefined"
-//   // ) {
-//   //   helper.createBarChart(resArea, calendarType);
-//   // }
-
-//   // let labelArray = result.labels;
-//   // let dataArray = result.data;
-//   // helper.overwriteData(myBarChart, labelArray, dataArray);
-// });
 
 let h = {
   overwriteData: function(chart, labelArr, dataArr) {
@@ -157,9 +121,9 @@ let h = {
     function getXaxisDates(type, cYear, cMonth, index, day) {
       let nextDay;
       // TODO: add yearly and daily, and delete 'ly's
-      if (type === "monthly") {
+      if (type === "month") {
         return new Date(cYear, cMonth, index + 1);
-      } else if (type === "weekly") {
+      } else if (type === "week") {
         nextDay = new Date(day);
         nextDay.setDate(nextDay.getDate() + index);
         return nextDay;
@@ -170,13 +134,13 @@ let h = {
   genNestedArr: function(type, m, y) {
     const nestedArray = [];
     let no_x_axis;
-    if (type === "monthly") {
+    if (type === "month") {
       no_x_axis = this.daysInMonth(m, y);
-    } else if (type === "yearly") {
+    } else if (type === "year") {
       no_x_axis = 12;
-    } else if (type === "weekly") {
+    } else if (type === "week") {
       no_x_axis = 7;
-    } else if (type === "daily") {
+    } else if (type === "day") {
       no_x_axis = 24;
     }
     for (let i = 0; i < no_x_axis; i++) {

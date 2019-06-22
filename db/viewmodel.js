@@ -189,7 +189,7 @@ const vm = {
       {
         id: 21,
         name: "ACTIVE DAYS THIS MONTH",
-        type: "month", // must be distinct in this array
+        periodTab: "month", // must be distinct in this array
         number: 0,
         cyclingTimeCal: false,
         color: "warning",
@@ -204,7 +204,7 @@ const vm = {
       {
         id: 22,
         name: "ACTIVE TIME THIS MONTH",
-        type: "month",
+        periodTab: "month",
         number: 0,
         cyclingTimeCal: true,
         color: "warning",
@@ -221,7 +221,7 @@ const vm = {
       {
         id: 23,
         name: "ACTIVE TIME THIS WEEK",
-        type: "week",
+        periodTab: "week",
         number: 0,
         cyclingTimeCal: true,
         color: "warning",
@@ -238,7 +238,7 @@ const vm = {
       // {
       //   id: 23,
       //   name: "ACTIVE TIME FOR THE LAST 7 DAYS",
-      //   type: "7days",
+      //   periodTab: "7days",
       //   number: 0,
       //   cyclingTimeCal: true,
       //   color: "warning",
@@ -257,7 +257,7 @@ const vm = {
       {
         id: 24,
         name: "ACTIVE TIME TODAY",
-        type: "day",
+        periodTab: "day",
         number: 0,
         cyclingTimeCal: true,
         color: "success",

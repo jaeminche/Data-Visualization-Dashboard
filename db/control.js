@@ -42,6 +42,7 @@ const c = {
   },
 
   convToMin: function(millisec) {
+    stateFlag = "0575";
     var minute, seconds;
     seconds = Math.floor(millisec / 1000);
     minute = Math.floor(seconds / 60);
@@ -102,49 +103,58 @@ const c = {
     }
   },
 
-  getDateDayMonth: function(timestamp, type) {
-    if (type === "month") {
+  getDateDayMonth: function(timestamp, periodTab) {
+    if (periodTab === "month") {
+      stateFlag = "0540";
       return new Date(timestamp).getDate();
-    } else if (type === "year") {
+    } else if (periodTab === "year") {
+      stateFlag = "0543";
       return new Date(timestamp).getMonth();
-    } else if (type === "week") {
+    } else if (periodTab === "week") {
+      stateFlag = "0546";
       let day = new Date(timestamp).getDay();
       if (day === 0) {
         day = 7;
       }
       return day;
-    } else if (type === "day") {
+    } else if (periodTab === "day") {
+      stateFlag = "0550";
       return new Date(timestamp).getHours();
     }
   },
 
-  createBarChart: function(res, calendarType, firstDayOfWeek) {
+  createBarChart: function(res, periodTab, firstDayOfWeek) {
+    stateFlag = "0521";
     // console.log(firstDayOfWeek);
     let cMonth, cYear;
     let timestamp = res[0].packet_generated;
-    let prevNo = this.getDateDayMonth(timestamp, calendarType);
+    stateFlag = "0535";
+    let prevNo = this.getDateDayMonth(timestamp, periodTab);
     cMonth = new Date(timestamp).getMonth();
     cYear = new Date(timestamp).getFullYear();
     let indexForResByDay = prevNo - 1;
 
-    // generate as many nested array as the calendarType,
+    // generate as many nested array as the periodTab,
     // and organize the res data day by day.
-    let resByDay = this.genNestedArr(calendarType, cMonth, cYear);
+    stateFlag = "0560";
+    let resByDay = this.genNestedArr(periodTab, cMonth, cYear);
     res.forEach(row => {
-      if (this.getDateDayMonth(row.packet_generated, calendarType) === prevNo) {
+      if (this.getDateDayMonth(row.packet_generated, periodTab) === prevNo) {
         resByDay[indexForResByDay].push(row);
       } else {
-        prevNo = this.getDateDayMonth(row.packet_generated, calendarType);
+        prevNo = this.getDateDayMonth(row.packet_generated, periodTab);
         indexForResByDay = prevNo - 1;
         resByDay[indexForResByDay].push(row);
       }
     });
 
     // manipulate the res data into dataset
+    stateFlag = "0570";
     const dataForBarChart = [];
     resByDay.forEach((dataForOneDay, index) => {
       let dataset, date;
       if (!!dataForOneDay && dataForOneDay.length > 0) {
+        stateFlag = "0571";
         date = new Date(dataForOneDay[0].packet_generated).toDateString();
         dataset = {
           date: date,
@@ -152,8 +162,9 @@ const c = {
           time: this.convToMin(this.getTimeCycledInMilSec(dataForOneDay))
         };
       } else {
+        stateFlag = "0580";
         date = getXaxisDates(
-          calendarType,
+          periodTab,
           cYear,
           cMonth,
           index,
@@ -165,17 +176,20 @@ const c = {
           time: 0
         };
       }
+      stateFlag = "0545";
       dataForBarChart.push(dataset);
     });
     vm.area.datasets = dataForBarChart;
 
-    function getXaxisDates(type, cYear, cMonth, index, day) {
+    function getXaxisDates(periodTab, cYear, cMonth, index, firstDay) {
       let nextDay;
       // TODO: add year and day, and delete 'ly's
-      if (type === "month") {
+      if (periodTab === "month") {
+        stateFlag = "0543";
         return new Date(cYear, cMonth, index + 1);
-      } else if (type === "week") {
-        nextDay = new Date(day);
+      } else if (periodTab === "week") {
+        stateFlag = "0544";
+        nextDay = new Date(firstDay);
         nextDay.setDate(nextDay.getDate() + index);
         return nextDay;
       }
@@ -183,6 +197,7 @@ const c = {
   },
 
   genNestedArr: function(type, m, y) {
+    stateFlag = "0561";
     const nestedArray = [];
     let no_x_axis;
     if (type === "month") {
