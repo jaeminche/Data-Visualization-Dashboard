@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router({ mergeParams: true });
+const bodyParser = require("body-parser");
 const { Pool, Client } = require("pg");
 const client_config = require("../config/client");
 const Chart = require("chart.js");
@@ -140,18 +141,19 @@ router.get("/dashboard/:uuid", async function(req, res) {
             resCard = await client.query(card.query, [vm.currentShow.id]);
             timeCycledInMilSec = c.getTimeCycledInMilSec(resCard.rows);
             if (
-              card.name === "ACTIVE TIME THIS WEEK" &&
+              card.name === "ACTIVE TIME THIS MONTH" &&
               timeCycledInMilSec != 0
             ) {
               resArea = resCard.rows;
               calendarType = card.type;
-            } else if (
-              card.name === "ACTIVE TIME THIS MONTH" &&
-              timeCycledInMilSec != 0
-            ) {
-              vm.tempResAreaM = resCard.rows;
-              vm.tempCalendarTypeM = card.type;
             }
+            // else if (
+            //   card.name === "ACTIVE TIME THIS WEEK" &&
+            //   timeCycledInMilSec != 0
+            // ) {
+            //   vm.tempResArea = resCard.rows;
+            //   vm.tempCalendarType = card.type;
+            // }
           }
           break;
       }
@@ -174,14 +176,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
       typeof resArea != "undefined" &&
       typeof resArea[0].packet_generated != "undefined"
     ) {
-      let firstDayOfWeek = await client.query(
-        `select * from date_trunc('week', date(${vm.today}))`
-      );
-      c.createBarChart(
-        resArea,
-        calendarType,
-        firstDayOfWeek.rows[0].date_trunc
-      );
+      c.createBarChart(resArea, calendarType);
     }
     console.log("TCL: vm.area.datasets", vm.area.datasets);
     // resBar = await client.query(m.bar.find)
@@ -219,12 +214,30 @@ router.get("/dashboard/:uuid", async function(req, res) {
     console.log("Client disconnected");
   }
 });
-router.get("/barchart", async function(req, res) {
+
+router.post("/barchart", async function(req, res) {
   const client = await pool.connect();
   try {
-    let resArea = vm.tempResAreaM;
-    let calendarType = vm.tempCalendarTypeM;
-    c.createBarChart(resArea, calendarType);
+    let resCard, resArea;
+    userPickedCalType = req.body.type;
+    console.log("TCL: userPickedCalType", userPickedCalType);
+    console.log("vm.currentShowType:", vm.currentShowType);
+    for await (let card of vm.cards[`for${vm.currentShowType}`]) {
+      if (card.type === userPickedCalType) {
+        resCard = await client.query(card.query, [vm.currentShow.id]);
+        resArea = resCard.rows;
+        // break;
+      }
+    }
+    // let resArea = vm.tempResArea;
+    let firstDayOfWeek = await client.query(
+      `select * from date_trunc('week', date(${vm.today}))`
+    );
+    c.createBarChart(
+      resArea,
+      userPickedCalType,
+      firstDayOfWeek.rows[0].date_trunc
+    );
     let labels = [],
       data = [];
     vm.area.datasets.forEach(dataset => {
@@ -232,6 +245,7 @@ router.get("/barchart", async function(req, res) {
       data.push(dataset.time);
     });
     let result = { labels: labels, data: data };
+    console.log("============1000==========");
     res.send(result);
   } catch (ex) {
     // await client.query('ROLLBACK')

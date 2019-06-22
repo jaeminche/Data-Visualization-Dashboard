@@ -103,17 +103,17 @@ const c = {
   },
 
   getDateDayMonth: function(timestamp, type) {
-    if (type === "monthly") {
+    if (type === "month") {
       return new Date(timestamp).getDate();
-    } else if (type === "yearly") {
+    } else if (type === "year") {
       return new Date(timestamp).getMonth();
-    } else if (type === "weekly") {
+    } else if (type === "week") {
       let day = new Date(timestamp).getDay();
       if (day === 0) {
         day = 7;
       }
       return day;
-    } else if (type === "daily") {
+    } else if (type === "day") {
       return new Date(timestamp).getHours();
     }
   },
@@ -171,10 +171,10 @@ const c = {
 
     function getXaxisDates(type, cYear, cMonth, index, day) {
       let nextDay;
-      // TODO: add yearly and daily, and delete 'ly's
-      if (type === "monthly") {
+      // TODO: add year and day, and delete 'ly's
+      if (type === "month") {
         return new Date(cYear, cMonth, index + 1);
-      } else if (type === "weekly") {
+      } else if (type === "week") {
         nextDay = new Date(day);
         nextDay.setDate(nextDay.getDate() + index);
         return nextDay;
@@ -185,13 +185,13 @@ const c = {
   genNestedArr: function(type, m, y) {
     const nestedArray = [];
     let no_x_axis;
-    if (type === "monthly") {
+    if (type === "month") {
       no_x_axis = this.daysInMonth(m, y);
-    } else if (type === "yearly") {
+    } else if (type === "year") {
       no_x_axis = 12;
-    } else if (type === "weekly") {
+    } else if (type === "week") {
       no_x_axis = 7;
-    } else if (type === "daily") {
+    } else if (type === "day") {
       no_x_axis = 24;
     }
     for (let i = 0; i < no_x_axis; i++) {

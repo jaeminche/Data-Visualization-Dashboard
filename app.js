@@ -26,8 +26,13 @@ const sharedroutesRoutes = require("./routes/sharedroutes");
 
 app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "public")));
-// app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+// app.use(function(req, res) {
+//   // res.setHeader("Content-Type", "text/plain");
+//   res.write("you posted:\n");
+//   res.end(JSON.stringify(req.body, null, 2));
+// });
 
 app.use("/", indexRoutes);
 app.use("/", dashboardRoutes);

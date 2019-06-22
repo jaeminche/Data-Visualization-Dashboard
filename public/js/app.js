@@ -1,14 +1,38 @@
-// import { today } from "./db/viewmodel.js";
-// import v from "./view";
+if (!!myBarChart) {
+  let defaultChartData = myBarChart;
+}
 
-let chartTab = document.getElementsByClassName("chart-tab-month")[0];
-// let parsedNo = parseInt(chartTab.textContent);
-let defaultChartData;
-chartTab.addEventListener("click", function() {
-  defaultChartData = myBarChart;
-  helper.removeData(myBarChart);
-  // get resArea
-  fetch("/barchart")
+let chartTabs = document.getElementsByClassName("chart-tab");
+Array.prototype.forEach.call(chartTabs, function(tab) {
+  tab.addEventListener("click", function(e) {
+    console.log("this: ", this);
+    console.log("e: ", e);
+    console.log("value: ", this.getAttribute("value"));
+    let tabValue = this.getAttribute("value");
+    h.removeData(myBarChart);
+    postData("/barchart", { type: tabValue })
+      .then(data => console.log(data)) // JSON-string from `response.json()` call
+      .catch(error => console.error(error));
+  });
+});
+
+// chartTab.type = "button";
+
+function postData(url = "", data = {}) {
+  // Default options are marked with *
+  return fetch(url, {
+    method: "POST", // *GET, POST, PUT, DELETE, etc.
+    headers: {
+      "Content-Type": "application/json"
+      // 'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: JSON.stringify(data) // body data type must match "Content-Type" header
+    // , mode: "cors", // no-cors, cors, *same-origin
+    // cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+    // credentials: "same-origin", // include, *same-origin, omit
+    // redirect: "follow", // manual, *follow, error
+    // referrer: "no-referrer", // no-referrer, *client
+  })
     .then(function(response) {
       return response.json();
     })
@@ -16,21 +40,47 @@ chartTab.addEventListener("click", function() {
       console.log(JSON.stringify(myJson));
       let labelArray = myJson.labels;
       let dataArray = myJson.data;
-      helper.overwriteData(myBarChart, labelArray, dataArray);
-    });
-  // if (
-  //   typeof resArea != "undefined" &&
-  //   typeof resArea[0].packet_generated != "undefined"
-  // ) {
-  //   helper.createBarChart(resArea, calendarType);
-  // }
+      h.overwriteData(myBarChart, labelArray, dataArray);
+    }); // parses JSON response into native Javascript objects
+}
 
-  // let labelArray = result.labels;
-  // let dataArray = result.data;
-  // helper.overwriteData(myBarChart, labelArray, dataArray);
-});
+// let chartTab = document.getElementsByClassName("chart-tab-week")[0];
+// chartTab.type = "button";
+// let defaultChartData;
+// chartTab.addEventListener("click", function(e) {
+//   defaultChartData = myBarChart;
+//   helper.removeData(myBarChart);
+//   // get resArea
+//   const Url = "/barchart";
+//   const data = { type: "week" };
+//   const otherParam = {
+//     headers: { "Content-type": "application/json; charset=UTF-8" },
+//     body: data,
+//     method: "POST"
+//   };
+//   fetch(Url, otherParam)
+//     .then(function(response) {
+//       return response.json();
+//     })
+//     .then(function(myJson) {
+//       console.log(JSON.stringify(myJson));
+//       let labelArray = myJson.labels;
+//       let dataArray = myJson.data;
+//       helper.overwriteData(myBarChart, labelArray, dataArray);
+//     });
+//   // if (
+//   //   typeof resArea != "undefined" &&
+//   //   typeof resArea[0].packet_generated != "undefined"
+//   // ) {
+//   //   helper.createBarChart(resArea, calendarType);
+//   // }
 
-let helper = {
+//   // let labelArray = result.labels;
+//   // let dataArray = result.data;
+//   // helper.overwriteData(myBarChart, labelArray, dataArray);
+// });
+
+let h = {
   overwriteData: function(chart, labelArr, dataArr) {
     //////
     chart.data.labels = labelArr;

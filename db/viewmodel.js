@@ -189,7 +189,7 @@ const vm = {
       {
         id: 21,
         name: "ACTIVE DAYS THIS MONTH",
-        type: "monthly",
+        type: "month", // must be distinct in this array
         number: 0,
         cyclingTimeCal: false,
         color: "warning",
@@ -204,7 +204,7 @@ const vm = {
       {
         id: 22,
         name: "ACTIVE TIME THIS MONTH",
-        type: "monthly",
+        type: "month",
         number: 0,
         cyclingTimeCal: true,
         color: "warning",
@@ -221,7 +221,7 @@ const vm = {
       {
         id: 23,
         name: "ACTIVE TIME THIS WEEK",
-        type: "weekly",
+        type: "week",
         number: 0,
         cyclingTimeCal: true,
         color: "warning",
@@ -235,29 +235,29 @@ const vm = {
         },
         auth: ["superadmin", "admin", "user"]
       },
-      {
-        id: 23,
-        name: "ACTIVE TIME FOR THE LAST 7 DAYS",
-        type: "weekly",
-        number: 0,
-        cyclingTimeCal: true,
-        color: "warning",
-        fa: "stopwatch",
-        get query() {
-          return `${
-            vm.qr.cyclingTime
-          } WHERE u.id = $1 AND date(packet_generated) > date ${
-            vm.today
-          } - interval '7 days' AND date(packet_generated) < date ${
-            vm.today
-          } + interval '1 day'`;
-        },
-        auth: ["superadmin", "admin", "user"]
-      },
+      // {
+      //   id: 23,
+      //   name: "ACTIVE TIME FOR THE LAST 7 DAYS",
+      //   type: "7days",
+      //   number: 0,
+      //   cyclingTimeCal: true,
+      //   color: "warning",
+      //   fa: "stopwatch",
+      //   get query() {
+      //     return `${
+      //       vm.qr.cyclingTime
+      //     } WHERE u.id = $1 AND date(packet_generated) > date ${
+      //       vm.today
+      //     } - interval '7 days' AND date(packet_generated) < date ${
+      //       vm.today
+      //     } + interval '1 day'`;
+      //   },
+      //   auth: ["superadmin", "admin", "user"]
+      // },
       {
         id: 24,
         name: "ACTIVE TIME TODAY",
-        type: "daily",
+        type: "day",
         number: 0,
         cyclingTimeCal: true,
         color: "success",
