@@ -2,6 +2,7 @@ const vm = {
   // TODO: when deployment, change the date to current_date
   today: "'2017-01-29'",
   pgload: 1,
+  stateflag: "",
   jwt: {
     o: null,
     u: null,

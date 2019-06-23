@@ -42,8 +42,7 @@ const c = {
   },
 
   convToMin: function(millisec) {
-    // TODO: find a way to store the stateFlags
-    stateFlag = "0575";
+    vm.stateFlag = "0575";
     var minute, seconds;
     seconds = Math.floor(millisec / 1000);
     minute = Math.floor(seconds / 60);
@@ -79,7 +78,7 @@ const c = {
   },
 
   getDateDayMonth: function(timestamp, periodTab) {
-    stateFlag = "0540";
+    vm.stateFlag = "0540";
     if (periodTab === "month") {
       return new Date(timestamp).getDate();
     } else if (periodTab === "year") {
@@ -93,18 +92,18 @@ const c = {
       }
       return day;
     } else if (periodTab === "day") {
-      stateFlag = "0550";
+      vm.stateFlag = "0550";
       return new Date(timestamp).getHours();
     }
   },
 
   createBarChart: function(resRows, periodTab, firstDayOfWeek) {
-    stateFlag = "0521";
+    vm.stateFlag = "0521";
     let cMonth, cYear;
     let tempTimestamp = resRows[0].packet_generated;
     // generate as many nested array as the periodTab,
     // and organize the res data day by day.
-    stateFlag = "0535";
+    vm.stateFlag = "0535";
     let prevDDM = this.getDateDayMonth(tempTimestamp, periodTab);
     cMonth = new Date(tempTimestamp).getMonth();
     cYear = new Date(tempTimestamp).getFullYear();
@@ -117,15 +116,15 @@ const c = {
       }
       sortedArrByDDM[indexForSortedArr].push(row);
     });
-    console.log("TCL: sortedArrByDDM: ", sortedArrByDDM);
+    // console.log("TCL: sortedArrByDDM: ", sortedArrByDDM);
     // sortedArrByMonth, dataForOneMonth
     // manipulate the res data into dataset
-    stateFlag = "0570";
+    vm.stateFlag = "0570";
     const dataForBarChart = [];
     sortedArrByDDM.forEach((dataForOneDDM, index) => {
       let dataset, date;
       if (!!dataForOneDDM && dataForOneDDM.length > 0) {
-        stateFlag = "0571";
+        vm.stateFlag = "0571";
         date = new Date(dataForOneDDM[0].packet_generated);
         if (periodTab === "year") {
           date = `${this.convertMonth(date.getMonth())} ${date.getFullYear()}`;
@@ -141,7 +140,7 @@ const c = {
           time: this.convToMin(this.getTimeCycledInMilSec(dataForOneDDM))
         };
       } else {
-        stateFlag = "0580";
+        vm.stateFlag = "0580";
         date = getXaxisDates(periodTab, cYear, cMonth, index, firstDayOfWeek);
         if (periodTab === "year") {
           date = `${this.convertMonth(date.getMonth())} ${date.getFullYear()}`;
@@ -157,13 +156,13 @@ const c = {
           time: 0
         };
       }
-      stateFlag = "0545";
+      vm.stateFlag = "0545";
       dataForBarChart.push(dataset);
     });
     vm.area.datasets = dataForBarChart;
 
     function getXaxisDates(periodTab, cYear, cMonth, index, firstDay) {
-      stateFlag = "0543";
+      vm.stateFlag = "0543";
       // TODO: add year and day, and delete 'ly's
       if (periodTab === "month") {
         return new Date(cYear, cMonth, index + 1);
@@ -178,7 +177,7 @@ const c = {
   },
 
   genNestedArr: function(type, m, y) {
-    stateFlag = "0561";
+    vm.stateFlag = "0561";
     const nestedArray = [];
     let no_x_axis;
     if (type === "month") {
