@@ -35,7 +35,7 @@ const vm = {
         name: "NO. OF ORGANIZATIONS LOGGED IN TODAY",
         classname: "sa",
         number: 0,
-        cyclingTimeCal: false,
+        isForTimeCalc: false,
         color: "primary",
         fa: "sign-in-alt",
         get query() {
@@ -49,7 +49,7 @@ const vm = {
         id: 2,
         name: "NO. OF ORGANIZATIONS LOGGED IN THIS MONTH",
         number: 0,
-        cyclingTimeCal: false,
+        isForTimeCalc: false,
         color: "info",
         fa: "sign-in-alt",
         query:
@@ -60,7 +60,7 @@ const vm = {
         id: 3,
         name: "TOTAL NO. OF ORGANIZATIONS",
         number: 0,
-        cyclingTimeCal: false,
+        isForTimeCalc: false,
         color: "warning",
         fa: "user",
         query: "SELECT * FROM public.organisations",
@@ -70,7 +70,7 @@ const vm = {
         id: 4,
         name: "TOTAL NO. OF USERS",
         number: 0,
-        cyclingTimeCal: false,
+        isForTimeCalc: false,
         color: "warning",
         fa: "users",
         query: "SELECT * FROM public.users",
@@ -80,7 +80,7 @@ const vm = {
         id: 5,
         name: "NO. OF ACTIVE USERS TODAY",
         number: 0,
-        cyclingTimeCal: false,
+        isForTimeCalc: false,
         color: "primary",
         fa: "bicycle",
         get query() {
@@ -94,7 +94,7 @@ const vm = {
         id: 6,
         name: "NO. OF ACTIVE USERS THIS WEEK",
         number: 0,
-        cyclingTimeCal: false,
+        isForTimeCalc: false,
         color: "info",
         fa: "bicycle",
         get query() {
@@ -110,7 +110,7 @@ const vm = {
         id: 7,
         name: "AVERAGE CYCLING TIME THIS WEEK",
         number: 0,
-        cyclingTimeCal: false,
+        isForTimeCalc: false,
         color: "success",
         fa: "stopwatch",
         //   todo:
@@ -121,7 +121,7 @@ const vm = {
         id: 8,
         name: "AVERAGE CYCLING TIME THIS MONTH",
         number: 0,
-        cyclingTimeCal: false,
+        isForTimeCalc: false,
         color: "success",
         fa: "stopwatch",
         //   todo:
@@ -134,7 +134,7 @@ const vm = {
         id: 11,
         name: "NO. OF ACTIVE USERS TODAY",
         number: 0,
-        cyclingTimeCal: false,
+        isForTimeCalc: false,
         color: "primary",
         fa: "bicycle",
         get query() {
@@ -148,7 +148,7 @@ const vm = {
         id: 12,
         name: "NO. OF ACTIVE USERS THIS MONTH",
         number: 0,
-        cyclingTimeCal: false,
+        isForTimeCalc: false,
         color: "info",
         fa: "bicycle",
         get query() {
@@ -166,7 +166,7 @@ const vm = {
         get number() {
           return vm.average.admin_monthly.usersDailyAvgThisMonth;
         },
-        cyclingTimeCal: false,
+        isForTimeCalc: false,
         color: "success",
         fa: "stopwatch",
         //   todo:
@@ -178,7 +178,7 @@ const vm = {
         id: 14,
         name: "TOTAL NO. OF USERS",
         number: 0,
-        cyclingTimeCal: false,
+        isForTimeCalc: false,
         color: "warning",
         fa: "users",
         query: "SELECT * FROM public.users WHERE organisation = $1",
@@ -189,9 +189,11 @@ const vm = {
       {
         id: 21,
         name: "ACTIVE DAYS THIS MONTH",
+        isDefaultForChart: true,
+        isForLeftXaxis: false,
         periodTab: "month", // must be distinct in this array
         number: 0,
-        cyclingTimeCal: false,
+        isForTimeCalc: false,
         color: "warning",
         fa: "stopwatch",
         get query() {
@@ -204,9 +206,11 @@ const vm = {
       {
         id: 22,
         name: "ACTIVE TIME THIS MONTH",
+        isDefaultForChart: true,
+        isForLeftXaxis: true,
         periodTab: "month",
         number: 0,
-        cyclingTimeCal: true,
+        isForTimeCalc: true,
         color: "warning",
         fa: "stopwatch",
         get query() {
@@ -221,9 +225,11 @@ const vm = {
       {
         id: 23,
         name: "ACTIVE TIME THIS WEEK",
+        isDefaultForChart: false,
+        isForLeftXaxis: true,
         periodTab: "week",
         number: 0,
-        cyclingTimeCal: true,
+        isForTimeCalc: true,
         color: "warning",
         fa: "stopwatch",
         get query() {
@@ -238,9 +244,11 @@ const vm = {
       // {
       //   id: 23,
       //   name: "ACTIVE TIME FOR THE LAST 7 DAYS",
+      //   isDefaultForChart: false,//
+      //   isForLeftXaxis: true,
       //   periodTab: "7days",
       //   number: 0,
-      //   cyclingTimeCal: true,
+      //   isForTimeCalc: true,
       //   color: "warning",
       //   fa: "stopwatch",
       //   get query() {
@@ -257,9 +265,11 @@ const vm = {
       {
         id: 24,
         name: "ACTIVE TIME TODAY",
+        isDefaultForChart: false,
+        isForLeftXaxis: true,
         periodTab: "day",
         number: 0,
-        cyclingTimeCal: true,
+        isForTimeCalc: true,
         color: "success",
         fa: "stopwatch",
         get query() {

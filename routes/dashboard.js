@@ -160,7 +160,9 @@ router.get("/dashboard/:uuid", async function(req, res) {
             resCard = await client.query(card.query, [vm.currentShow.id]);
             timeCycledInMilSec = c.getTimeCycledInMilSec(resCard.rows);
             if (
-              card.name === "ACTIVE TIME THIS MONTH" &&
+              card.isForLeftXaxis &&
+              card.isDefaultForChart &&
+              // TODO: delete the following line so the chart displays always no matter the data exists
               timeCycledInMilSec != 0
             ) {
               stateFlag = "0240";
@@ -177,15 +179,15 @@ router.get("/dashboard/:uuid", async function(req, res) {
           }
           break;
       }
-      // if card.number should be resCard.rowCount, cyclingTimeCal is set to false
-      if (!!card.query && card.cyclingTimeCal) {
+      // if card.number should be resCard.rowCount, isForTimeCalc is set to false
+      if (!!card.query && card.isForTimeCalc) {
         stateFlag = "0250";
         card.number = c.convMilSecToFin(timeCycledInMilSec);
-      } else if (!!card.query && !card.cyclingTimeCal) {
+      } else if (!!card.query && !card.isForTimeCalc) {
         stateFlag = "0260";
         card.number = resCard.rowCount;
       }
-      // card.query != null && card.cyclingTimeCal
+      // card.query != null && card.isForTimeCalc
       //   ? (card.number = c.convMilSecToFin(timeCycledInMilSec))
       //   : (card.number = resCard.rowCount);
     }
