@@ -42,6 +42,7 @@ const c = {
   },
 
   convToMin: function(millisec) {
+    // TODO: find a way to store the stateFlags
     stateFlag = "0575";
     var minute, seconds;
     seconds = Math.floor(millisec / 1000);
@@ -77,41 +78,15 @@ const c = {
     return big - small;
   },
 
-  convertDay: function(number) {
-    switch (number) {
-      case 0:
-        return "Sun";
-        break;
-      case 1:
-        return "Mon";
-        break;
-      case 2:
-        return "Tues";
-        break;
-      case 3:
-        return "Wed";
-        break;
-      case 4:
-        return "Thur";
-        break;
-      case 5:
-        return "Fri";
-        break;
-      case 6:
-        return "Sat";
-        break;
-    }
-  },
-
   getDateDayMonth: function(timestamp, periodTab) {
+    stateFlag = "0540";
     if (periodTab === "month") {
-      stateFlag = "0540";
       return new Date(timestamp).getDate();
     } else if (periodTab === "year") {
-      stateFlag = "0543";
-      return new Date(timestamp).getMonth();
+      let month = new Date(timestamp).getMonth();
+      month = month + 1;
+      return month;
     } else if (periodTab === "week") {
-      stateFlag = "0546";
       let day = new Date(timestamp).getDay();
       if (day === 0) {
         day = 7;
@@ -123,53 +98,59 @@ const c = {
     }
   },
 
-  createBarChart: function(res, periodTab, firstDayOfWeek) {
+  createBarChart: function(resRows, periodTab, firstDayOfWeek) {
     stateFlag = "0521";
-    // console.log(firstDayOfWeek);
     let cMonth, cYear;
-    let timestamp = res[0].packet_generated;
-    stateFlag = "0535";
-    let prevNo = this.getDateDayMonth(timestamp, periodTab);
-    cMonth = new Date(timestamp).getMonth();
-    cYear = new Date(timestamp).getFullYear();
-    let indexForResByDay = prevNo - 1;
-
+    let tempTimestamp = resRows[0].packet_generated;
     // generate as many nested array as the periodTab,
     // and organize the res data day by day.
-    stateFlag = "0560";
-    let resByDay = this.genNestedArr(periodTab, cMonth, cYear);
-    res.forEach(row => {
-      if (this.getDateDayMonth(row.packet_generated, periodTab) === prevNo) {
-        resByDay[indexForResByDay].push(row);
-      } else {
-        prevNo = this.getDateDayMonth(row.packet_generated, periodTab);
-        indexForResByDay = prevNo - 1;
-        resByDay[indexForResByDay].push(row);
+    stateFlag = "0535";
+    let prevDDM = this.getDateDayMonth(tempTimestamp, periodTab);
+    cMonth = new Date(tempTimestamp).getMonth();
+    cYear = new Date(tempTimestamp).getFullYear();
+    let indexForSortedArr = prevDDM - 1;
+    let sortedArrByDDM = this.genNestedArr(periodTab, cMonth, cYear);
+    resRows.forEach(row => {
+      if (this.getDateDayMonth(row.packet_generated, periodTab) != prevDDM) {
+        prevDDM = this.getDateDayMonth(row.packet_generated, periodTab);
+        indexForSortedArr = prevDDM - 1;
       }
+      sortedArrByDDM[indexForSortedArr].push(row);
     });
-
+    console.log("TCL: sortedArrByDDM: ", sortedArrByDDM);
+    // sortedArrByMonth, dataForOneMonth
     // manipulate the res data into dataset
     stateFlag = "0570";
     const dataForBarChart = [];
-    resByDay.forEach((dataForOneDay, index) => {
+    sortedArrByDDM.forEach((dataForOneDDM, index) => {
       let dataset, date;
-      if (!!dataForOneDay && dataForOneDay.length > 0) {
+      if (!!dataForOneDDM && dataForOneDDM.length > 0) {
         stateFlag = "0571";
-        date = new Date(dataForOneDay[0].packet_generated).toDateString();
+        date = new Date(dataForOneDDM[0].packet_generated);
+        if (periodTab === "year") {
+          date = `${this.convertMonth(date.getMonth())} ${date.getFullYear()}`;
+        } else if (periodTab === "day") {
+          // TODO: change the date to hourly
+          date = date.toDateString();
+        } else {
+          date = date.toDateString();
+        }
         dataset = {
           date: date,
           label: date,
-          time: this.convToMin(this.getTimeCycledInMilSec(dataForOneDay))
+          time: this.convToMin(this.getTimeCycledInMilSec(dataForOneDDM))
         };
       } else {
         stateFlag = "0580";
-        date = getXaxisDates(
-          periodTab,
-          cYear,
-          cMonth,
-          index,
-          firstDayOfWeek
-        ).toDateString();
+        date = getXaxisDates(periodTab, cYear, cMonth, index, firstDayOfWeek);
+        if (periodTab === "year") {
+          date = `${this.convertMonth(date.getMonth())} ${date.getFullYear()}`;
+        } else if (periodTab === "day") {
+          // TODO: change the date to hourly
+          date = date.toDateString();
+        } else {
+          date = date.toDateString();
+        }
         dataset = {
           date: date,
           label: date,
@@ -182,16 +163,16 @@ const c = {
     vm.area.datasets = dataForBarChart;
 
     function getXaxisDates(periodTab, cYear, cMonth, index, firstDay) {
-      let nextDay;
+      stateFlag = "0543";
       // TODO: add year and day, and delete 'ly's
       if (periodTab === "month") {
-        stateFlag = "0543";
         return new Date(cYear, cMonth, index + 1);
       } else if (periodTab === "week") {
-        stateFlag = "0544";
-        nextDay = new Date(firstDay);
+        let nextDay = new Date(firstDay);
         nextDay.setDate(nextDay.getDate() + index);
         return nextDay;
+      } else if (periodTab === "year") {
+        return new Date(cYear, index, 1);
       }
     }
   },
@@ -233,6 +214,73 @@ const c = {
       dataset.data.pop();
     });
     chart.update();
+  },
+
+  convertDay: function(number) {
+    switch (number) {
+      case 0:
+        return "Sun";
+        break;
+      case 1:
+        return "Mon";
+        break;
+      case 2:
+        return "Tues";
+        break;
+      case 3:
+        return "Wed";
+        break;
+      case 4:
+        return "Thur";
+        break;
+      case 5:
+        return "Fri";
+        break;
+      case 6:
+        return "Sat";
+        break;
+    }
+  },
+
+  convertMonth: function(number) {
+    switch (number) {
+      case 0:
+        return "Jan";
+        break;
+      case 1:
+        return "Feb";
+        break;
+      case 2:
+        return "Mar";
+        break;
+      case 3:
+        return "Apr";
+        break;
+      case 4:
+        return "May";
+        break;
+      case 5:
+        return "Jun";
+        break;
+      case 6:
+        return "Jul";
+        break;
+      case 7:
+        return "Aug";
+        break;
+      case 8:
+        return "Sep";
+        break;
+      case 9:
+        return "Oct";
+        break;
+      case 10:
+        return "Nov";
+        break;
+      case 11:
+        return "Dec";
+        break;
+    }
   }
 
   // sortDateArr: function(arr) {

@@ -142,54 +142,53 @@ router.get("/dashboard/:uuid", async function(req, res) {
     let calendarType;
     stateFlag = "0200";
     for await (let card of vm.cards[`for${vm.currentShowType}`]) {
-      let resCard, timeCycledInMilSec;
-      switch (vm.currentShowType) {
-        case "superadmin":
-          stateFlag = "0210";
-          if (!!card.query) resCard = await client.query(card.query);
-          break;
-        case "admin":
-          stateFlag = "0220";
-          if (!!card.query)
-            resCard = await client.query(card.query, [vm.currentShow.o_id]);
-          break;
-        case "user":
-          console.log("user card ----");
-          if (!!card.query) {
-            stateFlag = "0230";
-            resCard = await client.query(card.query, [vm.currentShow.id]);
-            timeCycledInMilSec = c.getTimeCycledInMilSec(resCard.rows);
-            if (
-              card.isForLeftXaxis &&
-              card.isDefaultForChart &&
-              // TODO: delete the following line so the chart displays always no matter the data exists
-              timeCycledInMilSec != 0
-            ) {
-              stateFlag = "0240";
-              resArea = resCard.rows;
-              calendarType = card.periodTab;
+      if (card.isShown) {
+        let resCard, timeCycledInMilSec;
+        switch (vm.currentShowType) {
+          case "superadmin":
+            stateFlag = "0210";
+            if (!!card.query) resCard = await client.query(card.query);
+            break;
+          case "admin":
+            stateFlag = "0220";
+            if (!!card.query)
+              resCard = await client.query(card.query, [vm.currentShow.o_id]);
+            break;
+          case "user":
+            console.log("user card ----");
+            if (!!card.query) {
+              stateFlag = "0230";
+              resCard = await client.query(card.query, [vm.currentShow.id]);
+              timeCycledInMilSec = c.getTimeCycledInMilSec(resCard.rows);
+              if (
+                card.isForLeftXaxis &&
+                card.isDefaultForChart &&
+                // TODO: delete the following line so the chart displays always no matter the data exists
+                timeCycledInMilSec != 0
+              ) {
+                stateFlag = "0240";
+                resArea = resCard.rows;
+                calendarType = card.periodTab;
+              }
+              // else if (
+              //   card.name === "ACTIVE TIME THIS WEEK" &&
+              //   timeCycledInMilSec != 0
+              // ) {
+              //   vm.tempResArea = resCard.rows;
+              //   vm.tempCalendarType = card.periodTab;
+              // }
             }
-            // else if (
-            //   card.name === "ACTIVE TIME THIS WEEK" &&
-            //   timeCycledInMilSec != 0
-            // ) {
-            //   vm.tempResArea = resCard.rows;
-            //   vm.tempCalendarType = card.periodTab;
-            // }
-          }
-          break;
+            break;
+        }
+        // if card.number should be resCard.rowCount, isForTimeCalc is set to false
+        if (!!card.query && card.isForTimeCalc) {
+          stateFlag = "0250";
+          card.number = c.convMilSecToFin(timeCycledInMilSec);
+        } else if (!!card.query && !card.isForTimeCalc) {
+          stateFlag = "0260";
+          card.number = resCard.rowCount;
+        }
       }
-      // if card.number should be resCard.rowCount, isForTimeCalc is set to false
-      if (!!card.query && card.isForTimeCalc) {
-        stateFlag = "0250";
-        card.number = c.convMilSecToFin(timeCycledInMilSec);
-      } else if (!!card.query && !card.isForTimeCalc) {
-        stateFlag = "0260";
-        card.number = resCard.rowCount;
-      }
-      // card.query != null && card.isForTimeCalc
-      //   ? (card.number = c.convMilSecToFin(timeCycledInMilSec))
-      //   : (card.number = resCard.rowCount);
     }
 
     // =========================================================
@@ -246,38 +245,48 @@ router.post("/barchart", async function(req, res) {
   const client = await pool.connect();
   stateFlag = "0500";
   try {
-    let resCard, resArea;
+    let resArea;
     userPickedPeriodTab = req.body.periodTab;
     console.log("TCL: userPickedPeriodTab", userPickedPeriodTab);
     console.log("vm.currentShowType:", vm.currentShowType);
+
     stateFlag = "0501";
+    // let resArea = vm.tempResArea;
+    let firstDayOfWeek;
+    if (userPickedPeriodTab === "week") {
+      firstDayOfWeek = await client.query(
+        `select * from date_trunc('week', date(${vm.today}))`
+      );
+      firstDayOfWeek = firstDayOfWeek.rows[0].date_trunc;
+    } else {
+      firstDayOfWeek = "";
+    }
+
+    stateFlag = "0510";
+    // get response only from cards that correspond with user-picked period
     for await (let card of vm.cards[`for${vm.currentShowType}`]) {
       if (card.periodTab === userPickedPeriodTab) {
-        resCard = await client.query(card.query, [vm.currentShow.id]);
-        resArea = resCard.rows;
+        if (card.isForLeftXaxis) {
+          resArea = await client.query(card.query, [vm.currentShow.id]);
+          resArea = resArea.rows;
+        } else {
+        }
         // break;
       }
     }
-    stateFlag = "0510";
-    // let resArea = vm.tempResArea;
-    let firstDayOfWeek = await client.query(
-      `select * from date_trunc('week', date(${vm.today}))`
-    );
+
     stateFlag = "0520";
-    c.createBarChart(
-      resArea,
-      userPickedPeriodTab,
-      firstDayOfWeek.rows[0].date_trunc
-    );
+    c.createBarChart(resArea, userPickedPeriodTab, firstDayOfWeek);
+
+    stateFlag = "0600";
     let labels = [],
       data = [];
-    stateFlag = "0600";
     vm.area.datasets.forEach(dataset => {
       labels.push(dataset.label);
       data.push(dataset.time);
     });
-    stateFlag = "0650";
     let result = { labels: labels, data: data };
+
     res.send(result);
   } catch (ex) {
     // await client.query('ROLLBACK')

@@ -33,6 +33,7 @@ const vm = {
       {
         id: 1,
         name: "NO. OF ORGANIZATIONS LOGGED IN TODAY",
+        isShown: true,
         classname: "sa",
         number: 0,
         isForTimeCalc: false,
@@ -48,6 +49,7 @@ const vm = {
       {
         id: 2,
         name: "NO. OF ORGANIZATIONS LOGGED IN THIS MONTH",
+        isShown: true,
         number: 0,
         isForTimeCalc: false,
         color: "info",
@@ -59,6 +61,7 @@ const vm = {
       {
         id: 3,
         name: "TOTAL NO. OF ORGANIZATIONS",
+        isShown: true,
         number: 0,
         isForTimeCalc: false,
         color: "warning",
@@ -69,6 +72,7 @@ const vm = {
       {
         id: 4,
         name: "TOTAL NO. OF USERS",
+        isShown: true,
         number: 0,
         isForTimeCalc: false,
         color: "warning",
@@ -79,6 +83,7 @@ const vm = {
       {
         id: 5,
         name: "NO. OF ACTIVE USERS TODAY",
+        isShown: true,
         number: 0,
         isForTimeCalc: false,
         color: "primary",
@@ -93,6 +98,7 @@ const vm = {
       {
         id: 6,
         name: "NO. OF ACTIVE USERS THIS WEEK",
+        isShown: true,
         number: 0,
         isForTimeCalc: false,
         color: "info",
@@ -109,6 +115,7 @@ const vm = {
       {
         id: 7,
         name: "AVERAGE CYCLING TIME THIS WEEK",
+        isShown: true,
         number: 0,
         isForTimeCalc: false,
         color: "success",
@@ -120,6 +127,7 @@ const vm = {
       {
         id: 8,
         name: "AVERAGE CYCLING TIME THIS MONTH",
+        isShown: true,
         number: 0,
         isForTimeCalc: false,
         color: "success",
@@ -133,6 +141,7 @@ const vm = {
       {
         id: 11,
         name: "NO. OF ACTIVE USERS TODAY",
+        isShown: true,
         number: 0,
         isForTimeCalc: false,
         color: "primary",
@@ -147,6 +156,7 @@ const vm = {
       {
         id: 12,
         name: "NO. OF ACTIVE USERS THIS MONTH",
+        isShown: true,
         number: 0,
         isForTimeCalc: false,
         color: "info",
@@ -163,6 +173,7 @@ const vm = {
       {
         id: 13,
         name: "USERS' DAILY AVERAGE CYCLING TIME THIS MONTH",
+        isShown: true,
         get number() {
           return vm.average.admin_monthly.usersDailyAvgThisMonth;
         },
@@ -177,6 +188,7 @@ const vm = {
       {
         id: 14,
         name: "TOTAL NO. OF USERS",
+        isShown: true,
         number: 0,
         isForTimeCalc: false,
         color: "warning",
@@ -189,7 +201,8 @@ const vm = {
       {
         id: 21,
         name: "ACTIVE DAYS THIS MONTH",
-        isDefaultForChart: true,
+        isShown: true,
+        isDefaultForChart: false,
         isForLeftXaxis: false,
         periodTab: "month", // must be distinct in this array
         number: 0,
@@ -204,8 +217,29 @@ const vm = {
         auth: ["superadmin", "admin", "user"]
       },
       {
+        id: 24,
+        name: "ACTIVE DAYS PER MONTH THIS YEAR",
+        isShown: false,
+        isDefaultForChart: false,
+        isForLeftXaxis: false,
+        periodTab: "year",
+        number: 0,
+        isForTimeCalc: true,
+        color: "warning",
+        fa: "stopwatch",
+        get query() {
+          return `${
+            vm.qr.cyclingTime
+          } WHERE event_userid = $1 AND packet_generated >= date_trunc('week', date(${
+            vm.today
+          }))`;
+        },
+        auth: ["superadmin", "admin", "user"]
+      },
+      {
         id: 22,
         name: "ACTIVE TIME THIS MONTH",
+        isShown: true,
         isDefaultForChart: true,
         isForLeftXaxis: true,
         periodTab: "month",
@@ -223,8 +257,29 @@ const vm = {
         auth: ["superadmin", "admin", "user"]
       },
       {
+        id: 25,
+        name: "ACTIVE TIME PER MONTH THIS YEAR",
+        isShown: false,
+        isDefaultForChart: false,
+        isForLeftXaxis: true,
+        periodTab: "year",
+        number: null,
+        isForTimeCalc: true,
+        color: "warning",
+        fa: "stopwatch",
+        get query() {
+          return `${
+            vm.qr.cyclingTime
+          } WHERE event_userid = $1 AND packet_generated >= date_trunc('year', date(${
+            vm.today
+          }))`;
+        },
+        auth: ["superadmin", "admin", "user"]
+      },
+      {
         id: 23,
         name: "ACTIVE TIME THIS WEEK",
+        isShown: false,
         isDefaultForChart: false,
         isForLeftXaxis: true,
         periodTab: "week",
@@ -265,6 +320,7 @@ const vm = {
       {
         id: 24,
         name: "ACTIVE TIME TODAY",
+        isShown: true,
         isDefaultForChart: false,
         isForLeftXaxis: true,
         periodTab: "day",

@@ -16,7 +16,7 @@ Array.prototype.forEach.call(chartTabs, function(tab) {
         console.log("resMyJson: ", resMyJson);
         let labelArray = resMyJson.labels;
         let dataArray = resMyJson.data;
-        h.overwriteData(myBarChart, labelArray, dataArray);
+        h.writeData(myBarChart, labelArray, dataArray);
       }) // JSON-string from `response.json()` call
       .catch(error => console.error(error));
   });
@@ -44,7 +44,7 @@ function postData(url = "", data = {}) {
 }
 
 let h = {
-  overwriteData: function(chart, labelArr, dataArr) {
+  writeData: function(chart, labelArr, dataArr) {
     //////
     chart.data.labels = labelArr;
     chart.data.datasets.forEach(dataset => {
