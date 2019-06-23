@@ -11,7 +11,13 @@ Array.prototype.forEach.call(chartTabs, function(tab) {
     let tabValue = this.getAttribute("value");
     h.removeData(myBarChart);
     postData("/barchart", { periodTab: tabValue })
-      .then(data => console.log(data)) // JSON-string from `response.json()` call
+      // TODO: the following then not getting data
+      .then(resMyJson => {
+        console.log("resMyJson: ", resMyJson);
+        let labelArray = resMyJson.labels;
+        let dataArray = resMyJson.data;
+        h.overwriteData(myBarChart, labelArray, dataArray);
+      }) // JSON-string from `response.json()` call
       .catch(error => console.error(error));
   });
 });
@@ -32,16 +38,9 @@ function postData(url = "", data = {}) {
     // credentials: "same-origin", // include, *same-origin, omit
     // redirect: "follow", // manual, *follow, error
     // referrer: "no-referrer", // no-referrer, *client
-  })
-    .then(function(response) {
-      return response.json();
-    })
-    .then(function(myJson) {
-      console.log(JSON.stringify(myJson));
-      let labelArray = myJson.labels;
-      let dataArray = myJson.data;
-      h.overwriteData(myBarChart, labelArray, dataArray);
-    }); // parses JSON response into native Javascript objects
+  }).then(function(response) {
+    return response.json();
+  });
 }
 
 let h = {
