@@ -283,6 +283,7 @@ router.post("/barchart", async function(req, res) {
       labels.push(dataset.label);
       data.push(dataset.time);
     });
+
     let result = { labels: labels, data: data };
 
     res.send(result);

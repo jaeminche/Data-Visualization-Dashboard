@@ -2,21 +2,25 @@ if (!!myBarChart) {
   let defaultChartData = myBarChart;
 }
 
-let chartTabs = document.getElementsByClassName("chart-tab");
-Array.prototype.forEach.call(chartTabs, function(tab) {
+let el_ChartTabs = document.getElementsByClassName("chart-tab");
+let el_dateRange = document.getElementById("date-range");
+Array.prototype.forEach.call(el_ChartTabs, function(tab) {
   tab.addEventListener("click", function(e) {
     console.log("this: ", this);
     console.log("e: ", e);
     console.log("value: ", this.getAttribute("value"));
     let tabValue = this.getAttribute("value");
     h.removeData(myBarChart);
+
     postData("/barchart", { periodTab: tabValue })
-      // TODO: the following then not getting data
       .then(resMyJson => {
         console.log("resMyJson: ", resMyJson);
         let labelArray = resMyJson.labels;
         let dataArray = resMyJson.data;
         h.writeData(myBarChart, labelArray, dataArray);
+        el_dateRange.textContent = `${labelArray[0]} ~ ${
+          labelArray[labelArray.length - 1]
+        }`;
       }) // JSON-string from `response.json()` call
       .catch(error => console.error(error));
   });
