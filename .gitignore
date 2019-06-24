@@ -5,3 +5,4 @@ config
 jae_table_layout_v0.01.xls
 bash.exe.stackdump
 .vscode
+db/model.js
