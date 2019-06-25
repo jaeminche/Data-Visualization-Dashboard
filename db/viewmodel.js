@@ -211,9 +211,11 @@ const vm = {
         color: "warning",
         fa: "stopwatch",
         get query() {
-          return `SELECT DISTINCT ON (created_on) date_trunc('day', client_timestamp) AS created_on FROM log_startcycling WHERE userid = $1 AND client_timestamp >= date_trunc('month', date(${
+          return `SELECT DISTINCT ON (client_timestamp) date_trunc('day', client_timestamp) AS client_timestamp FROM log_startcycling WHERE userid = $1 AND client_timestamp >= date_trunc('month', date(${
             vm.today
-          }))`;
+          })) AND client_timestamp < date_trunc('month', date(${
+            vm.today
+          }) + interval '1 month')`;
         },
         auth: ["superadmin", "admin", "user"]
       },
@@ -375,7 +377,7 @@ const vm = {
     findAll: {
       // query: "SELECT name, id, uuid FROM public.organisations ORDER BY name",
       query:
-        "SELECT DISTINCT o.name, o.id, o.uuid FROM public.organisations o JOIN users u ON o.id = u.organisation ORDER BY o.name",
+        "SELECT DISTINCT o.name, o.id, o.uuid FROM public.organisations o JOIN users u ON o.id = u.organisation ORDER BY o.id",
       auth: ["superadmin"]
     },
     findOne: {
@@ -386,18 +388,18 @@ const vm = {
   userList: {
     findAll: {
       query:
-        "SELECT u.name, u.id, u.uuid as uuid, u.admin, o.name as o_name, u.organisation as o_id, o.uuid as o_uuid, o.superadmin FROM public.users u LEFT JOIN organisations o ON organisation = o.id",
+        "SELECT u.name, u.display, u.id, u.uuid as uuid, u.admin, o.name as o_name, u.organisation as o_id, o.uuid as o_uuid, o.superadmin FROM public.users u LEFT JOIN organisations o ON organisation = o.id",
 
       auth: ["superadmin"]
     },
     findAllForAdmin: {
       query:
-        "SELECT u.name, u.id, u.uuid as uuid, u.admin, o.name as o_name, u.organisation as o_id, o.uuid as o_uuid, o.superadmin FROM public.users u LEFT JOIN organisations o ON organisation = o.id WHERE o.id = $1",
+        "SELECT u.name, u.display, u.id, u.uuid as uuid, u.admin, o.name as o_name, u.organisation as o_id, o.uuid as o_uuid, o.superadmin FROM public.users u LEFT JOIN organisations o ON organisation = o.id WHERE o.id = $1 ORDER BY u.id",
       auth: ["admin", "superadmin"]
     },
     findOne: {
       query:
-        "SELECT name, id, uuid, organisation, admin FROM public.users WHERE uuid = $1",
+        "SELECT name, display, id, uuid, organisation, admin FROM public.users WHERE uuid = $1",
       auth: ["user", "admin", "superadmin"]
     }
   },

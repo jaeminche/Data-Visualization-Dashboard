@@ -86,7 +86,7 @@
 
             <h6 class="collapse-header">Select Organization:</h6>
             <% orgs.forEach(org => { %>
-                <a class="collapse-item" href="/dashboard/<%= org.uuid %>"><%= org.name %> <%= org.id %></a>
+                <a class="collapse-item" href="/dashboard/<%= org.uuid %>"><%= org.id %>_<%= org.name %></a>
             <% }) %>
 
           <% } else { %>
@@ -114,7 +114,7 @@
             <h6 class="collapse-header">SELECT USER</h6>
 
             <% users.forEach(user => { %>
-                <a class="collapse-item" href="/dashboard/<%= user.uuid %>"><%= user.name %></a>
+                <a class="collapse-item" href="/dashboard/<%= user.uuid %>"><%= user.o_id %>_<%= user.id %>_<%= user.display %></a>
             <% }) %>
 
           <% } else { %>
