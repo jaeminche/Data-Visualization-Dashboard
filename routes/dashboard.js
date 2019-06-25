@@ -140,7 +140,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
     let calendarType;
     vm.stateFlag = "0200";
     for await (let card of vm.cards[`for${vm.currentShowType}`]) {
-      if (card.isShown) {
+      if (card.isCardShown) {
         let resCard, timeCycledInMilSec;
         switch (vm.currentShowType) {
           case "superadmin":

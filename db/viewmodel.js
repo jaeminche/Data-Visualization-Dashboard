@@ -34,7 +34,7 @@ const vm = {
       {
         id: 1,
         name: "NO. OF ORGANIZATIONS LOGGED IN TODAY",
-        isShown: false,
+        isCardShown: false,
         isDefaultForChart: false,
         isForLeftXaxis: false, // true only if time
         periodTab: "day",
@@ -53,7 +53,7 @@ const vm = {
       {
         id: 2,
         name: "NO. OF ORGANIZATIONS LOGGED IN THIS MONTH",
-        isShown: false,
+        isCardShown: false,
         isDefaultForChart: false,
         isForLeftXaxis: false,
         periodTab: "month",
@@ -73,7 +73,7 @@ const vm = {
       {
         id: 3,
         name: "TOTAL NO. OF ORGANIZATIONS",
-        isShown: true,
+        isCardShown: true,
         isDefaultForChart: false,
         isForLeftXaxis: false,
         periodTab: null,
@@ -87,7 +87,7 @@ const vm = {
       {
         id: 4,
         name: "TOTAL NO. OF USERS",
-        isShown: false,
+        isCardShown: false,
         isDefaultForChart: false,
         isForLeftXaxis: false,
         periodTab: null,
@@ -101,7 +101,7 @@ const vm = {
       {
         id: 5, // card on pg 4 of ppt
         name: "NO. OF ACTIVE ORGANIZATIONS TODAY",
-        isShown: true,
+        isCardShown: true,
         isDefaultForChart: false,
         isForLeftXaxis: false,
         periodTab: "day",
@@ -119,7 +119,7 @@ const vm = {
       {
         id: 6,
         name: "NO. OF ACTIVE ORGANIZATIONS THIS MONTH",
-        isShown: false,
+        isCardShown: false,
         isDefaultForChart: false,
         isForLeftXaxis: false,
         periodTab: "month",
@@ -139,7 +139,7 @@ const vm = {
       {
         id: 6, // chart on pg 4 of ppt
         name: "NO. OF ACTIVE ORGANIZATIONS PER DAY THIS MONTH",
-        isShown: false,
+        isCardShown: false,
         isDefaultForChart: true,
         isForLeftXaxis: true,
         periodTab: "month",
@@ -159,7 +159,7 @@ const vm = {
       {
         id: 7,
         name: "AVERAGE TIME THIS WEEK",
-        isShown: false,
+        isCardShown: false,
         isDefaultForChart: true,
         isForLeftXaxis: true,
         periodTab: "week",
@@ -181,7 +181,7 @@ const vm = {
       {
         id: 8,
         name: "AVERAGE TIME THIS MONTH",
-        isShown: true,
+        isCardShown: true,
         isDefaultForChart: true,
         isForLeftXaxis: true,
         periodTab: "month",
@@ -205,7 +205,7 @@ const vm = {
       {
         id: 11,
         name: "NO. OF ACTIVE USERS TODAY",
-        isShown: true,
+        isCardShown: true,
         isDefaultForChart: false,
         isForLeftXaxis: false,
         periodTab: "day",
@@ -223,7 +223,7 @@ const vm = {
       {
         id: 12,
         name: "NO. OF ACTIVE USERS THIS MONTH",
-        isShown: true,
+        isCardShown: true,
         isDefaultForChart: false,
         isForLeftXaxis: false,
         periodTab: "month",
@@ -243,7 +243,7 @@ const vm = {
       {
         id: 13,
         name: "ACTIVE TIME THIS MONTH",
-        isShown: true,
+        isCardShown: true,
         isDefaultForChart: true,
         isForLeftXaxis: true,
         periodTab: "month",
@@ -265,7 +265,7 @@ const vm = {
       {
         id: 13,
         name: "USERS' DAILY AVERAGE CYCLING TIME THIS MONTH",
-        isShown: true,
+        isCardShown: true,
         isDefaultForChart: false,
         isForLeftXaxis: false,
         periodTab: "month",
@@ -283,7 +283,7 @@ const vm = {
       {
         id: 14,
         name: "TOTAL NO. OF USERS",
-        isShown: true,
+        isCardShown: true,
         isDefaultForChart: false,
         isForLeftXaxis: false,
         periodTab: null,
@@ -299,7 +299,7 @@ const vm = {
       {
         id: 21,
         name: "ACTIVE DAYS THIS MONTH",
-        isShown: true,
+        isCardShown: true,
         isDefaultForChart: false,
         isForLeftXaxis: false,
         periodTab: "month", // must be distinct in this array
@@ -319,7 +319,7 @@ const vm = {
       {
         id: 24,
         name: "ACTIVE DAYS PER MONTH THIS YEAR",
-        isShown: true,
+        isCardShown: true,
         isDefaultForChart: false,
         isForLeftXaxis: false,
         periodTab: "year",
@@ -342,7 +342,7 @@ const vm = {
       {
         id: 22,
         name: "ACTIVE TIME THIS MONTH",
-        isShown: true,
+        isCardShown: true,
         isDefaultForChart: true,
         isForLeftXaxis: true,
         periodTab: "month",
@@ -364,7 +364,7 @@ const vm = {
       {
         id: 25,
         name: "ACTIVE TIME PER MONTH THIS YEAR",
-        isShown: false,
+        isCardShown: false,
         isDefaultForChart: false,
         isForLeftXaxis: true,
         periodTab: "year",
@@ -386,7 +386,7 @@ const vm = {
       {
         id: 23,
         name: "ACTIVE TIME THIS WEEK",
-        isShown: false,
+        isCardShown: false,
         isDefaultForChart: false,
         isForLeftXaxis: true,
         periodTab: "week",
@@ -408,7 +408,7 @@ const vm = {
       {
         id: 24,
         name: "ACTIVE TIME TODAY",
-        isShown: true,
+        isCardShown: true,
         isDefaultForChart: false,
         isForLeftXaxis: true,
         periodTab: "day",
