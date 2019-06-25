@@ -34,10 +34,13 @@ const vm = {
       {
         id: 1,
         name: "NO. OF ORGANIZATIONS LOGGED IN TODAY",
-        isShown: true,
+        isShown: false,
+        isDefaultForChart: false,
+        isForLeftXaxis: false, // true only if time
+        periodTab: "day",
         classname: "sa",
         number: 0,
-        isForTimeCalc: false,
+        isForTimeCalc: false, // true only if isForLeftXaxis is true
         color: "primary",
         fa: "sign-in-alt",
         get query() {
@@ -50,19 +53,30 @@ const vm = {
       {
         id: 2,
         name: "NO. OF ORGANIZATIONS LOGGED IN THIS MONTH",
-        isShown: true,
+        isShown: false,
+        isDefaultForChart: false,
+        isForLeftXaxis: false,
+        periodTab: "month",
         number: 0,
         isForTimeCalc: false,
         color: "info",
         fa: "sign-in-alt",
-        query:
-          "select orgid, count(orgid) from public.log_login GROUP BY orgid",
+        get query() {
+          return `SELECT orgid, COUNT(orgid) FROM public.log_login WHERE DATE(client_timestamp) >= DATE_TRUNC('month', DATE(${
+            vm.today
+          })) AND DATE(client_timestamp) < DATE_TRUNC('month', DATE(${
+            vm.today
+          }) + INTERVAL '1 month') GROUP BY orgid`;
+        },
         auth: ["superadmin"]
       },
       {
         id: 3,
         name: "TOTAL NO. OF ORGANIZATIONS",
         isShown: true,
+        isDefaultForChart: false,
+        isForLeftXaxis: false,
+        periodTab: null,
         number: 0,
         isForTimeCalc: false,
         color: "warning",
@@ -73,7 +87,10 @@ const vm = {
       {
         id: 4,
         name: "TOTAL NO. OF USERS",
-        isShown: true,
+        isShown: false,
+        isDefaultForChart: false,
+        isForLeftXaxis: false,
+        periodTab: null,
         number: 0,
         isForTimeCalc: false,
         color: "warning",
@@ -82,59 +99,105 @@ const vm = {
         auth: ["superadmin"]
       },
       {
-        id: 5,
-        name: "NO. OF ACTIVE USERS TODAY",
+        id: 5, // card on pg 4 of ppt
+        name: "NO. OF ACTIVE ORGANIZATIONS TODAY",
         isShown: true,
+        isDefaultForChart: false,
+        isForLeftXaxis: false,
+        periodTab: "day",
         number: 0,
         isForTimeCalc: false,
         color: "primary",
         fa: "bicycle",
         get query() {
-          return `SELECT userid FROM public.log_startcycling WHERE date(client_timestamp) = ${
+          return `SELECT DISTINCT orgid FROM public.log_startcycling WHERE date(client_timestamp) = ${
             vm.today
-          } GROUP BY userid`;
-        },
+          }`;
+        }, // to get users, simply change orgid to 'userid'
         auth: ["superadmin"]
       },
       {
         id: 6,
-        name: "NO. OF ACTIVE USERS THIS WEEK",
-        isShown: true,
+        name: "NO. OF ACTIVE ORGANIZATIONS THIS MONTH",
+        isShown: false,
+        isDefaultForChart: false,
+        isForLeftXaxis: false,
+        periodTab: "month",
         number: 0,
         isForTimeCalc: false,
         color: "info",
         fa: "bicycle",
         get query() {
-          return `SELECT userid FROM log_startcycling WHERE date(client_timestamp) > date(${
+          return `SELECT ordid FROM log_startcycling WHERE DATE(client_timestamp) >= DATE_TRUNC('month', DATE(${
             vm.today
-          }) - interval '7 days' AND date(client_timestamp) < date(${
+          })) AND DATE(client_timestamp) < DATE_TRUNC('month', DATE(${
             vm.today
-          }) + interval '1 day' GROUP BY userid  `;
+          }) + INTERVAL '1 month') GROUP BY ordid`;
+        },
+        auth: ["superadmin"]
+      },
+      {
+        id: 6, // chart on pg 4 of ppt
+        name: "NO. OF ACTIVE ORGANIZATIONS PER DAY THIS MONTH",
+        isShown: false,
+        isDefaultForChart: true,
+        isForLeftXaxis: true,
+        periodTab: "month",
+        number: null,
+        isForTimeCalc: false,
+        color: "info",
+        fa: "bicycle",
+        get query() {
+          return `SELECT DATE(client_timestamp), COUNT(DISTINCT orgid) FROM log_startcycling WHERE DATE(client_timestamp) >= DATE_TRUNC('month', DATE(${
+            vm.today
+          })) AND DATE(client_timestamp) < DATE_TRUNC('month', DATE(${
+            vm.today
+          }) + INTERVAL '1 month') GROUP BY DATE(client_timestamp)`;
         },
         auth: ["superadmin"]
       },
       {
         id: 7,
-        name: "AVERAGE CYCLING TIME THIS WEEK",
-        isShown: true,
+        name: "AVERAGE TIME THIS WEEK",
+        isShown: false,
+        isDefaultForChart: true,
+        isForLeftXaxis: true,
+        periodTab: "week",
         number: 0,
-        isForTimeCalc: false,
+        isForTimeCalc: true,
         color: "success",
         fa: "stopwatch",
-        //   todo:
-        query: "SELECT * FROM public.users",
+        get query() {
+          return `${
+            vm.qr.cyclingTime
+          } WHERE packet_generated >= date_trunc('week', date(${
+            vm.today
+          })) AND packet_generated < date_trunc('week', date(${
+            vm.today
+          }) + interval '1 week')`;
+        },
         auth: ["superadmin"]
       },
       {
         id: 8,
-        name: "AVERAGE CYCLING TIME THIS MONTH",
+        name: "AVERAGE TIME THIS MONTH",
         isShown: true,
+        isDefaultForChart: true,
+        isForLeftXaxis: true,
+        periodTab: "month",
         number: 0,
-        isForTimeCalc: false,
+        isForTimeCalc: true,
         color: "success",
         fa: "stopwatch",
-        //   todo:
-        query: "SELECT * FROM public.users",
+        get query() {
+          return `${
+            vm.qr.cyclingTime
+          } WHERE packet_generated >= date_trunc('month', date(${
+            vm.today
+          })) AND packet_generated < date_trunc('month', date(${
+            vm.today
+          }) + interval '1 month')`;
+        },
         auth: ["superadmin"]
       }
     ],
@@ -143,6 +206,9 @@ const vm = {
         id: 11,
         name: "NO. OF ACTIVE USERS TODAY",
         isShown: true,
+        isDefaultForChart: false,
+        isForLeftXaxis: false,
+        periodTab: "day",
         number: 0,
         isForTimeCalc: false,
         color: "primary",
@@ -150,7 +216,7 @@ const vm = {
         get query() {
           return `SELECT userid FROM public.log_startcycling WHERE date(client_timestamp) = ${
             vm.today
-          } and orgid = $1 GROUP BY userid`;
+          } AND orgid = $1 GROUP BY userid`;
         },
         auth: ["superadmin", "admin"]
       },
@@ -158,23 +224,51 @@ const vm = {
         id: 12,
         name: "NO. OF ACTIVE USERS THIS MONTH",
         isShown: true,
+        isDefaultForChart: false,
+        isForLeftXaxis: false,
+        periodTab: "month",
         number: 0,
         isForTimeCalc: false,
         color: "info",
         fa: "bicycle",
         get query() {
-          return `SELECT userid FROM log_startcycling WHERE orgid = $1 AND date(client_timestamp) > date(${
+          return `SELECT userid FROM log_startcycling WHERE orgid = $1 AND DATE(client_timestamp) >= DATE_TRUNC('month', DATE(${
             vm.today
-          }) - interval '7 days' AND date(client_timestamp) < date(${
+          })) AND DATE(client_timestamp) < DATE_TRUNC('month', DATE(${
             vm.today
-          }) + interval '1 day' GROUP BY userid  `;
+          }) + INTERVAL '1 month')`;
         },
         auth: ["superadmin", "admin"]
       },
       {
         id: 13,
+        name: "ACTIVE TIME THIS MONTH",
+        isShown: true,
+        isDefaultForChart: true,
+        isForLeftXaxis: true,
+        periodTab: "month",
+        isForTimeCalc: true,
+        color: "success",
+        fa: "stopwatch",
+        get query() {
+          return `${
+            vm.qr.cyclingTime
+          } WHERE event_orgid = $1 AND packet_generated >= date_trunc('month', date(${
+            vm.today
+          })) AND packet_generated < date_trunc('month', date(${
+            vm.today
+          }) + interval '1 month')`;
+        },
+        auth: ["superadmin", "admin"]
+      },
+      // TODO:
+      {
+        id: 13,
         name: "USERS' DAILY AVERAGE CYCLING TIME THIS MONTH",
         isShown: true,
+        isDefaultForChart: false,
+        isForLeftXaxis: false,
+        periodTab: "month",
         get number() {
           return vm.average.admin_monthly.usersDailyAvgThisMonth;
         },
@@ -190,6 +284,9 @@ const vm = {
         id: 14,
         name: "TOTAL NO. OF USERS",
         isShown: true,
+        isDefaultForChart: false,
+        isForLeftXaxis: false,
+        periodTab: null,
         number: 0,
         isForTimeCalc: false,
         color: "warning",
@@ -222,20 +319,23 @@ const vm = {
       {
         id: 24,
         name: "ACTIVE DAYS PER MONTH THIS YEAR",
-        isShown: false,
+        isShown: true,
         isDefaultForChart: false,
         isForLeftXaxis: false,
         periodTab: "year",
         number: 0,
-        isForTimeCalc: true,
+        isForTimeCalc: false,
         color: "warning",
         fa: "stopwatch",
         get query() {
-          return `${
-            vm.qr.cyclingTime
-          } WHERE event_userid = $1 AND packet_generated >= date_trunc('week', date(${
+          return `SELECT DATE(DATE_TRUNC('month', DATE(client_timestamp)) ), COUNT(*) 
+          FROM (
+            SELECT DISTINCT ON (client_timestamp) date_trunc('day', client_timestamp) AS client_timestamp FROM log_startcycling WHERE userid = $1 AND client_timestamp >= date_trunc('year', DATE(${
+              vm.today
+            })) AND client_timestamp < date_trunc('year', DATE(${
             vm.today
-          }))`;
+          }) + INTERVAL '1 year')
+            ) AS active_days_this_year GROUP BY DATE(date_trunc('month', DATE(client_timestamp)) )`;
         },
         auth: ["superadmin", "admin", "user"]
       },
@@ -255,7 +355,9 @@ const vm = {
             vm.qr.cyclingTime
           } WHERE event_userid = $1 AND packet_generated >= date_trunc('month', date(${
             vm.today
-          }))`;
+          })) AND packet_generated < date_trunc('month', date(${
+            vm.today
+          }) + interval '1 month')`;
         },
         auth: ["superadmin", "admin", "user"]
       },
@@ -275,7 +377,9 @@ const vm = {
             vm.qr.cyclingTime
           } WHERE event_userid = $1 AND packet_generated >= date_trunc('year', date(${
             vm.today
-          }))`;
+          })) AND packet_generated < date_trunc('year', date(${
+            vm.today
+          }) + interval '1 year')`;
         },
         auth: ["superadmin", "admin", "user"]
       },
@@ -295,10 +399,30 @@ const vm = {
             vm.qr.cyclingTime
           } WHERE event_userid = $1 AND packet_generated >= date_trunc('week', date(${
             vm.today
-          }))`;
+          })) AND packet_generated < date_trunc('week', date(${
+            vm.today
+          }) + interval '1 week')`;
         },
         auth: ["superadmin", "admin", "user"]
       },
+      {
+        id: 24,
+        name: "ACTIVE TIME TODAY",
+        isShown: true,
+        isDefaultForChart: false,
+        isForLeftXaxis: true,
+        periodTab: "day",
+        number: 0,
+        isForTimeCalc: true,
+        color: "success",
+        fa: "stopwatch",
+        get query() {
+          return `${
+            vm.qr.cyclingTime
+          } WHERE u.id = $1 AND date(packet_generated) = date ${vm.today}`;
+        },
+        auth: ["superadmin", "admin", "user"]
+      }
       // {
       //   id: 23,
       //   name: "ACTIVE TIME FOR THE LAST 7 DAYS",
@@ -319,25 +443,7 @@ const vm = {
       //     } + interval '1 day'`;
       //   },
       //   auth: ["superadmin", "admin", "user"]
-      // },
-      {
-        id: 24,
-        name: "ACTIVE TIME TODAY",
-        isShown: true,
-        isDefaultForChart: false,
-        isForLeftXaxis: true,
-        periodTab: "day",
-        number: 0,
-        isForTimeCalc: true,
-        color: "success",
-        fa: "stopwatch",
-        get query() {
-          return `${
-            vm.qr.cyclingTime
-          } WHERE u.id = $1 AND date(packet_generated) = date ${vm.today}`;
-        },
-        auth: ["superadmin", "admin", "user"]
-      }
+      // }
     ]
   },
   pie: {
@@ -369,8 +475,6 @@ const vm = {
           vm.today
         } + interval '1 day'`;
       }
-      // query:
-      // "SELECT e.start_id, e.event_id, e.packet_id, e.packet_len, e.start_userid, e.event_userid, u.uuid as uuid, e.event_orgid, e.event_type, e.event_data, e.start_cycling, e.event_time, e.packet_generated, e.locationid, e.routeid, e.location, u.name from (select d.id as start_id, c.event_id, c.packet_id, c.packet_len, d.userid as start_userid, c.userid as event_userid, c.orgid as event_orgid, c.event_type, c.event_data, d.client_timestamp as start_cycling, c.event_time, c.packet_generated, d.locationid, d.routeid, d.location from (select a.id as event_id, b.id as packet_id, length as packet_len, userid, orgid, event_type, event_data, event_time, b.client_timestamp as packet_generated from log_cycling a full outer join log_cycling_packets b on a.packet_id = b.id order by packet_generated, event_time) c full outer join log_startcycling d on d.client_timestamp = c.event_time and d.userid = c.userid order by COALESCE(packet_generated, d.client_timestamp), event_time) e left join users u ON e.event_userid = u.id WHERE event_userid = $1"
     }
   },
   orgList: {
