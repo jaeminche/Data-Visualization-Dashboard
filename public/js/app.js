@@ -56,10 +56,10 @@ let h = {
     chart.update();
   },
 
-  postData: function(url = "/barchart", data = { periodTab: "month" }) {
+  postData: async function(url = "/barchart", data = { periodTab: "month" }) {
     // Default options are marked with *
-    return fetch(url, {
-      method: "POST", // *GET, POST, PUT, DELETE, etc.
+    const response = await fetch(url, {
+      method: "POST",
       headers: {
         "Content-Type": "application/json"
         // 'Content-Type': 'application/x-www-form-urlencoded',
@@ -70,8 +70,7 @@ let h = {
       // credentials: "same-origin", // include, *same-origin, omit
       // redirect: "follow", // manual, *follow, error
       // referrer: "no-referrer", // no-referrer, *client
-    }).then(function(response) {
-      return response.json();
     });
+    return response.json();
   }
 };
