@@ -99,7 +99,7 @@ const vm = {
         auth: ["superadmin"]
       },
       {
-        id: 5, // card on pg 4 of ppt
+        id: 5, // card on pg 4 in ppt
         name: "NO. OF ACTIVE ORGANIZATIONS TODAY",
         isCardShown: true,
         isDefaultForChart: false,
@@ -108,7 +108,7 @@ const vm = {
         number: 0,
         isForTimeCalc: false,
         color: "primary",
-        fa: "bicycle",
+        fa: "chart-bar",
         get query() {
           return `SELECT DISTINCT orgid FROM public.log_startcycling WHERE date(client_timestamp) = ${
             vm.today
@@ -117,7 +117,27 @@ const vm = {
         auth: ["superadmin"]
       },
       {
-        id: 6,
+        id: 6, // chart on pg 4 in ppt
+        name: "NO. OF ACTIVE ORGANIZATIONS PER DAY THIS MONTH",
+        isCardShown: false,
+        isDefaultForChart: true,
+        isForLeftXaxis: true,
+        periodTab: "month",
+        number: null,
+        isForTimeCalc: false,
+        color: "info",
+        fa: "chart-bar",
+        get query() {
+          return `SELECT DATE(client_timestamp), COUNT(DISTINCT orgid) FROM log_startcycling WHERE DATE(client_timestamp) >= DATE_TRUNC('month', DATE(${
+            vm.today
+          })) AND DATE(client_timestamp) < DATE_TRUNC('month', DATE(${
+            vm.today
+          }) + INTERVAL '1 month') GROUP BY DATE(client_timestamp)`;
+        },
+        auth: ["superadmin"]
+      },
+      {
+        id: 6, // card on pg 5 in ppt
         name: "NO. OF ACTIVE ORGANIZATIONS THIS MONTH",
         isCardShown: true,
         isDefaultForChart: false,
@@ -137,27 +157,7 @@ const vm = {
         auth: ["superadmin"]
       },
       {
-        id: 6, // chart on pg 4 of ppt
-        name: "NO. OF ACTIVE ORGANIZATIONS PER DAY THIS MONTH",
-        isCardShown: false,
-        isDefaultForChart: true,
-        isForLeftXaxis: true,
-        periodTab: "month",
-        number: null,
-        isForTimeCalc: false,
-        color: "info",
-        fa: "bicycle",
-        get query() {
-          return `SELECT DATE(client_timestamp), COUNT(DISTINCT orgid) FROM log_startcycling WHERE DATE(client_timestamp) >= DATE_TRUNC('month', DATE(${
-            vm.today
-          })) AND DATE(client_timestamp) < DATE_TRUNC('month', DATE(${
-            vm.today
-          }) + INTERVAL '1 month') GROUP BY DATE(client_timestamp)`;
-        },
-        auth: ["superadmin"]
-      },
-      {
-        id: 7, // chart on pg 4 of ppt
+        id: 7, // chart on pg 5 in ppt
         name: "NO. OF ACTIVE ORGANIZATIONS PER MONTH THIS YEAR",
         isCardShown: false,
         isDefaultForChart: true,
