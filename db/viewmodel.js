@@ -119,20 +119,20 @@ const vm = {
       {
         id: 6,
         name: "NO. OF ACTIVE ORGANIZATIONS THIS MONTH",
-        isCardShown: false,
+        isCardShown: true,
         isDefaultForChart: false,
         isForLeftXaxis: false,
         periodTab: "month",
         number: 0,
         isForTimeCalc: false,
         color: "info",
-        fa: "bicycle",
+        fa: "chart-line",
         get query() {
-          return `SELECT ordid FROM log_startcycling WHERE DATE(client_timestamp) >= DATE_TRUNC('month', DATE(${
+          return `SELECT orgid FROM log_startcycling WHERE DATE(client_timestamp) >= DATE_TRUNC('month', DATE(${
             vm.today
           })) AND DATE(client_timestamp) < DATE_TRUNC('month', DATE(${
             vm.today
-          }) + INTERVAL '1 month') GROUP BY ordid`;
+          }) + INTERVAL '1 month') GROUP BY orgid`;
         },
         auth: ["superadmin"]
       },
@@ -157,10 +157,32 @@ const vm = {
         auth: ["superadmin"]
       },
       {
+        id: 7, // chart on pg 4 of ppt
+        name: "NO. OF ACTIVE ORGANIZATIONS PER MONTH THIS YEAR",
+        isCardShown: false,
+        isDefaultForChart: true,
+        isForLeftXaxis: true,
+        periodTab: "year",
+        number: null,
+        isForTimeCalc: false,
+        color: "info",
+        fa: "chart-line",
+        get query() {
+          return `SELECT DATE(DATE_TRUNC('month', DATE(client_timestamp)) ), COUNT(DISTINCT orgid) FROM log_startcycling WHERE DATE(client_timestamp) >= DATE_TRUNC('year', DATE(${
+            vm.today
+          })) 
+    AND DATE(client_timestamp) < DATE_TRUNC('year', DATE(${
+      vm.today
+    }) + INTERVAL '1 year') 
+    GROUP BY DATE(DATE_TRUNC('month', DATE(client_timestamp)) )`;
+        },
+        auth: ["superadmin"]
+      },
+      {
         id: 7,
         name: "AVERAGE TIME THIS WEEK",
         isCardShown: false,
-        isDefaultForChart: true,
+        isDefaultForChart: false,
         isForLeftXaxis: true,
         periodTab: "week",
         number: 0,
@@ -181,8 +203,8 @@ const vm = {
       {
         id: 8,
         name: "AVERAGE TIME THIS MONTH",
-        isCardShown: true,
-        isDefaultForChart: true,
+        isCardShown: false,
+        isDefaultForChart: false,
         isForLeftXaxis: true,
         periodTab: "month",
         number: 0,
