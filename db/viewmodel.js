@@ -1,6 +1,6 @@
 const vm = {
   // TODO: when deployment, change the date to current_date
-  today: "'2017-01-29'",
+  today: "'2017-06-10'",
   pgload: 1,
   stateflag: "",
   jwt: {
@@ -43,6 +43,7 @@ const vm = {
         isForTimeCalc: false, // true only if isForLeftXaxis is true
         color: "primary",
         fa: "sign-in-alt",
+        cardIdRedirectedOnClickForQuery: null,
         get query() {
           return `select orgid, count(orgid) from public.log_login where date(client_timestamp) = ${
             vm.today
@@ -61,6 +62,7 @@ const vm = {
         isForTimeCalc: false,
         color: "info",
         fa: "sign-in-alt",
+        cardIdRedirectedOnClickForQuery: null,
         get query() {
           return `SELECT orgid, COUNT(orgid) FROM public.log_login WHERE DATE(client_timestamp) >= DATE_TRUNC('month', DATE(${
             vm.today
@@ -81,6 +83,7 @@ const vm = {
         isForTimeCalc: false,
         color: "warning",
         fa: "user",
+        cardIdRedirectedOnClickForQuery: null,
         query: "SELECT * FROM public.organisations",
         auth: ["superadmin"]
       },
@@ -95,6 +98,7 @@ const vm = {
         isForTimeCalc: false,
         color: "warning",
         fa: "users",
+        cardIdRedirectedOnClickForQuery: null,
         query: "SELECT * FROM public.users",
         auth: ["superadmin"]
       },
@@ -109,6 +113,7 @@ const vm = {
         isForTimeCalc: false,
         color: "primary",
         fa: "chart-bar",
+        cardIdRedirectedOnClickForQuery: 6,
         get query() {
           return `SELECT DISTINCT orgid FROM public.log_startcycling WHERE date(client_timestamp) = ${
             vm.today
@@ -127,6 +132,7 @@ const vm = {
         isForTimeCalc: false,
         color: "info",
         fa: "chart-bar",
+        cardIdRedirectedOnClickForQuery: null,
         get query() {
           return `SELECT DATE(client_timestamp), COUNT(DISTINCT orgid) FROM log_startcycling WHERE DATE(client_timestamp) >= DATE_TRUNC('month', DATE(${
             vm.today
@@ -137,7 +143,7 @@ const vm = {
         auth: ["superadmin"]
       },
       {
-        id: 6, // card on pg 5 in ppt
+        id: 7, // card on pg 5 in ppt
         name: "NO. OF ACTIVE ORGANIZATIONS THIS MONTH",
         isCardShown: true,
         isDefaultForChart: false,
@@ -147,6 +153,7 @@ const vm = {
         isForTimeCalc: false,
         color: "info",
         fa: "chart-line",
+        cardIdRedirectedOnClickForQuery: 8,
         get query() {
           return `SELECT orgid FROM log_startcycling WHERE DATE(client_timestamp) >= DATE_TRUNC('month', DATE(${
             vm.today
@@ -157,7 +164,7 @@ const vm = {
         auth: ["superadmin"]
       },
       {
-        id: 7, // chart on pg 5 in ppt
+        id: 8, // chart on pg 5 in ppt
         name: "NO. OF ACTIVE ORGANIZATIONS PER MONTH THIS YEAR",
         isCardShown: false,
         isDefaultForChart: true,
@@ -167,6 +174,7 @@ const vm = {
         isForTimeCalc: false,
         color: "info",
         fa: "chart-line",
+        cardIdRedirectedOnClickForQuery: null,
         get query() {
           return `SELECT DATE(DATE_TRUNC('month', DATE(client_timestamp)) ), COUNT(DISTINCT orgid) FROM log_startcycling WHERE DATE(client_timestamp) >= DATE_TRUNC('year', DATE(${
             vm.today
@@ -179,7 +187,7 @@ const vm = {
         auth: ["superadmin"]
       },
       {
-        id: 7,
+        id: 9,
         name: "AVERAGE TIME THIS WEEK",
         isCardShown: false,
         isDefaultForChart: false,
@@ -189,6 +197,7 @@ const vm = {
         isForTimeCalc: true,
         color: "success",
         fa: "stopwatch",
+        cardIdRedirectedOnClickForQuery: null,
         get query() {
           return `${
             vm.qr.cyclingTime
@@ -201,7 +210,7 @@ const vm = {
         auth: ["superadmin"]
       },
       {
-        id: 8,
+        id: 10,
         name: "AVERAGE TIME THIS MONTH",
         isCardShown: false,
         isDefaultForChart: false,
@@ -211,6 +220,7 @@ const vm = {
         isForTimeCalc: true,
         color: "success",
         fa: "stopwatch",
+        cardIdRedirectedOnClickForQuery: null,
         get query() {
           return `${
             vm.qr.cyclingTime
@@ -225,7 +235,7 @@ const vm = {
     ],
     foradmin: [
       {
-        id: 11,
+        id: 101,
         name: "NO. OF ACTIVE USERS TODAY",
         isCardShown: true,
         isDefaultForChart: false,
@@ -235,6 +245,7 @@ const vm = {
         isForTimeCalc: false,
         color: "primary",
         fa: "bicycle",
+        cardIdRedirectedOnClickForQuery: null,
         get query() {
           return `SELECT userid FROM public.log_startcycling WHERE date(client_timestamp) = ${
             vm.today
@@ -243,7 +254,7 @@ const vm = {
         auth: ["superadmin", "admin"]
       },
       {
-        id: 12,
+        id: 102,
         name: "NO. OF ACTIVE USERS THIS MONTH",
         isCardShown: true,
         isDefaultForChart: false,
@@ -253,6 +264,7 @@ const vm = {
         isForTimeCalc: false,
         color: "info",
         fa: "bicycle",
+        cardIdRedirectedOnClickForQuery: null,
         get query() {
           return `SELECT userid FROM log_startcycling WHERE orgid = $1 AND DATE(client_timestamp) >= DATE_TRUNC('month', DATE(${
             vm.today
@@ -263,7 +275,7 @@ const vm = {
         auth: ["superadmin", "admin"]
       },
       {
-        id: 13,
+        id: 103,
         name: "ACTIVE TIME THIS MONTH",
         isCardShown: true,
         isDefaultForChart: true,
@@ -272,6 +284,7 @@ const vm = {
         isForTimeCalc: true,
         color: "success",
         fa: "stopwatch",
+        cardIdRedirectedOnClickForQuery: null,
         get query() {
           return `${
             vm.qr.cyclingTime
@@ -285,7 +298,7 @@ const vm = {
       },
       // TODO:
       {
-        id: 13,
+        id: 104,
         name: "USERS' DAILY AVERAGE CYCLING TIME THIS MONTH",
         isCardShown: true,
         isDefaultForChart: false,
@@ -297,13 +310,14 @@ const vm = {
         isForTimeCalc: false,
         color: "success",
         fa: "stopwatch",
-        //   todo:
+        cardIdRedirectedOnClickForQuery: null,
+        //   TODO:
         query: null,
         // query: "SELECT * FROM public.users WHERE organisation = $1",
         auth: ["superadmin", "admin"]
       },
       {
-        id: 14,
+        id: 105,
         name: "TOTAL NO. OF USERS",
         isCardShown: true,
         isDefaultForChart: false,
@@ -313,13 +327,14 @@ const vm = {
         isForTimeCalc: false,
         color: "warning",
         fa: "users",
+        cardIdRedirectedOnClickForQuery: null,
         query: "SELECT * FROM public.users WHERE organisation = $1",
-        auth: ["superadmin"]
+        auth: ["superadmin", "admin"]
       }
     ],
     foruser: [
       {
-        id: 21,
+        id: 201,
         name: "ACTIVE DAYS THIS MONTH",
         isCardShown: true,
         isDefaultForChart: false,
@@ -329,6 +344,7 @@ const vm = {
         isForTimeCalc: false,
         color: "warning",
         fa: "stopwatch",
+        cardIdRedirectedOnClickForQuery: null,
         get query() {
           return `SELECT DISTINCT ON (client_timestamp) date_trunc('day', client_timestamp) AS client_timestamp FROM log_startcycling WHERE userid = $1 AND client_timestamp >= date_trunc('month', date(${
             vm.today
@@ -339,7 +355,7 @@ const vm = {
         auth: ["superadmin", "admin", "user"]
       },
       {
-        id: 24,
+        id: 202,
         name: "ACTIVE DAYS PER MONTH THIS YEAR",
         isCardShown: true,
         isDefaultForChart: false,
@@ -349,6 +365,7 @@ const vm = {
         isForTimeCalc: false,
         color: "warning",
         fa: "stopwatch",
+        cardIdRedirectedOnClickForQuery: null,
         get query() {
           return `SELECT DATE(DATE_TRUNC('month', DATE(client_timestamp)) ), COUNT(*) 
           FROM (
@@ -362,7 +379,7 @@ const vm = {
         auth: ["superadmin", "admin", "user"]
       },
       {
-        id: 22,
+        id: 203,
         name: "ACTIVE TIME THIS MONTH",
         isCardShown: true,
         isDefaultForChart: true,
@@ -372,6 +389,7 @@ const vm = {
         isForTimeCalc: true,
         color: "warning",
         fa: "stopwatch",
+        cardIdRedirectedOnClickForQuery: null,
         get query() {
           return `${
             vm.qr.cyclingTime
@@ -384,7 +402,7 @@ const vm = {
         auth: ["superadmin", "admin", "user"]
       },
       {
-        id: 25,
+        id: 204,
         name: "ACTIVE TIME PER MONTH THIS YEAR",
         isCardShown: false,
         isDefaultForChart: false,
@@ -394,6 +412,7 @@ const vm = {
         isForTimeCalc: true,
         color: "warning",
         fa: "stopwatch",
+        cardIdRedirectedOnClickForQuery: null,
         get query() {
           return `${
             vm.qr.cyclingTime
@@ -406,7 +425,7 @@ const vm = {
         auth: ["superadmin", "admin", "user"]
       },
       {
-        id: 23,
+        id: 205,
         name: "ACTIVE TIME THIS WEEK",
         isCardShown: false,
         isDefaultForChart: false,
@@ -416,6 +435,7 @@ const vm = {
         isForTimeCalc: true,
         color: "warning",
         fa: "stopwatch",
+        cardIdRedirectedOnClickForQuery: null,
         get query() {
           return `${
             vm.qr.cyclingTime
@@ -428,7 +448,7 @@ const vm = {
         auth: ["superadmin", "admin", "user"]
       },
       {
-        id: 24,
+        id: 206,
         name: "ACTIVE TIME TODAY",
         isCardShown: true,
         isDefaultForChart: false,
@@ -438,6 +458,7 @@ const vm = {
         isForTimeCalc: true,
         color: "success",
         fa: "stopwatch",
+        cardIdRedirectedOnClickForQuery: null,
         get query() {
           return `${
             vm.qr.cyclingTime
@@ -446,7 +467,7 @@ const vm = {
         auth: ["superadmin", "admin", "user"]
       }
       // {
-      //   id: 23,
+      //   id: 207,
       //   name: "ACTIVE TIME FOR THE LAST 7 DAYS",
       //   isDefaultForChart: false,//
       //   isForLeftXaxis: true,
@@ -455,6 +476,7 @@ const vm = {
       //   isForTimeCalc: true,
       //   color: "warning",
       //   fa: "stopwatch",
+      // cardIdRedirectedOnClickForQuery: null,
       //   get query() {
       //     return `${
       //       vm.qr.cyclingTime
@@ -551,17 +573,10 @@ const vm = {
         "Dec"
       ]
     },
-    datasets: {
-      week: [
-        // { date: "2017-01-26", label: "Mon", time: 50 },
-        // { date: "2017-01-27", label: "Tues", time: 40 },
-        // { date: "2017-01-28", label: "Wed", time: 60 },
-        // { date: "2017-01-26", label: "Thur", time: 100 },
-        // { date: "2017-01-27", label: "Fri", time: 10 },
-        // { date: "2017-01-28", label: "Sat", time: 10 },
-        // { date: "2017-01-29", label: "Sun", time: 30 }
-      ]
-    }
+    datasets: [
+      // { date: "2017-01-26", label: "Mon", time: 50 },
+      // { date: "2017-01-27", label: "Tues", time: 40 },
+    ]
   },
   average: {
     admin_monthly: { o_id: null, usersDailyAvgThisMonth: 0 }

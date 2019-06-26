@@ -2,23 +2,38 @@ if (!!myBarChart) {
   let defaultChartData = myBarChart;
 }
 
+let el_cards = document.getElementsByClassName("mycard");
+
 let el_ChartTabs = document.getElementsByClassName("chart-tab");
 let el_dateRange = document.getElementById("date-range");
-// updateChart();
-let updateChart = function(e) {
-  let tabValue, data;
-  if (myBarChart.data.labels.length > 0) {
-    console.log("this: ", this);
-    console.log("e: ", e);
-    console.log("value: ", this.getAttribute("value"));
-    tabValue = this.getAttribute("value");
-    h.removeData(myBarChart);
-    data = { periodTab: tabValue };
-  } else {
-    data = "";
-  }
 
-  h.postData("/barchart", data)
+// console.log("createchart at card is clicked");
+// get unique classname from the card, and post.
+// in the route, create the chart.
+
+// let getTabValue = function(self) {
+//   // if (myBarChart.data.labels.length > 0) {
+//   // console.log("this: ", this);
+//   // console.log("e: ", e);
+//   // console.log("value: ", this.getAttribute("value"));
+//   return { periodTab: self.getAttribute("value") };
+//   // } else {
+//   // return "";
+//   // }
+// };
+
+let getCardClassNm = function(self) {
+  return;
+};
+
+let updateChartWithTabs = function(e) {
+  updateChart("/barchart", { periodTab: this.getAttribute("value") });
+};
+let updateChartWithCards = function(e) {
+  updateChart("/barchartforcard", { card_id: this.getAttribute("value") });
+};
+let updateChart = function(url, reqBodyData) {
+  h.postData(url, reqBodyData)
     .then(resMyJson => {
       console.log("resMyJson: ", resMyJson);
       let labelArray = resMyJson.labels;
@@ -31,8 +46,11 @@ let updateChart = function(e) {
     .catch(error => console.error(error));
 };
 
+Array.prototype.forEach.call(el_cards, function(card) {
+  card.addEventListener("click", updateChartWithCards);
+});
 Array.prototype.forEach.call(el_ChartTabs, function(tab) {
-  tab.addEventListener("click", updateChart);
+  tab.addEventListener("click", updateChartWithTabs);
 });
 
 // chartTab.type = "button";

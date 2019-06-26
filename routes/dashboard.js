@@ -239,6 +239,88 @@ router.get("/dashboard/:uuid", async function(req, res) {
   }
 });
 
+router.post("/barchartforcard", async function(req, res) {
+  console.log("card clicked=====================");
+  const client = await pool.connect();
+  vm.stateFlag = "0700";
+  try {
+    let resArea, showStatePosted;
+    cardIdClickedOn = req.body.card_id;
+    console.log("TCL: cardIdClickedOn", cardIdClickedOn);
+    console.log("vm.currentShowType:", vm.currentShowType);
+
+    vm.stateFlag = "0701";
+    for await (let card of vm.cards[`for${vm.currentShowType}`]) {
+      console.log("in for of loop and before if");
+      console.log("card.id: ", typeof card.id);
+      console.log("cardIdClickedOn: ", typeof cardIdClickedOn);
+      // if (cardIdClickedOn.equals(card.id)) {
+      //   console.log("finally in...");
+      if (card.id == cardIdClickedOn) {
+        console.log("finally in...");
+        // showStatePosted = card.auth[card.auth.length - 1];
+        // if (card.isForLeftXaxis) {
+        if (card["cardIdRedirectedOnClickForQuery"] != null) {
+          console.log(
+            "in cardIdRedirectedOnClickForQuery!!",
+            card.cardIdRedirectedOnClickForQuery
+          );
+          if (vm.currentShowType === "superadmin") {
+            resArea = await client.query(
+              getQueryFromRedirectedCard(card.cardIdRedirectedOnClickForQuery)
+            );
+          } else if (vm.currentShowType === "admin") {
+            resArea = await client.query(
+              getQueryFromRedirectedCard(card.cardIdRedirectedOnClickForQuery),
+              [vm.currentShow.o_id]
+            );
+          } else if (vm.currentShowType === "user") {
+            resArea = await client.query(
+              getQueryFromRedirectedCard(card.cardIdRedirectedOnClickForQuery),
+              [vm.currentShow.id]
+            );
+          }
+        }
+      }
+    }
+    function getQueryFromRedirectedCard(id) {
+      for (let card of vm.cards[`for${vm.currentShowType}`]) {
+        if (card.id === id) {
+          return card.query;
+        }
+      }
+    }
+
+    vm.stateFlag = "0710";
+    resArea = resArea.rows;
+    console.log("TCL: forawait -> ###resArea", resArea);
+
+    vm.stateFlag = "0600";
+    let labels = [],
+      data = [];
+
+    resArea.map(set => {
+      labels.push(set.date);
+      data.push(set.count);
+    });
+
+    let result = { labels: labels, data: data };
+
+    res.send(result);
+  } catch (ex) {
+    // await client.query('ROLLBACK')
+    console.log(`something went wrong ${ex} at ${vm.stateFlag}`);
+    vm.currentShow = null;
+    // TODO: modify redirect destination
+    setTimeout(function redirect() {
+      res.redirect(`/dashboard/${req.params.uuid}`);
+    }, 5000);
+  } finally {
+    await client.release();
+    console.log("Client disconnected");
+  }
+});
+
 router.post("/barchart", async function(req, res) {
   const client = await pool.connect();
   vm.stateFlag = "0500";
