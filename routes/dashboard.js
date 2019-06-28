@@ -136,71 +136,112 @@ router.get("/dashboard/:uuid", async function(req, res) {
     // =========================================================
     // | DASHBOARD CONTENTS - CARD(only w/ query) - start | defines card.number
     // =========================================================
-    let resArea = undefined;
+    let resChart = undefined;
     let calendarType;
+    let chartDataForDefaultCard;
+    let tempChartDataForDefaultCard = {};
     vm.stateFlag = "0200";
     for await (let card of vm.cards[`for${vm.currentShowType}`]) {
-      if (card.isCardShown) {
-        let resCard, timeCycledInMilSec;
-        switch (vm.currentShowType) {
-          case "superadmin":
-            vm.stateFlag = "0210";
-            if (!!card.query) resCard = await client.query(card.query);
-            break;
-          case "admin":
-            vm.stateFlag = "0220";
-            if (!!card.query)
+      if (card.isCardShown && !!card.query) {
+        let resCard, timeCycledInMilSec, period, yAxisTickMark;
+        let isRedirected = false;
+
+        if (card["idRedirectedOnClickForQuery"] == null) {
+          switch (vm.currentShowType) {
+            case "superadmin":
+              vm.stateFlag = "0210";
+              resCard = await client.query(card.query);
+              break;
+            case "admin":
+              vm.stateFlag = "0220";
               resCard = await client.query(card.query, [vm.currentShow.o_id]);
-            break;
-          case "user":
-            console.log("user card ----");
-            if (!!card.query) {
+              break;
+            case "user":
+              console.log("user card ----");
               vm.stateFlag = "0230";
               resCard = await client.query(card.query, [vm.currentShow.id]);
               timeCycledInMilSec = c.getTimeCycledInMilSec(resCard.rows);
-              if (
-                card.isForLeftXaxis &&
-                card.isDefaultForChart &&
-                // TODO: delete the following line so the chart displays always no matter the data exists
-                timeCycledInMilSec != 0
-              ) {
-                vm.stateFlag = "0240";
-                resArea = resCard.rows;
-                calendarType = card.periodTab;
-              }
-              // else if (
-              //   card.name === "ACTIVE TIME THIS WEEK" &&
-              //   timeCycledInMilSec != 0
-              // ) {
-              //   vm.tempResArea = resCard.rows;
-              //   vm.tempCalendarType = card.periodTab;
-              // }
-            }
-            break;
+              break;
+          }
+        } else {
+          isRedirected = true;
+          console.log(
+            "in idRedirectedOnClickForQuery!!",
+            card.idRedirectedOnClickForQuery
+          );
+          if (vm.currentShowType === "superadmin") {
+            resCard = await client.query(
+              c.getQueryAndValueFromRedirectedCard(
+                card.idRedirectedOnClickForQuery
+              )["query"]
+            );
+          } else if (vm.currentShowType === "admin") {
+            resCard = await client.query(
+              c.getQueryAndValueFromRedirectedCard(
+                card.idRedirectedOnClickForQuery
+              )["query"],
+              [vm.currentShow.o_id]
+            );
+          } else if (vm.currentShowType === "user") {
+            resCard = await client.query(
+              c.getQueryAndValueFromRedirectedCard(
+                card.idRedirectedOnClickForQuery
+              )["query"],
+              [vm.currentShow.id]
+            );
+          }
+          period = card.period;
+          yAxisTickMark = card.yAxisTickMark;
         }
+
         // if card.number should be resCard.rowCount, isForTimeCalc is set to false
         if (!!card.query && card.isForTimeCalc) {
           vm.stateFlag = "0250";
           card.number = c.convMilSecToFin(timeCycledInMilSec);
-        } else if (!!card.query && !card.isForTimeCalc) {
+        } else if (!!card.query && !card.isForTimeCalc && card.number != null) {
           vm.stateFlag = "0260";
           card.number = resCard.rowCount;
         }
+        // TODO: idRedirectedOnClickForQuery
+        // MUST GET ONLY ONE default (OR/OTHERWISE, the last) set of data in the vm.cards object because it's default.
+        tempChartDataForDefaultCard = c.checkCardForDefaultChartAndStoreData(
+          card,
+          resCard
+        );
+        if (tempChartDataForDefaultCard.exists) {
+          chartDataForDefaultCard = tempChartDataForDefaultCard;
+          if (isRedirected === true) {
+            chartDataForDefaultCard.period = period;
+            chartDataForDefaultCard.yAxisTickMark = yAxisTickMark;
+          }
+        }
+        // console.log("chartDataForDefaultCard: ", chartDataForDefaultCard);
       }
     }
-
+    vm.stateFlag = "0301";
+    console.log(vm.stateFlag);
+    c.createBarChart(
+      chartDataForDefaultCard.reqFrom,
+      chartDataForDefaultCard.resChart,
+      chartDataForDefaultCard.period,
+      chartDataForDefaultCard.yAxisTickMark,
+      c.getFirstDayOfWeek(chartDataForDefaultCard.period)
+    );
+    vm.stateFlag = "0308";
+    console.log(vm.stateFlag);
     // =========================================================
     // | DASHBOARD CONTENTS - AREA-CHART - start |
     // =========================================================
-    // console.log("resArea: ", resArea);
-    if (
-      typeof resArea != "undefined" &&
-      typeof resArea[0].packet_generated != "undefined"
-    ) {
-      vm.stateFlag = "0300";
-      c.createBarChart(resArea, calendarType);
-    }
-    // console.log("TCL: vm.area.datasets", vm.area.datasets);
+    // console.log("resChart: ", resChart);
+
+    // if (
+    //   typeof resChart != "undefined" &&
+    //   typeof resChart[0].packet_generated != "undefined"
+    // ) {
+    //   vm.stateFlag = "0300";
+    //   c.createBarChart(resChart, calendarType);
+    // }
+
     // resBar = await client.query(m.bar.find)
     // =========================================================
     // | DASHBOARD CONTENTS - end |
@@ -239,13 +280,31 @@ router.get("/dashboard/:uuid", async function(req, res) {
   }
 });
 
-router.post("/barchartforcard", async function(req, res) {
+router.post("/createchart", async function(req, res) {
+  try {
+    // res.send(dataForChartArea);
+  } catch (ex) {
+    // await client.query('ROLLBACK')
+    console.log(`something went wrong ${ex} at ${vm.stateFlag}`);
+    vm.currentShow = null;
+    // TODO: modify redirect destination
+    setTimeout(function redirect() {
+      res.redirect(`/dashboard/${req.params.uuid}`);
+    }, 5000);
+  } finally {
+    await client.release();
+    console.log("Client disconnected");
+  }
+});
+
+router.post("/updatechartforcard", async function(req, res) {
   console.log("card clicked=====================");
   const client = await pool.connect();
   vm.stateFlag = "0700";
   try {
-    let resArea, showStatePosted;
+    let resChart, showStatePosted;
     cardIdClickedOn = req.body.card_id;
+    let reqType = "card";
     console.log("TCL: cardIdClickedOn", cardIdClickedOn);
     console.log("vm.currentShowType:", vm.currentShowType);
 
@@ -260,52 +319,74 @@ router.post("/barchartforcard", async function(req, res) {
         console.log("finally in...");
         // showStatePosted = card.auth[card.auth.length - 1];
         // if (card.isForLeftXaxis) {
-        if (card["cardIdRedirectedOnClickForQuery"] != null) {
+        if (card["idRedirectedOnClickForQuery"] != null) {
           console.log(
-            "in cardIdRedirectedOnClickForQuery!!",
-            card.cardIdRedirectedOnClickForQuery
+            "in idRedirectedOnClickForQuery!!",
+            card.idRedirectedOnClickForQuery
           );
           if (vm.currentShowType === "superadmin") {
-            resArea = await client.query(
-              getQueryFromRedirectedCard(card.cardIdRedirectedOnClickForQuery)
+            resChart = await client.query(
+              c.getQueryAndValueFromRedirectedCard(
+                card.idRedirectedOnClickForQuery
+              )["query"]
             );
           } else if (vm.currentShowType === "admin") {
-            resArea = await client.query(
-              getQueryFromRedirectedCard(card.cardIdRedirectedOnClickForQuery),
+            resChart = await client.query(
+              c.getQueryAndValueFromRedirectedCard(
+                card.idRedirectedOnClickForQuery
+              )["query"],
               [vm.currentShow.o_id]
             );
           } else if (vm.currentShowType === "user") {
-            resArea = await client.query(
-              getQueryFromRedirectedCard(card.cardIdRedirectedOnClickForQuery),
+            resChart = await client.query(
+              c.getQueryAndValueFromRedirectedCard(
+                card.idRedirectedOnClickForQuery
+              )["query"],
               [vm.currentShow.id]
             );
           }
-        }
-      }
-    }
-    function getQueryFromRedirectedCard(id) {
-      for (let card of vm.cards[`for${vm.currentShowType}`]) {
-        if (card.id === id) {
-          return card.query;
+        } else {
+          resChart = await client.query(card.query);
         }
       }
     }
 
     vm.stateFlag = "0710";
-    resArea = resArea.rows;
-    console.log("TCL: forawait -> ###resArea", resArea);
+    resChart = resChart.rows;
+    console.log("TCL: forawait -> ###resChart", resChart);
 
+    c.createBarChart(reqType, resChart, null, null);
     vm.stateFlag = "0600";
+
     let labels = [],
       data = [];
-
-    resArea.map(set => {
-      labels.push(set.date);
-      data.push(set.count);
+    // TODO: change vm.area
+    vm.area.datasets.forEach(dataset => {
+      labels.push(dataset.label);
+      data.push(dataset.data);
     });
+    // TODO: manipulate labels into such as "Mon"
+    let result = {
+      date: labels,
+      labels: labels,
+      data: data,
+      yAxisUnit: "min."
+    };
+    // let labels = [],
+    //   data = [];
 
-    let result = { labels: labels, data: data };
-
+    // resChart.map(set => {
+    //   labels.push(set.date);
+    //   data.push(set.count);
+    // });
+    // TODO: use c.createBarChart instead of the following line
+    // let dataForChartArea = {
+    //   data: labels,
+    //   labels: labels,
+    //   data: data,
+    //   yAxisUnit: "cust."
+    // };
+    // console.log(dataForChartArea);
     res.send(result);
   } catch (ex) {
     // await client.query('ROLLBACK')
@@ -321,34 +402,35 @@ router.post("/barchartforcard", async function(req, res) {
   }
 });
 
-router.post("/barchart", async function(req, res) {
+router.post("/updatechart", async function(req, res) {
   const client = await pool.connect();
   vm.stateFlag = "0500";
   try {
-    let resArea;
-    userPickedPeriodTab = req.body.periodTab;
-    console.log("TCL: userPickedPeriodTab", userPickedPeriodTab);
+    let resChart;
+    period = req.body.period;
+    let reqFrom = "period";
+    console.log("TCL: period", period);
     console.log("vm.currentShowType:", vm.currentShowType);
 
     vm.stateFlag = "0501";
-    // let resArea = vm.tempResArea;
-    let firstDayOfWeek;
-    if (userPickedPeriodTab === "week") {
-      firstDayOfWeek = await client.query(
-        `select * from date_trunc('week', date(${vm.today}))`
-      );
-      firstDayOfWeek = firstDayOfWeek.rows[0].date_trunc;
-    } else {
-      firstDayOfWeek = "";
-    }
+    // let resChart = vm.tempresChart;
+    let firstDayOfWeek = c.getFirstDayOfWeek(period);
+    // if (period === "week") {
+    //   firstDayOfWeek = await client.query(
+    //     `select * from date_trunc('week', date(${vm.today}))`
+    //   );
+    //   firstDayOfWeek = firstDayOfWeek.rows[0].date_trunc;
+    // } else {
+    //   firstDayOfWeek = "";
+    // }
 
     vm.stateFlag = "0510";
     // get response only from cards that correspond with user-picked period
     for await (let card of vm.cards[`for${vm.currentShowType}`]) {
-      if (card.periodTab === userPickedPeriodTab) {
+      if (card.period === period) {
         if (card.isForLeftXaxis) {
-          resArea = await client.query(card.query, [vm.currentShow.id]);
-          resArea = resArea.rows;
+          resChart = await client.query(card.query, [vm.currentShow.id]);
+          resChart = resChart.rows;
         } else {
         }
         // break;
@@ -356,17 +438,22 @@ router.post("/barchart", async function(req, res) {
     }
 
     vm.stateFlag = "0520";
-    c.createBarChart(resArea, userPickedPeriodTab, firstDayOfWeek);
+    c.createBarChart(reqFrom, resChart, period, firstDayOfWeek);
 
     vm.stateFlag = "0600";
     let labels = [],
       data = [];
     vm.area.datasets.forEach(dataset => {
       labels.push(dataset.label);
-      data.push(dataset.time);
+      data.push(dataset.data);
     });
-
-    let result = { labels: labels, data: data };
+    // TODO: manipulate labels into such as "Mon"
+    let result = {
+      date: labels,
+      labels: labels,
+      data: data,
+      yAxisUnit: "min."
+    };
 
     res.send(result);
   } catch (ex) {

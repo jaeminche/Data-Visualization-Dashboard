@@ -1,6 +1,7 @@
-if (!!myBarChart) {
-  let defaultChartData = myBarChart;
-}
+let stateFlag = "0001";
+// if (!!myBarChart) {
+//   let defaultChartData = myBarChart;
+// }
 
 let el_cards = document.getElementsByClassName("mycard");
 
@@ -16,7 +17,7 @@ let el_dateRange = document.getElementById("date-range");
 //   // console.log("this: ", this);
 //   // console.log("e: ", e);
 //   // console.log("value: ", this.getAttribute("value"));
-//   return { periodTab: self.getAttribute("value") };
+//   return { period: self.getAttribute("value") };
 //   // } else {
 //   // return "";
 //   // }
@@ -27,42 +28,73 @@ let getCardClassNm = function(self) {
 };
 
 let updateChartWithTabs = function(e) {
-  updateChart("/barchart", { periodTab: this.getAttribute("value") });
+  stateFlag = "0020";
+  updateChart("/updatechart", { period: this.getAttribute("value") });
 };
 let updateChartWithCards = function(e) {
-  updateChart("/barchartforcard", { card_id: this.getAttribute("value") });
+  stateFlag = "0030";
+  updateChart("/updatechartforcard", { card_id: this.getAttribute("value") });
 };
+
+/**
+ * @description Updates chart
+ * @param {string} url
+ * @param {object} reqBodyData from user's input value from tab or card
+ */
 let updateChart = function(url, reqBodyData) {
+  stateFlag = "0050";
+  // TODO: THERE MUST BE CREATED A CHART BY USING CREATEBARCHART() THEREFORE, MAKE ANOTHER ROUTER FOR CREATING A CHART
   h.postData(url, reqBodyData)
     .then(resMyJson => {
+      stateFlag = "0060";
       console.log("resMyJson: ", resMyJson);
       let labelArray = resMyJson.labels;
       let dataArray = resMyJson.data;
-      h.writeData(myBarChart, labelArray, dataArray);
+      let yAxisTickMark = resMyJson.yAxisTickMark;
+      h.writeData(myBarChart, labelArray, dataArray, yAxisTickMark);
       el_dateRange.textContent = `${labelArray[0]} ~ ${
         labelArray[labelArray.length - 1]
       }`;
     }) // JSON-string from `response.json()` call
-    .catch(error => console.error(error));
+    .catch(error => console.error(error + " at " + stateFlag));
 };
 
-Array.prototype.forEach.call(el_cards, function(card) {
-  card.addEventListener("click", updateChartWithCards);
-});
-Array.prototype.forEach.call(el_ChartTabs, function(tab) {
-  tab.addEventListener("click", updateChartWithTabs);
-});
+// TODO: the first eventlistener should make a bar chart, not a STACKED one
+// Array.prototype.forEach.call(el_cards, function(card) {
+//   stateFlag = "0005";
+//   card.addEventListener("click", updateChartWithCards);
+// });
+// Array.prototype.forEach.call(el_ChartTabs, function(tab) {
+//   stateFlag = "0010";
+//   tab.addEventListener("click", updateChartWithTabs);
+// });
 
 // chartTab.type = "button";
 
 let h = {
-  writeData: function(chart, labelArr, dataArr) {
+  writeData: function(chart, labelArr, nestedDataArr, yAxisTickMark) {
+    console.log("thischart: ", chart);
     //////
     chart.data.labels = labelArr;
-    chart.data.datasets.forEach(dataset => {
-      dataset.data = dataArr;
+    chart.data.datasets.forEach((dataset, i) => {
+      dataset.data = nestedDataArr[i];
     });
+    yAxisTickMark = yAxisTickMark;
+    // chart.myOptions.yAxisUnit = yAxisUnit;
     //////
+    chart.update();
+  },
+
+  updateConfigByMutating: function(chart) {
+    chart.options.title.text = "new title";
+    chart.update();
+  },
+
+  addData: function(chart, label, data) {
+    chart.data.labels.push(label);
+    chart.data.datasets.forEach(dataset => {
+      dataset.data.push(data);
+    });
     chart.update();
   },
 
@@ -74,7 +106,7 @@ let h = {
     chart.update();
   },
 
-  postData: async function(url = "/barchart", data = { periodTab: "month" }) {
+  postData: async function(url = "/barchart", data = { period: "month" }) {
     // Default options are marked with *
     const response = await fetch(url, {
       method: "POST",

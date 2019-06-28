@@ -75,25 +75,24 @@
             }
 
             // Area Chart Example
-            var ctx = document.getElementById("myAreaChart")
+            var ctx = document.getElementById("myAreaChart");
+            let yAxisTickMark = <%- JSON.stringify(vm.chart.myOptions.yAxisTickMark) %>
+            // let yAxisTickMark = "sample unit"
             // .getContext('2d');
-            var myBarChart = new Chart(ctx, {
+            let defaultChart = {
               type: "bar",
               data: {
-                labels: <%- JSON.stringify(vm.area.datasets.map(set => set.label)) %>,
-                //  || ["sample label 1", "sample label 2"]
+                labels: <%- JSON.stringify(vm.chart.data.labels) %>,
                 datasets: [
                   {
                     label: "Cycling Time",
-                    data: <%- JSON.stringify(vm.area.datasets.map(set => set.time)) %>,
-                    //  || [13, 15]
+                    data: <%- JSON.stringify(vm.chart.data.datasets) %>,
                     backgroundColor: "rgb(187,181,153, 1)"
                     // borderColor: "rgba(78, 115, 223, 1)"
                   }, 
                   {
                     label: "Taximode",
-                    data: <%- JSON.stringify(vm.area.datasets.map(set => set.time)) %>,
-                    //  || [2, 8]
+                    data: <%- JSON.stringify(vm.chart.data.datasets) %>,
                     backgroundColor: "rgb(187,181,153, 0.5)"
                   }
                 ]
@@ -138,7 +137,7 @@
                         padding: 10,
                         // Include a dollar sign in the ticks
                         callback: function(value, index, values) {
-                          return number_format(value) + "min.";
+                          return number_format(value) + yAxisTickMark;
                         }
                       },
                       // TODO: check and delete if not needed                      
@@ -174,13 +173,14 @@
                       var datasetLabel =
                         chart.datasets[tooltipItem.datasetIndex].label || "";
                       return (
-                        datasetLabel + ": " + number_format(tooltipItem.yLabel) + " min."
+                        datasetLabel + ": " + number_format(tooltipItem.yLabel) + yAxisTickMark
                       );
                     }
                   }
                 }
               }
-            });
+            }
+            var myBarChart = new Chart(ctx, defaultChart);
 
             // TODO: Reference to async updates
             // document
