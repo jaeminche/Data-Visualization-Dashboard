@@ -162,8 +162,14 @@ const c = {
     let dates = [],
       chartDataLabels = [],
       chartDataDatasets = [];
-
-    if (reqFrom === "period") {
+    if (reqFrom === "card") {
+      vm.stateFlag = "0543";
+      resRows.forEach(row => {
+        dates.push(row.date);
+        chartDataLabels.push(row.date);
+        chartDataDatasets.push(row.count);
+      });
+    } else if (reqFrom === "period") {
       vm.stateFlag = "0521";
       let cMonth, cYear;
       let tempTimestamp = resRows[0].packet_generated;
@@ -233,17 +239,11 @@ const c = {
         chartDataLabels.push(set.label);
         chartDataDatasets.push(set.data);
       });
-    } else if (reqFrom === "card") {
-      vm.stateFlag = "0543";
-      resRows.forEach(row => {
-        dates.push(row.date);
-        chartDataLabels.push(row.date);
-        chartDataDatasets.push(row.count);
-      });
-      // dataset = this.genDataset(set.date, set.count, "cust.");
-      // dataForBarChart.push(dataset);
-      vm.stateFlag = "0545";
     }
+    // dataset = this.genDataset(set.date, set.count, "cust.");
+    // dataForBarChart.push(dataset);
+    vm.stateFlag = "0545";
+
     vm.stateFlag = "0549";
 
     vm.chart.data.labels = chartDataLabels;

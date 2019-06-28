@@ -27,15 +27,15 @@ router.get("/dashboard/:uuid", async function(req, res) {
     console.log("================ dashboard pg starts ===============");
     // console.log("m.jwt: ", m.jwt);
     console.log("m.currentLogin: ", vm.currentLogin);
-    // =========================================================
-    // | Set CURRENT LOGIN & currentLoginType start |
-    // =========================================================
+    // *========================================
+    // *| Set current LOGIN & currentLoginType |
+    // *========================================
     vm.stateFlag = "0010";
     c.setCurrentType(vm.currentLogin, "currentLoginType");
     // console.log("currentLoginType", m.currentLoginType);
-    // =========================================================
-    // | Set CURRENT SHOW & currentShowType start |
-    // =========================================================
+    // *========================================
+    // *| Set current SHOW & currentShowType |
+    // *========================================
     if (vm.currentShow === null) {
       // when initial launch on the app
       vm.stateFlag = "0020";
@@ -44,7 +44,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
     } else {
       // from second launch on the app
       // check if the params.uuid is from org or user, if not the case of user, try fetching res with params.o.uuid in the next if-block.
-      vm.stateFlag = "0025";
+      vm.stateFlag = "0030";
       let currentShow = await client.query(
         `${vm.userList.findAll.query} WHERE u.uuid = $1`,
         [req.params.uuid]
@@ -68,9 +68,9 @@ router.get("/dashboard/:uuid", async function(req, res) {
     }
     console.log("currentShow: ", vm.currentShow);
     console.log("currentShowType: ", vm.currentShowType);
-    // =========================================================
-    // | Set ORGLIST & USERLIST start |
-    // =========================================================
+    // *=======================================
+    // * Set ORGLIST & USERLIST start |
+    // *=======================================
     let resOrgList, resUserList, resPie;
     vm.stateFlag = "0100";
     switch (vm.currentLoginType) {
@@ -97,13 +97,11 @@ router.get("/dashboard/:uuid", async function(req, res) {
         ]);
         vm.resUserList = resUserList.rows;
         break;
-      // default:
-      //   break;
     }
 
-    // =========================================================
-    // | DASHBOARD CONTENTS - BAR - start |
-    // =========================================================
+    // *=======================================
+    // *| BAR - start |
+    // *=======================================
     let usersDailyAvgThisMonth;
     if (typeof vm.resUserList != "undefined") {
       vm.stateFlag = "0150";
@@ -113,10 +111,10 @@ router.get("/dashboard/:uuid", async function(req, res) {
         // get accumulated data for one user for the last 30 days
         resBar = await client.query(vm.bar.findOne.query, [user.id]);
         timeCycledInMilSec = c.getTimeCycledInMilSec(resBar.rows);
-
-        // =========================================================
-        // | DASHBOARD - CARD(w/out query) - USERS' DAILY AVERAGE THIS MONTH |
-        // =========================================================
+        // *===================================
+        // *| CARD(w/out query)
+        // *| USERS' DAILY AVERAGE THIS MONTH |
+        // *===================================
         user.dpTime = c.convMilSecToFin(timeCycledInMilSec);
         user.timeCycledInMin = c.convToMin(timeCycledInMilSec);
         user.dpMonthlyAvgTCycled = c.convMilSecToFin(timeCycledInMilSec / 30);
@@ -133,105 +131,100 @@ router.get("/dashboard/:uuid", async function(req, res) {
       // console.log(vm.average.admin_monthly.usersDailyAvgThisMonth);
     }
 
-    // =========================================================
-    // | DASHBOARD CONTENTS - CARD(only w/ query) - start | defines card.number
-    // =========================================================
-    let resChart = undefined;
-    let calendarType;
-    let chartDataForDefaultCard;
-    let tempChartDataForDefaultCard = {};
+    // *=========================================
+    // *| CARD(only w/ query)
+    // *| defines card.number
+    // *=========================================
     vm.stateFlag = "0200";
+    vm.cards.areForChart = false;
     for await (let card of vm.cards[`for${vm.currentShowType}`]) {
       if (card.isCardShown && !!card.query) {
-        let resCard, timeCycledInMilSec, period, yAxisTickMark;
-        let isRedirected = false;
-
-        if (card["idRedirectedOnClickForQuery"] == null) {
-          switch (vm.currentShowType) {
-            case "superadmin":
-              vm.stateFlag = "0210";
-              resCard = await client.query(card.query);
-              break;
-            case "admin":
-              vm.stateFlag = "0220";
-              resCard = await client.query(card.query, [vm.currentShow.o_id]);
-              break;
-            case "user":
-              console.log("user card ----");
-              vm.stateFlag = "0230";
-              resCard = await client.query(card.query, [vm.currentShow.id]);
-              timeCycledInMilSec = c.getTimeCycledInMilSec(resCard.rows);
-              break;
-          }
-        } else {
-          isRedirected = true;
-          console.log(
-            "in idRedirectedOnClickForQuery!!",
-            card.idRedirectedOnClickForQuery
-          );
-          if (vm.currentShowType === "superadmin") {
-            resCard = await client.query(
-              c.getQueryAndValueFromRedirectedCard(
-                card.idRedirectedOnClickForQuery
-              )["query"]
-            );
-          } else if (vm.currentShowType === "admin") {
-            resCard = await client.query(
-              c.getQueryAndValueFromRedirectedCard(
-                card.idRedirectedOnClickForQuery
-              )["query"],
-              [vm.currentShow.o_id]
-            );
-          } else if (vm.currentShowType === "user") {
-            resCard = await client.query(
-              c.getQueryAndValueFromRedirectedCard(
-                card.idRedirectedOnClickForQuery
-              )["query"],
-              [vm.currentShow.id]
-            );
-          }
-          period = card.period;
-          yAxisTickMark = card.yAxisTickMark;
+        let resCard, timeCycledInMilSec;
+        switch (vm.currentShowType) {
+          case "superadmin":
+            vm.stateFlag = "0210";
+            resCard = await client.query(card.query);
+            break;
+          case "admin":
+            vm.stateFlag = "0220";
+            resCard = await client.query(card.query, [vm.currentShow.o_id]);
+            break;
+          case "user":
+            console.log("user card ----");
+            vm.stateFlag = "0230";
+            resCard = await client.query(card.query, [vm.currentShow.id]);
+            break;
         }
-
         // if card.number should be resCard.rowCount, isForTimeCalc is set to false
-        if (!!card.query && card.isForTimeCalc) {
+        if (card.isForTimeCalc) {
           vm.stateFlag = "0250";
+          timeCycledInMilSec = c.getTimeCycledInMilSec(resCard.rows);
           card.number = c.convMilSecToFin(timeCycledInMilSec);
-        } else if (!!card.query && !card.isForTimeCalc && card.number != null) {
+        } else if (!card.isForTimeCalc && card.number != null) {
           vm.stateFlag = "0260";
           card.number = resCard.rowCount;
         }
-        // TODO: idRedirectedOnClickForQuery
-        // MUST GET ONLY ONE default (OR/OTHERWISE, the last) set of data in the vm.cards object because it's default.
-        tempChartDataForDefaultCard = c.checkCardForDefaultChartAndStoreData(
-          card,
-          resCard
-        );
-        if (tempChartDataForDefaultCard.exists) {
-          chartDataForDefaultCard = tempChartDataForDefaultCard;
-          if (isRedirected === true) {
-            chartDataForDefaultCard.period = period;
-            chartDataForDefaultCard.yAxisTickMark = yAxisTickMark;
-          }
+      }
+    }
+
+    // *========================================
+    // *| DEFAULT CHART, LOOP OVER CARDS |
+    // *========================================
+    vm.stateFlag = "0200";
+    vm.cards.areForChart = true;
+    for await (let card of vm.cards[`for${vm.currentShowType}`]) {
+      let resChart, period, yAxisTickMark;
+      if (card.isDefaultForChart) {
+        period = card.period;
+        yAxisTickMark = card.yAxisTickMark;
+        if (vm.currentShowType === "superadmin") {
+          resChart = await client.query(card.query);
+        } else if (vm.currentShowType === "admin") {
+          resCard = await client.query(card.query, [vm.currentShow.o_id]);
+        } else if (vm.currentShowType === "user") {
+          resChart = await client.query(card.query, [vm.currentShow.id]);
         }
+
+        c.createBarChart(
+          "card",
+          resChart.rows,
+          period,
+          yAxisTickMark,
+          c.getFirstDayOfWeek(period)
+        );
+        vm.stateFlag = "0308";
+        console.log(vm.stateFlag);
+        break; // !MUST GET ONLY ONE default (OR/OTHERWISE, the FIRST) set of data in the vm.cards object because it's default.
+        // TODO: idRedirectedForChartQuery
+
+        // tempChartDataForDefaultCard = c.checkCardForDefaultChartAndStoreData(
+        //   card,
+        //   resChart
+        // );
+        // if (tempChartDataForDefaultCard.exists) {
+        //   chartDataForDefaultCard = tempChartDataForDefaultCard;
+        //   if (forChart === true) {
+        //     chartDataForDefaultCard.period = period;
+        //     chartDataForDefaultCard.yAxisTickMark = yAxisTickMark;
+        //   }
+        // }
         // console.log("chartDataForDefaultCard: ", chartDataForDefaultCard);
       }
     }
+
     vm.stateFlag = "0301";
     console.log(vm.stateFlag);
-    c.createBarChart(
-      chartDataForDefaultCard.reqFrom,
-      chartDataForDefaultCard.resChart,
-      chartDataForDefaultCard.period,
-      chartDataForDefaultCard.yAxisTickMark,
-      c.getFirstDayOfWeek(chartDataForDefaultCard.period)
-    );
-    vm.stateFlag = "0308";
-    console.log(vm.stateFlag);
-    // =========================================================
-    // | DASHBOARD CONTENTS - AREA-CHART - start |
-    // =========================================================
+    // c.createBarChart(
+    //   chartDataForDefaultCard.reqFrom,
+    //   chartDataForDefaultCard.resChart,
+    //   chartDataForDefaultCard.period,
+    //   chartDataForDefaultCard.yAxisTickMark,
+    //   c.getFirstDayOfWeek(chartDataForDefaultCard.period)
+    // );
+    // *=======================================
+    // *| AREA-CHART - start |
+    // *=======================================
+
     // console.log("resChart: ", resChart);
 
     // if (
@@ -243,9 +236,9 @@ router.get("/dashboard/:uuid", async function(req, res) {
     // }
 
     // resBar = await client.query(m.bar.find)
-    // =========================================================
-    // | DASHBOARD CONTENTS - end |
-    // =========================================================
+    // *=======================================
+    // *| PASS IN DATA
+    // *=======================================
     let data = {
       currentLogin: vm.currentLogin,
       currentLoginType: vm.currentLoginType,
@@ -269,7 +262,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
     res.render("dashboard", data);
   } catch (ex) {
     // await client.query('ROLLBACK')
-    console.log(`something went wrong ${ex} at ${vm.stateFlag}`);
+    console.log(`something went wrong ${ex} at ${vm.stateFlag} `);
     vm.currentShow = null;
     setTimeout(function redirect() {
       res.redirect(`/dashboard/${req.params.uuid}`);
@@ -319,28 +312,28 @@ router.post("/updatechartforcard", async function(req, res) {
         console.log("finally in...");
         // showStatePosted = card.auth[card.auth.length - 1];
         // if (card.isForLeftXaxis) {
-        if (card["idRedirectedOnClickForQuery"] != null) {
+        if (card["idRedirectedForChartQuery"] != null) {
           console.log(
-            "in idRedirectedOnClickForQuery!!",
-            card.idRedirectedOnClickForQuery
+            "in idRedirectedForChartQuery!!",
+            card.idRedirectedForChartQuery
           );
           if (vm.currentShowType === "superadmin") {
             resChart = await client.query(
               c.getQueryAndValueFromRedirectedCard(
-                card.idRedirectedOnClickForQuery
+                card.idRedirectedForChartQuery
               )["query"]
             );
           } else if (vm.currentShowType === "admin") {
             resChart = await client.query(
               c.getQueryAndValueFromRedirectedCard(
-                card.idRedirectedOnClickForQuery
+                card.idRedirectedForChartQuery
               )["query"],
               [vm.currentShow.o_id]
             );
           } else if (vm.currentShowType === "user") {
             resChart = await client.query(
               c.getQueryAndValueFromRedirectedCard(
-                card.idRedirectedOnClickForQuery
+                card.idRedirectedForChartQuery
               )["query"],
               [vm.currentShow.id]
             );
