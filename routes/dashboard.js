@@ -136,81 +136,55 @@ router.get("/dashboard/:uuid", async function(req, res) {
     // *| defines card.number
     // *=========================================
     vm.stateFlag = "0200";
-    vm.cards.areForChart = false;
-    for await (let card of vm.cards[`for${vm.currentShowType}`]) {
-      if (card.isCardShown && !!card.query) {
-        let resCard, timeCycledInMilSec;
-        switch (vm.currentShowType) {
-          case "superadmin":
-            vm.stateFlag = "0210";
-            resCard = await client.query(card.query);
-            break;
-          case "admin":
-            vm.stateFlag = "0220";
-            resCard = await client.query(card.query, [vm.currentShow.o_id]);
-            break;
-          case "user":
-            console.log("user card ----");
-            vm.stateFlag = "0230";
-            resCard = await client.query(card.query, [vm.currentShow.id]);
-            break;
-        }
-        // if card.number should be resCard.rowCount, isForTimeCalc is set to false
-        if (card.isForTimeCalc) {
-          vm.stateFlag = "0250";
-          timeCycledInMilSec = c.getTimeCycledInMilSec(resCard.rows);
-          card.number = c.convMilSecToFin(timeCycledInMilSec);
-        } else if (!card.isForTimeCalc && card.number != null) {
-          vm.stateFlag = "0260";
-          card.number = resCard.rowCount;
-        }
-      }
-    }
+    let forChart = false;
+    await c.updateViewForCardsOrReturnResForChartQuery(client, forChart);
 
     // *========================================
     // *| DEFAULT CHART, LOOP OVER CARDS |
     // *========================================
     vm.stateFlag = "0200";
-    vm.cards.areForChart = true;
-    for await (let card of vm.cards[`for${vm.currentShowType}`]) {
-      let resChart, period, yAxisTickMark;
-      if (card.isDefaultForChart) {
-        period = card.period;
-        yAxisTickMark = card.yAxisTickMark;
-        if (vm.currentShowType === "superadmin") {
-          resChart = await client.query(card.query);
-        } else if (vm.currentShowType === "admin") {
-          resCard = await client.query(card.query, [vm.currentShow.o_id]);
-        } else if (vm.currentShowType === "user") {
-          resChart = await client.query(card.query, [vm.currentShow.id]);
-        }
+    forChart = true;
+    await c.updateViewForCardsOrReturnResForChartQuery(client, forChart);
+    // vm.cards.areForChart = true;
+    // for await (let card of vm.cards[`for${vm.currentShowType}`]) {
+    //   let resChart, period, yAxisTickMark;
+    //   if (card.isDefaultForChart) {
+    //     period = card.period;
+    //     yAxisTickMark = card.yAxisTickMark;
+    //     if (vm.currentShowType === "superadmin") {
+    //       resChart = await client.query(card.query);
+    //     } else if (vm.currentShowType === "admin") {
+    //       resCard = await client.query(card.query, [vm.currentShow.o_id]);
+    //     } else if (vm.currentShowType === "user") {
+    //       resChart = await client.query(card.query, [vm.currentShow.id]);
+    //     }
 
-        c.createBarChart(
-          "card",
-          resChart.rows,
-          period,
-          yAxisTickMark,
-          c.getFirstDayOfWeek(period)
-        );
-        vm.stateFlag = "0308";
-        console.log(vm.stateFlag);
-        break; // !MUST GET ONLY ONE default (OR/OTHERWISE, the FIRST) set of data in the vm.cards object because it's default.
-        // TODO: idRedirectedForChartQuery
+    // await c.createBarChart(
+    //   "card",
+    //   resChart.rows,
+    //   period,
+    //   yAxisTickMark,
+    //   c.getFirstDayOfWeek(period)
+    // );
+    //     vm.stateFlag = "0308";
+    //     console.log(vm.stateFlag);
+    //     break; // !MUST GET ONLY ONE default (OR/OTHERWISE, the FIRST) set of data in the vm.cards object because it's default.
+    //     // TODO: idRedirectedForChartQuery
 
-        // tempChartDataForDefaultCard = c.checkCardForDefaultChartAndStoreData(
-        //   card,
-        //   resChart
-        // );
-        // if (tempChartDataForDefaultCard.exists) {
-        //   chartDataForDefaultCard = tempChartDataForDefaultCard;
-        //   if (forChart === true) {
-        //     chartDataForDefaultCard.period = period;
-        //     chartDataForDefaultCard.yAxisTickMark = yAxisTickMark;
-        //   }
-        // }
-        // console.log("chartDataForDefaultCard: ", chartDataForDefaultCard);
-      }
-    }
+    //     // tempChartDataForDefaultCard = c.checkCardForDefaultChartAndStoreData(
+    //     //   card,
+    //     //   resChart
+    //     // );
+    //     // if (tempChartDataForDefaultCard.exists) {
+    //     //   chartDataForDefaultCard = tempChartDataForDefaultCard;
+    //     //   if (forChart === true) {
+    //     //     chartDataForDefaultCard.period = period;
+    //     //     chartDataForDefaultCard.yAxisTickMark = yAxisTickMark;
+    //     //   }
+    //     // }
+    //     // console.log("chartDataForDefaultCard: ", chartDataForDefaultCard);
+    //   }
+    // }
 
     vm.stateFlag = "0301";
     console.log(vm.stateFlag);

@@ -128,30 +128,95 @@ const c = {
     }
   },
 
-  checkCardForDefaultChartAndStoreData: function(card, resCard) {
-    let exists = false;
-    let reqFrom = "card";
-    let resChart, period, yAxisTickMark;
-    // TODO: IMPLEMENT LINES FOR EXCEPTION: THERE COULD BE RESCARD WITH NO ROWS
-    if (card.isForLeftXaxis && card.isDefaultForChart) {
-      vm.stateFlag = "0240";
-      resChart = resCard.rows;
-      period = card.period;
-      yAxisTickMark = card.yAxisTickMark;
-      exists = true;
+  // checkCardForDefaultChartAndStoreData: function(card, resCard) {
+  //   let exists = false;
+  //   let reqFrom = "card";
+  //   let resChart, period, yAxisTickMark;
+  //   // TODO: IMPLEMENT LINES FOR EXCEPTION: THERE COULD BE RESCARD WITH NO ROWS
+  //   if (card.isForLeftXaxis && card.isDefaultForChart) {
+  //     vm.stateFlag = "0240";
+  //     resChart = resCard.rows;
+  //     period = card.period;
+  //     yAxisTickMark = card.yAxisTickMark;
+  //     exists = true;
+  //   }
+  //   return {
+  //     reqFrom: reqFrom,
+  //     resChart: resChart,
+  //     period: period,
+  //     yAxisTickMark: yAxisTickMark,
+  //     exists: exists
+  //   };
+  // },
+
+  updateViewForCardsOrReturnResForChartQuery: async function(
+    client,
+    areForChart
+  ) {
+    let key, res;
+    let period;
+    let yAxisTickMark;
+    const foundCardsAndRes = [];
+
+    vm.cards.areForChart = areForChart;
+
+    for await (let card of vm.cards[`for${vm.currentShowType}`]) {
+      if (
+        card[areForChart ? "isDefaultForChart" : "isCardShown"] &&
+        !!card.query
+      ) {
+        switch (vm.currentShowType) {
+          case "superadmin":
+            vm.stateFlag = "0210";
+            res = await client.query(card.query);
+            break;
+          case "admin":
+            vm.stateFlag = "0220";
+            res = await client.query(card.query, [vm.currentShow.o_id]);
+            break;
+          case "user":
+            console.log("user card ----");
+            vm.stateFlag = "0230";
+            res = await client.query(card.query, [vm.currentShow.id]);
+            break;
+        }
+        if (!areForChart) {
+          await this.defineNumbersInCards(card, res);
+        } else {
+          period = card.period;
+          yAxisTickMark = card.yAxisTickMark;
+          await foundCardsAndRes.push([card, res]);
+        }
+      }
     }
-    return {
-      reqFrom: reqFrom,
-      resChart: resChart,
-      period: period,
-      yAxisTickMark: yAxisTickMark,
-      exists: exists
-    };
+    // if (areForChart) return foundCardsAndRes;
+    if (areForChart) {
+      await this.createBarChart(
+        "card",
+        foundCardsAndRes[0][1].rows,
+        period,
+        yAxisTickMark,
+        this.getFirstDayOfWeek(period)
+      );
+    }
+  },
+
+  defineNumbersInCards: async function(card, res) {
+    // In order for card.number to take resCard.rowCount, card.isForTimeCalc is set to false
+    console.log("carcardcard: ", card);
+    if (card.isForTimeCalc) {
+      vm.stateFlag = "0250";
+      timeCycledInMilSec = await c.getTimeCycledInMilSec(res.rows);
+      card.number = c.convMilSecToFin(timeCycledInMilSec);
+    } else if (!card.isForTimeCalc && card.number != null) {
+      vm.stateFlag = "0260";
+      card.number = await res.rowCount;
+    }
   },
 
   // TODO: move this to browser-side
   //  TODO: make default params of sample data
-  createBarChart: function(
+  createBarChart: async function(
     reqFrom,
     resRows = null,
     period = "month",
