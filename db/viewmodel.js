@@ -46,10 +46,11 @@ const vm = {
         isForTimeCalc: false, // !true only if isForLeftXaxis is true
         color: "primary",
         fa: "sign-in-alt",
+        resType: "rowCountable",
         get query() {
-          return `select orgid, count(orgid) from public.log_login where date(client_timestamp) = ${
+          return `select orgid, count(orgid) from public.log_login where date(client_timestamp) = date(${
             vm.today
-          } GROUP BY orgid`;
+          }) GROUP BY orgid`;
         },
         auth: ["superadmin"]
       },
@@ -65,6 +66,7 @@ const vm = {
         isForTimeCalc: false,
         color: "info",
         fa: "sign-in-alt",
+        resType: "rowCountable",
         get query() {
           return `SELECT orgid, COUNT(orgid) FROM public.log_login WHERE DATE(client_timestamp) >= DATE_TRUNC('month', DATE(${
             vm.today
@@ -86,6 +88,7 @@ const vm = {
         isForTimeCalc: false,
         color: "warning",
         fa: "user",
+        resType: "rowCountable",
         query: "SELECT * FROM public.organisations",
         auth: ["superadmin"]
       },
@@ -101,6 +104,7 @@ const vm = {
         isForTimeCalc: false,
         color: "warning",
         fa: "users",
+        resType: "rowCountable",
         query: "SELECT * FROM public.users",
         auth: ["superadmin"]
       },
@@ -123,7 +127,7 @@ const vm = {
         isForTimeCalc: false,
         color: "primary",
         fa: "chart-bar",
-        // idRedirectedForChartQuery: 6,
+        resType: "rowCountable",
         get query() {
           if (!vm.cards.areForChart) {
             // !to get users, simply change orgid to 'userid'
@@ -150,6 +154,7 @@ const vm = {
         isForTimeCalc: false,
         color: "info",
         fa: "chart-bar",
+        resType: "retrievable_date_count",
         get query() {
           return `SELECT DATE(client_timestamp), COUNT(DISTINCT orgid) FROM log_startcycling WHERE DATE(client_timestamp) >= DATE_TRUNC('month', DATE(${
             vm.today
@@ -172,6 +177,7 @@ const vm = {
         color: "info",
         fa: "chart-line",
         // idRedirectedForChartQuery: 8,
+        resType: "rowCountable",
         get query() {
           return `SELECT orgid FROM log_startcycling WHERE DATE(client_timestamp) >= DATE_TRUNC('month', DATE(${
             vm.today
@@ -193,14 +199,13 @@ const vm = {
         isForTimeCalc: false,
         color: "info",
         fa: "chart-line",
+        resType: "retrievable_date_count",
         get query() {
           return `SELECT DATE(DATE_TRUNC('month', DATE(client_timestamp)) ), COUNT(DISTINCT orgid) FROM log_startcycling WHERE DATE(client_timestamp) >= DATE_TRUNC('year', DATE(${
             vm.today
-          })) 
-    AND DATE(client_timestamp) < DATE_TRUNC('year', DATE(${
-      vm.today
-    }) + INTERVAL '1 year') 
-    GROUP BY DATE(DATE_TRUNC('month', DATE(client_timestamp)) )`;
+          })) AND DATE(client_timestamp) < DATE_TRUNC('year', DATE(${
+            vm.today
+          }) + INTERVAL '1 year') GROUP BY DATE(DATE_TRUNC('month', DATE(client_timestamp)) )`;
         },
         auth: ["superadmin"]
       },
@@ -216,6 +221,7 @@ const vm = {
         isForTimeCalc: true,
         color: "success",
         fa: "stopwatch",
+        resType: "timeCalculatable",
         get query() {
           return `${
             vm.qr.cyclingTime
@@ -239,6 +245,7 @@ const vm = {
         isForTimeCalc: true,
         color: "success",
         fa: "stopwatch",
+        resType: "timeCalculatable",
         get query() {
           return `${
             vm.qr.cyclingTime
@@ -255,55 +262,190 @@ const vm = {
       // !must include at least $1 for o_id
       {
         id: 101,
-        name: "NO. OF ACTIVE USERS TODAY",
+        name: "ACTIVE DAYS THIS MONTH",
         isCardShown: true,
+        isDefaultForChart: false,
+        isForLeftXaxis: true,
+        yAxisTickMark: "month",
+        get period() {
+          if (!vm.cards.areForChart) {
+            return "days";
+          } else {
+            return vm.cards.foruser[1].period;
+          }
+        },
+        number: 0,
+        isForTimeCalc: false,
+        color: "warning",
+        fa: "stopwatch",
+        resType: "rowCountable",
+        get query() {
+          if (!vm.cards.areForChart) {
+            return `SELECT DISTINCT ON (client_timestamp) date_trunc('day', client_timestamp) AS client_timestamp FROM log_startcycling WHERE orgid = $1 AND client_timestamp >= date_trunc('month', date(${
+              vm.today
+            })) AND client_timestamp < date_trunc('month', date(${
+              vm.today
+            }) + interval '1 month')`;
+          } else {
+            return vm.cards.foruser[1].query;
+          }
+        },
+        auth: ["superadmin", "admin", "user"]
+      },
+      {
+        id: 102,
+        name: "ACTIVE DAYS PER MONTH THIS YEAR",
+        isCardShown: false,
+        isDefaultForChart: true,
+        isForLeftXaxis: true,
+        yAxisTickMark: "days",
+        period: "year",
+        number: 0,
+        isForTimeCalc: false,
+        color: "warning",
+        fa: "stopwatch",
+        resType: "retrievable_date_count",
+        get query() {
+          return `SELECT DATE(DATE_TRUNC('month', DATE(client_timestamp)) ), COUNT(*) 
+          FROM (
+            SELECT DISTINCT ON (client_timestamp) date_trunc('day', client_timestamp) AS client_timestamp FROM log_startcycling WHERE orgid = $1 AND client_timestamp >= date_trunc('year', DATE(${
+              vm.today
+            })) AND client_timestamp < date_trunc('year', DATE(${
+            vm.today
+          }) + INTERVAL '1 year')
+            ) AS active_days_this_year GROUP BY DATE(date_trunc('month', DATE(client_timestamp)) ) ORDER BY date`;
+        },
+        auth: ["superadmin", "admin", "user"]
+      },
+      {
+        id: 103,
+        name: "ACTIVE TIME THIS MONTH",
+        isCardShown: true,
+        isDefaultForChart: false, // !must be only one true for each showtype(two for stacked-bar), also (this card.isCardShown && !!card.query)
+        isForLeftXaxis: false,
+        yAxisTickMark: "min.",
+        get period() {
+          if (!vm.cards.areForChart) {
+            return "month";
+          } else {
+            return vm.cards.foruser[3].period;
+          }
+        },
+        number: 0,
+        isForTimeCalc: true,
+        color: "warning",
+        fa: "stopwatch",
+        resType: "timeCalculatable",
+        get query() {
+          if (!vm.cards.areForChart) {
+            return `${
+              vm.qr.cyclingTime
+            } WHERE event_orgid = $1 AND packet_generated >= date_trunc('month', date(${
+              vm.today
+            })) AND packet_generated < date_trunc('month', date(${
+              vm.today
+            }) + interval '1 month')`;
+          } else {
+            return vm.cards.foruser[3].query;
+          }
+        },
+        auth: ["superadmin", "admin", "user"]
+      },
+      {
+        id: 104,
+        name: "ACTIVE TIME PER MONTH THIS YEAR",
+        isCardShown: false,
+        isDefaultForChart: true,
+        isForLeftXaxis: false,
+        yAxisTickMark: "min.",
+        period: "year",
+        number: null,
+        isForTimeCalc: true,
+        color: "warning",
+        fa: "stopwatch",
+        resType: "timeCalculatable",
+        get query() {
+          return `${
+            vm.qr.cyclingTime
+          } WHERE event_orgid = $1 AND packet_generated >= date_trunc('year', date(${
+            vm.today
+          })) AND packet_generated < date_trunc('year', date(${
+            vm.today
+          }) + interval '1 year')`;
+        },
+        auth: ["superadmin", "admin", "user"]
+      },
+      {
+        id: 105,
+        name: "NO. OF ACTIVE USERS TODAY",
+        isCardShown: false,
         isDefaultForChart: false,
         isForLeftXaxis: false,
         yAxisTickMark: "users",
-        period: "day",
+        get period() {
+          if (!vm.cards.areForChart) {
+            return "day";
+          } else {
+            return vm.cards.foradmin[1].period;
+          }
+        },
         number: 0,
         isForTimeCalc: false,
         color: "primary",
         fa: "bicycle",
+        resType: "rowCountable",
         get query() {
-          return `SELECT userid FROM public.log_startcycling WHERE date(client_timestamp) = ${
-            vm.today
-          } AND orgid = $1 GROUP BY userid`;
+          if (!vm.cards.areForChart) {
+            return `SELECT userid FROM public.log_startcycling WHERE date(client_timestamp) = ${
+              vm.today
+            } AND orgid = $1 GROUP BY userid`;
+          } else {
+            return vm.cards.foradmin[1].query;
+          }
         },
         auth: ["superadmin", "admin"]
       },
       {
-        id: 102,
+        id: 106,
         name: "NO. OF ACTIVE USERS THIS MONTH",
-        isCardShown: true,
+        isCardShown: false,
         isDefaultForChart: false,
-        isForLeftXaxis: false,
+        isForLeftXaxis: true,
         yAxisTickMark: "users",
         period: "month",
         number: 0,
         isForTimeCalc: false,
         color: "info",
         fa: "bicycle",
+        resType: "retrievable_date_count",
         get query() {
-          return `SELECT userid FROM log_startcycling WHERE orgid = $1 AND DATE(client_timestamp) >= DATE_TRUNC('month', DATE(${
+          // daily
+          return `SELECT DATE(DATE_TRUNC('day', DATE(client_timestamp)) ), COUNT(DISTINCT userid) FROM log_startcycling WHERE orgid = $1 AND DATE(client_timestamp) >= DATE_TRUNC('month', DATE(${
             vm.today
           })) AND DATE(client_timestamp) < DATE_TRUNC('month', DATE(${
             vm.today
-          }) + INTERVAL '1 month')`;
+          }) + INTERVAL '1 month') GROUP BY DATE(DATE_TRUNC('day', DATE(client_timestamp)) )`;
+          // below is simply a number for a month, not daily
+          // return `SELECT userid FROM log_startcycling WHERE orgid = $1 AND DATE(client_timestamp) >= DATE_TRUNC('month', DATE(${
+          //   vm.today
+          // })) AND DATE(client_timestamp) < DATE_TRUNC('month', DATE(${
+          //   vm.today
+          // }) + INTERVAL '1 month')`;
         },
         auth: ["superadmin", "admin"]
       },
       {
-        id: 103,
+        id: 107,
         name: "ACTIVE TIME THIS MONTH",
-        isCardShown: true,
-        isDefaultForChart: true, // !must be only one true for each showtype(two for stacked-bar), also (this card.isCardShown && !!card.query)
+        isCardShown: false,
+        isDefaultForChart: false, // !must be only one true for each showtype(two for stacked-bar), also (this card.isCardShown && !!card.query)
         isForLeftXaxis: true,
         yAxisTickMark: "min.",
         period: "month",
         isForTimeCalc: true,
         color: "success",
         fa: "stopwatch",
+        resType: "timeCalculatable",
         get query() {
           return `${
             vm.qr.cyclingTime
@@ -317,9 +459,9 @@ const vm = {
       },
       // TODO:
       {
-        id: 104,
+        id: 108,
         name: "USERS' DAILY AVERAGE CYCLING TIME THIS MONTH",
-        isCardShown: true,
+        isCardShown: false,
         isDefaultForChart: false,
         isForLeftXaxis: false,
         yAxisTickMark: "min.",
@@ -330,15 +472,16 @@ const vm = {
         isForTimeCalc: false,
         color: "success",
         fa: "stopwatch",
+        resType: "average",
         //   TODO:
         query: null,
         // query: "SELECT * FROM public.users WHERE organisation = $1",
         auth: ["superadmin", "admin"]
       },
       {
-        id: 105,
+        id: 109,
         name: "TOTAL NO. OF USERS",
-        isCardShown: true,
+        isCardShown: false,
         isDefaultForChart: false,
         isForLeftXaxis: false,
         yAxisTickMark: "users",
@@ -347,6 +490,7 @@ const vm = {
         isForTimeCalc: false,
         color: "warning",
         fa: "users",
+        resType: "rowCountable",
         query: "SELECT * FROM public.users WHERE organisation = $1",
         auth: ["superadmin", "admin"]
       }
@@ -358,34 +502,46 @@ const vm = {
         name: "ACTIVE DAYS THIS MONTH",
         isCardShown: true,
         isDefaultForChart: false,
-        isForLeftXaxis: false,
+        isForLeftXaxis: true,
         yAxisTickMark: "days",
-        period: "month", // !must be distinct in this array
+        get period() {
+          if (!vm.cards.areForChart) {
+            return "month";
+          } else {
+            return vm.cards.foruser[1].period;
+          }
+        },
         number: 0,
         isForTimeCalc: false,
         color: "warning",
         fa: "stopwatch",
+        resType: "rowCountable",
         get query() {
-          return `SELECT DISTINCT ON (client_timestamp) date_trunc('day', client_timestamp) AS client_timestamp FROM log_startcycling WHERE userid = $1 AND client_timestamp >= date_trunc('month', date(${
-            vm.today
-          })) AND client_timestamp < date_trunc('month', date(${
-            vm.today
-          }) + interval '1 month')`;
+          if (!vm.cards.areForChart) {
+            return `SELECT DISTINCT ON (client_timestamp) date_trunc('day', client_timestamp) AS client_timestamp FROM log_startcycling WHERE userid = $1 AND client_timestamp >= date_trunc('month', date(${
+              vm.today
+            })) AND client_timestamp < date_trunc('month', date(${
+              vm.today
+            }) + interval '1 month')`;
+          } else {
+            return vm.cards.foruser[1].query;
+          }
         },
         auth: ["superadmin", "admin", "user"]
       },
       {
         id: 202,
         name: "ACTIVE DAYS PER MONTH THIS YEAR",
-        isCardShown: true,
-        isDefaultForChart: false,
-        isForLeftXaxis: false,
+        isCardShown: false,
+        isDefaultForChart: true,
+        isForLeftXaxis: true,
         yAxisTickMark: "days",
         period: "year",
         number: 0,
         isForTimeCalc: false,
         color: "warning",
         fa: "stopwatch",
+        resType: "retrievable_date_count",
         get query() {
           return `SELECT DATE(DATE_TRUNC('month', DATE(client_timestamp)) ), COUNT(*) 
           FROM (
@@ -394,7 +550,7 @@ const vm = {
             })) AND client_timestamp < date_trunc('year', DATE(${
             vm.today
           }) + INTERVAL '1 year')
-            ) AS active_days_this_year GROUP BY DATE(date_trunc('month', DATE(client_timestamp)) )`;
+            ) AS active_days_this_year GROUP BY DATE(date_trunc('month', DATE(client_timestamp)) ) ORDER BY date`;
         },
         auth: ["superadmin", "admin", "user"]
       },
@@ -402,22 +558,33 @@ const vm = {
         id: 203,
         name: "ACTIVE TIME THIS MONTH",
         isCardShown: true,
-        isDefaultForChart: true, // !must be only one true for each showtype(two for stacked-bar), also (this card.isCardShown && !!card.query)
-        isForLeftXaxis: true,
+        isDefaultForChart: false, // !must be only one true for each showtype(two for stacked-bar), also (this card.isCardShown && !!card.query)
+        isForLeftXaxis: false,
         yAxisTickMark: "min.",
-        period: "month",
+        get period() {
+          if (!vm.cards.areForChart) {
+            return "month";
+          } else {
+            return vm.cards.foruser[3].period;
+          }
+        },
         number: 0,
         isForTimeCalc: true,
         color: "warning",
         fa: "stopwatch",
+        resType: "timeCalculatable",
         get query() {
-          return `${
-            vm.qr.cyclingTime
-          } WHERE event_userid = $1 AND packet_generated >= date_trunc('month', date(${
-            vm.today
-          })) AND packet_generated < date_trunc('month', date(${
-            vm.today
-          }) + interval '1 month')`;
+          if (!vm.cards.areForChart) {
+            return `${
+              vm.qr.cyclingTime
+            } WHERE event_userid = $1 AND packet_generated >= date_trunc('month', date(${
+              vm.today
+            })) AND packet_generated < date_trunc('month', date(${
+              vm.today
+            }) + interval '1 month')`;
+          } else {
+            return vm.cards.foruser[3].query;
+          }
         },
         auth: ["superadmin", "admin", "user"]
       },
@@ -425,14 +592,15 @@ const vm = {
         id: 204,
         name: "ACTIVE TIME PER MONTH THIS YEAR",
         isCardShown: false,
-        isDefaultForChart: false,
-        isForLeftXaxis: true,
+        isDefaultForChart: true,
+        isForLeftXaxis: false,
         yAxisTickMark: "min.",
         period: "year",
         number: null,
         isForTimeCalc: true,
         color: "warning",
         fa: "stopwatch",
+        resType: "timeCalculatable",
         get query() {
           return `${
             vm.qr.cyclingTime
@@ -456,6 +624,7 @@ const vm = {
         isForTimeCalc: true,
         color: "warning",
         fa: "stopwatch",
+        resType: "timeCalculatable",
         get query() {
           return `${
             vm.qr.cyclingTime
@@ -479,6 +648,7 @@ const vm = {
         isForTimeCalc: true,
         color: "success",
         fa: "stopwatch",
+        resType: "timeCalculatable",
         get query() {
           return `${
             vm.qr.cyclingTime
@@ -577,11 +747,13 @@ const vm = {
   },
   chart: {
     myOptions: {
-      yAxisTickMark: "sample unit"
+      yAxisMarkLeft: "left unit1",
+      yAxisMarkRight: "right unit2"
     },
     data: {
-      labels: ["sample label1", "sample label2"],
-      datasets: [10, 20]
+      xAxis: ["sample label1", "sample label2"],
+      yAxisCyclingMode: [10, 20],
+      yAxisTaxiMode: [15, 25]
     }
   },
   average: {
