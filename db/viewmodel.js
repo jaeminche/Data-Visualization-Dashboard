@@ -112,10 +112,9 @@ const vm = {
         id: 5, //! card on pg 4 in ppt
         name: "NO. OF ACTIVE ORGANIZATIONS TODAY",
         isCardShown: true,
-        isDefaultForChart: true,
+        isDefaultForChart: false,
         isForLeftXaxis: true,
         yAxisTickMark: "cust.",
-        period: "day",
         get period() {
           if (!vm.cards.areForChart) {
             return "day";
@@ -127,7 +126,13 @@ const vm = {
         isForTimeCalc: false,
         color: "primary",
         fa: "chart-bar",
-        resType: "rowCountable",
+        get resType() {
+          if (!vm.cards.areForChart) {
+            return "rowCountable";
+          } else {
+            return vm.cards.forsuperadmin[5].resType;
+          }
+        },
         get query() {
           if (!vm.cards.areForChart) {
             // !to get users, simply change orgid to 'userid'
@@ -146,7 +151,7 @@ const vm = {
         id: 6, // !chart on pg 4 in ppt
         name: "NO. OF ACTIVE ORGANIZATIONS PER DAY THIS MONTH",
         isCardShown: false,
-        isDefaultForChart: false, // !must be only one true for each showtype(two for stacked-bar), also (this card.isCardShown && !!card.query)
+        isDefaultForChart: true, // !must be only one true for each showtype(two for stacked-bar), also (this card.isCardShown && !!card.query)
         isForLeftXaxis: true,
         yAxisTickMark: "cust.",
         period: "month",
@@ -278,7 +283,13 @@ const vm = {
         isForTimeCalc: false,
         color: "warning",
         fa: "stopwatch",
-        resType: "rowCountable",
+        get resType() {
+          if (!vm.cards.areForChart) {
+            return "rowCountable";
+          } else {
+            return vm.cards.foruser[1].resType;
+          }
+        },
         get query() {
           if (!vm.cards.areForChart) {
             return `SELECT DISTINCT ON (client_timestamp) date_trunc('day', client_timestamp) AS client_timestamp FROM log_startcycling WHERE orgid = $1 AND client_timestamp >= date_trunc('month', date(${
@@ -335,7 +346,13 @@ const vm = {
         isForTimeCalc: true,
         color: "warning",
         fa: "stopwatch",
-        resType: "timeCalculatable",
+        get resType() {
+          if (!vm.cards.areForChart) {
+            return "timeCalculatable";
+          } else {
+            return vm.cards.foruser[3].resType;
+          }
+        },
         get query() {
           if (!vm.cards.areForChart) {
             return `${
@@ -393,7 +410,13 @@ const vm = {
         isForTimeCalc: false,
         color: "primary",
         fa: "bicycle",
-        resType: "rowCountable",
+        get resType() {
+          if (!vm.cards.areForChart) {
+            return "rowCountable";
+          } else {
+            return vm.cards.foradmin[1].resType;
+          }
+        },
         get query() {
           if (!vm.cards.areForChart) {
             return `SELECT userid FROM public.log_startcycling WHERE date(client_timestamp) = ${
@@ -515,7 +538,13 @@ const vm = {
         isForTimeCalc: false,
         color: "warning",
         fa: "stopwatch",
-        resType: "rowCountable",
+        get resType() {
+          if (!vm.cards.areForChart) {
+            return "rowCountable";
+          } else {
+            return vm.cards.foruser[1].resType;
+          }
+        },
         get query() {
           if (!vm.cards.areForChart) {
             return `SELECT DISTINCT ON (client_timestamp) date_trunc('day', client_timestamp) AS client_timestamp FROM log_startcycling WHERE userid = $1 AND client_timestamp >= date_trunc('month', date(${
@@ -572,7 +601,13 @@ const vm = {
         isForTimeCalc: true,
         color: "warning",
         fa: "stopwatch",
-        resType: "timeCalculatable",
+        get resType() {
+          if (!vm.cards.areForChart) {
+            return "timeCalculatable";
+          } else {
+            return vm.cards.foruser[3].resType;
+          }
+        },
         get query() {
           if (!vm.cards.areForChart) {
             return `${
