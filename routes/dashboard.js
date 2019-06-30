@@ -137,14 +137,30 @@ router.get("/dashboard/:uuid", async function(req, res) {
     // *=========================================
     vm.stateFlag = "0200";
     let forChart = false;
-    await c.updateViewForCardsOrReturnResForChartQuery(client, forChart);
+    // !updates directly the cards' numbers in this case
+    await c.findCardsAndGetResOrUpdateCardsNo(client, forChart);
 
     // *========================================
     // *| DEFAULT CHART, LOOP OVER CARDS |
     // *========================================
     vm.stateFlag = "0200";
     forChart = true;
-    await c.updateViewForCardsOrReturnResForChartQuery(client, forChart);
+    let foundCardsAndRes = await c.findCardsAndGetResOrUpdateCardsNo(
+      client,
+      forChart
+    );
+    // foundCardsAndRes = { cardObjs: [{}, {}], resRowArrs: [[], []]}
+    vm.stateFlag = "0215";
+    let period = foundCardsAndRes.cardObjs[0].period; // you need only one period data because there's one xAxis
+    console.log("foundCardsAndRes.resRowArrs: ", foundCardsAndRes.resRowArrs);
+    await c.updateVM_chart(
+      "default",
+      foundCardsAndRes.cardObjs, //[{}, {}]
+      foundCardsAndRes.resRowArrs, //[[], []]
+      period, //""
+      // null,
+      c.getFirstDayOfWeek(period)
+    );
     // vm.cards.areForChart = true;
     // for await (let card of vm.cards[`for${vm.currentShowType}`]) {
     //   let resChart, period, yAxisTickMark;
@@ -322,7 +338,7 @@ router.post("/updatechartforcard", async function(req, res) {
     resChart = resChart.rows;
     console.log("TCL: forawait -> ###resChart", resChart);
 
-    c.createBarChart(reqType, resChart, null, null);
+    c.updateVM_chart(reqType, resChart, null, null);
     vm.stateFlag = "0600";
 
     let labels = [],
@@ -405,7 +421,7 @@ router.post("/updatechart", async function(req, res) {
     }
 
     vm.stateFlag = "0520";
-    c.createBarChart(reqFrom, resChart, period, firstDayOfWeek);
+    c.updateVM_chart(reqFrom, resChart, period, firstDayOfWeek);
 
     vm.stateFlag = "0600";
     let labels = [],

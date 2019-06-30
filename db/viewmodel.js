@@ -787,8 +787,9 @@ const vm = {
     },
     data: {
       xAxis: ["sample label1", "sample label2"],
-      yAxisCyclingMode: [10, 20],
-      yAxisTaxiMode: [15, 25]
+      yAxis1: [10, 20], //cycling
+      yAxis2: [15, 25], //taximode
+      yAxis3: [20, 25] //average
     }
   },
   average: {

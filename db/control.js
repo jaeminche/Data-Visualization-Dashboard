@@ -10,11 +10,14 @@ const c = {
   init: function() {
     vm.chart = {
       myOptions: {
-        yAxisTickMark: "sample unit"
+        yAxisMarkLeft: "left unit1",
+        yAxisMarkRight: "right unit2"
       },
       data: {
-        labels: ["sample label1", "sample label2"],
-        datasets: [10, 20]
+        xAxis: ["sample label1", "sample label2"],
+        yAxis1: [10, 20], //cycling
+        yAxis2: [], //taximode
+        yAxis3: [] //average
       }
     };
     vm.resPie = null;
@@ -78,7 +81,7 @@ const c = {
     return `${dDisplay} ${hDisplay} ${mDisplay} ${seconds} sec`;
   },
 
-  // takes params and returns as millisec.
+  // takes params and returns as millisec
   getTimeDiff: function(date1, date2) {
     let big = new Date(date1);
     let small = new Date(date2);
@@ -149,14 +152,17 @@ const c = {
   //   };
   // },
 
-  updateViewForCardsOrReturnResForChartQuery: async function(
-    client,
-    areForChart
-  ) {
+  /**
+   * @description finds cards and get res if areForChart === true,
+   * Or updates cards' numbers if areForChart === false
+   * @param {boolean} areForChart
+   * @return {object} foundCardsAndRes
+   */
+  findCardsAndGetResOrUpdateCardsNo: async function(client, areForChart) {
     let key, res;
-    let period;
-    let yAxisTickMark;
-    const foundCardsAndRes = [];
+    const foundCardObjs = [];
+    const resRows = [];
+    const resRowArrs = [];
 
     vm.cards.areForChart = areForChart;
 
@@ -180,61 +186,113 @@ const c = {
             res = await client.query(card.query, [vm.currentShow.id]);
             break;
         }
+
         if (!areForChart) {
-          await this.defineNumbersInCards(card, res);
+          // ! updates directly cards' numbers when 'areForChart' is set to false
+          await this.updateVM_cards(card, res);
         } else {
-          period = card.period;
-          yAxisTickMark = card.yAxisTickMark;
-          await foundCardsAndRes.push([card, res]);
+          await foundCardObjs.push(card); // to get myoption data
+          await resRowArrs.push(res.rows); // for stacked-bar, 2 sets pushed
         }
       }
+      // resRowSets.push(resRows);
     }
-    // if (areForChart) return foundCardsAndRes;
-    if (areForChart) {
-      await this.createBarChart(
-        "card",
-        foundCardsAndRes[0][1].rows,
-        period,
-        yAxisTickMark,
-        this.getFirstDayOfWeek(period)
-      );
-    }
+    vm.stateFlag = "0213";
+    return { cardObjs: foundCardObjs, resRowArrs: resRowArrs }; // { cardObjs: [{}, {}], resRowArrs: [[], []]}
   },
 
-  defineNumbersInCards: async function(card, res) {
+  /**
+   * updates cards' numbers in viewmodel
+   * @param {object}
+   */
+  updateVM_cards: async function(card, res) {
     // In order for card.number to take resCard.rowCount, card.isForTimeCalc is set to false
     console.log("carcardcard: ", card);
-    if (card.isForTimeCalc) {
+    if (card.resType === "timeCalculatable") {
       vm.stateFlag = "0250";
-      timeCycledInMilSec = await c.getTimeCycledInMilSec(res.rows);
-      card.number = c.convMilSecToFin(timeCycledInMilSec);
-    } else if (!card.isForTimeCalc && card.number != null) {
+      timeCycledInMilSec = this.getTimeCycledInMilSec(res.rows);
+      card.number = this.convMilSecToFin(timeCycledInMilSec);
+    } else if (card.resType === "rowCountable") {
       vm.stateFlag = "0260";
       card.number = await res.rowCount;
+    } else {
+      card.number = "something went wrong";
     }
   },
 
   // TODO: move this to browser-side
   //  TODO: make default params of sample data
-  createBarChart: async function(
-    reqFrom,
-    resRows = null,
+  updateVM_chart: async function(
+    reqBy,
+    cardObjs, // [{}, {}]
+    resRowArrs, //[[], []]
     period = "month",
-    yAxisTickMark = "",
-    firstDayOfWeek
+    // yAxisTickMark,
+    firstDayOfWeek = this.getFirstDayOfWeek("month")
   ) {
-    const dataForBarChart = [];
-    let dates = [],
-      chartDataLabels = [],
-      chartDataDatasets = [];
-    if (reqFrom === "card") {
+    vm.stateFlag = "0540";
+    let yAxisTickMark;
+    let yAxisData1 = []; // resRowArrs[0]
+    let yAxisData2 = []; // resRowArrs[1]
+    let yAxisData3 = []; // resRowArrs[1]
+    let xAxisData = []; // ["date1", "date2"]
+    let yAxisMarkLeft = "";
+    let yAxisMarkRight = ""; //
+    const dataForChart = [];
+    // let [resrows1, resrows2, resrows3] = resRowArrs;
+    vm.stateFlag = "0543";
+    cardObjs.forEach((card, i) => {
+      if (card.resType === "retrievable_date_count") {
+        resRowArrs[i].forEach(row => {
+          if (i == 0) {
+            xAxisData.push(new Date(row.date).toDateString());
+            yAxisData1.push(row.count);
+          } else if (i == 1) {
+            yAxisData2.push(row.count);
+          } else if (i == 2) {
+            yAixsData3.push(row.count);
+          }
+        });
+      } else if (card.resType === "timeCalculatable") {
+      } else {
+      }
+    });
+    // console.log("dataForBarChart: ", dataForChart);
+    // dataForChart.map(set => {
+    //   xAxisData.push(set.label);
+    //   yAxisData.push(set.data);
+    // });
+    vm.stateFlag = "0545";
+    vm.chart.data.xAxis = xAxisData;
+    vm.chart.data.yAxis1 = yAxisData1;
+    vm.chart.myOptions.yAxisMarkLeft = yAxisMarkLeft;
+    if (yAxisData2.length > 0) vm.chart.data.yAxis2 = yAxisData2;
+    if (yAxisData3.length > 0) vm.chart.data.yAxis3 = yAxisData3;
+    if (yAxisMarkRight.length > 0)
+      vm.chart.myOptions.yAxisMarkRight = yAxisMarkRight;
+    // console.log("vm.chart: ", vm.chart);
+
+    /*
+    if (reqBy === "card" || reqBy === "default") {
       vm.stateFlag = "0543";
-      resRows.forEach(row => {
-        dates.push(row.date);
-        chartDataLabels.push(row.date);
-        chartDataDatasets.push(row.count);
+      resRowArrs.forEach((resrow, i) => {
+        resrow.forEach(row => {
+          dates.push(row.date);
+          xAxisData.push(row.date);
+          oneChartDataForYAxis.push(row.count);
+        });
+        console.log(
+          "chartDataXAxis: ",
+          xAxisData,
+          "chartDataYAxis: ",
+          yAxisData
+        );
       });
-    } else if (reqFrom === "period") {
+      yAxisData.push(row.count);
+      cardObjs.forEach((card, i) => {
+        yMarksData.push(resrow.card.yAxisTickMark);
+      });
+    } else if (reqBy === "period") {
       vm.stateFlag = "0521";
       let cMonth, cYear;
       let tempTimestamp = resRows[0].packet_generated;
@@ -297,24 +355,22 @@ const c = {
           dataset = this.genDataset(date, 0, yAxisTickMark);
         }
         vm.stateFlag = "0545";
-        dataForBarChart.push(dataset);
+        dataForChart.push(dataset);
       });
-      console.log("dataForBarChart: ", dataForBarChart);
-      dataForBarChart.map(set => {
-        chartDataLabels.push(set.label);
-        chartDataDatasets.push(set.data);
+      console.log("dataForBarChart: ", dataForChart);
+      dataForChart.map(set => {
+        xAxisData.push(set.label);
+        yAxisData.push(set.data);
       });
     }
     // dataset = this.genDataset(set.date, set.count, "cust.");
     // dataForBarChart.push(dataset);
     vm.stateFlag = "0545";
-
-    vm.stateFlag = "0549";
-
-    vm.chart.data.labels = chartDataLabels;
-    vm.chart.data.datasets = chartDataDatasets;
+    vm.chart.data.labels = xAxisData;
+    vm.chart.data.dataset = yAxisData;
     vm.chart.myOptions.yAxisTickMark = yAxisTickMark;
     console.log("vm.chart: ", vm.chart);
+    */
 
     function getXaxisDates(period, cYear, cMonth, index, firstDay) {
       vm.stateFlag = "0544";
@@ -367,19 +423,18 @@ const c = {
     return new Date(year, month, 0).getDate();
   },
 
-  addData: function(chart, label, data) {
-    chart.data.labels.push(label);
-    chart.data.datasets.forEach(dataset => {
-      dataset.data.push(data);
-    });
+  addData: function(chart, label, yAxisData1, yAxisData2, yAxisData3) {
+    chart.data.xAxis.push(label);
+    // TODO: add yAxis data
+    // chart.data.yAxis1.forEach(dataset => {
+    //   dataset.data.push(yAxisData1);
+    // });
     chart.update();
   },
 
   removeData: function(chart) {
-    chart.data.labels.pop();
-    chart.data.datasets.forEach(dataset => {
-      dataset.data.pop();
-    });
+    chart.data.xAxis.pop();
+    chart.data.yAxis1.pop();
     chart.update();
   },
 
