@@ -83,12 +83,14 @@ router.get("/dashboard/:uuid", async function(req, res) {
         ]);
         vm.resOrgList = resOrgList.rows;
         vm.resUserList = resUserList.rows;
+        /*
         // Only when showType, fetch top 10 votes' rows in sharedroutes table for pie graph
         if (vm.currentShowType === "superadmin") {
           vm.stateFlag = "0115";
           resPie = await client.query(vm.pie.query);
           vm.resPie = resPie.rows;
         }
+        */
         break;
       case "admin":
         vm.stateFlag = "0120";
