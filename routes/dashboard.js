@@ -154,6 +154,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
     // foundCardsAndRes = { cardObjs: [{}, {}], resRowArrs: [[], []]}
     vm.stateFlag = "0215";
     let period = foundCardsAndRes.cardObjs[0].period; // you need only one period data because there's one xAxis
+    // TODO: check if firstDay must be passed in as param here.
     let firstDay = await c.getFirstDayOfWeek(client, period);
     console.log("foundCardsAndRes.resRowArrs: ", foundCardsAndRes.resRowArrs);
     await c.updateVM_chart(

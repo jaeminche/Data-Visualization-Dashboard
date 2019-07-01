@@ -215,7 +215,7 @@
               
               <%# TODO: Get the logged in org's name from THE SESSION, REQ.USERS %>
                 <% if (typeof currentLogin !== "undefined") { %>
-                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Logged in as <span class="font-weight-bold"><%= currentLogin.name %></span></span>
+                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Logged in as <span class="font-weight-bold"><%= currentLogin.display %> (<%= currentLoginType %>)</span></span>
                 <% } %>
                 <img class="img-profile rounded-circle" src="/img/userImg300x300.jpeg">
               </a>

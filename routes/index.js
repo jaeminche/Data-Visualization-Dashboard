@@ -30,7 +30,7 @@ router.get("/logged_in_as/:id", async function(req, res) {
   try {
     c.init_login_show();
     resLoggedInUser = await client.query(
-      "SELECT u.name, u.id, u.uuid as uuid, u.admin, o.name as o_name, u.organisation as o_id, o.uuid as o_uuid, o.superadmin FROM public.users u LEFT JOIN organisations o ON organisation = o.id WHERE u.id =  $1",
+      "SELECT u.name, u.display, u.id, u.uuid as uuid, u.admin, o.name as o_name, u.organisation as o_id, o.uuid as o_uuid, o.superadmin FROM public.users u LEFT JOIN organisations o ON organisation = o.id WHERE u.id =  $1",
       [req.params.id]
     );
     if (resLoggedInUser.rowCount === 0)

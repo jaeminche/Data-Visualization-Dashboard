@@ -227,6 +227,7 @@ const c = {
     cardObjs, // [{}, {}]
     resRowArrs, //[[], []]
     period = "month",
+    // TODO: change it to await and pass 'client' as a param
     firstDayOfWeek = this.getFirstDayOfWeek("month")
   ) {
     vm.stateFlag = "0540";
@@ -235,11 +236,13 @@ const c = {
     let yAxisData3 = []; // resRowArrs[1]
     let xAxisData = []; // ["date1", "date2"]
     let yAxisMarkLeft = "";
-    let yAxisMarkRight = ""; //
+    let yAxisMarkRight = "";
+    let chartTitle = ""; //
     const dataForChart = [];
     // let [resrows1, resrows2, resrows3] = resRowArrs;
     vm.stateFlag = "0543";
     cardObjs.forEach((card, i) => {
+      if (i == 0) chartTitle = card.name;
       if (card.isForLeftXaxis) {
         yAxisMarkLeft = card.yAxisMark;
       } else {
@@ -247,6 +250,7 @@ const c = {
       }
       if (card.resType === "retrievable_date_count") {
         resRowArrs[i].forEach(row => {
+          // TODO: modulize
           if (i == 0) {
             xAxisData.push(new Date(row.date).toDateString());
             yAxisData1.push(row.count);
@@ -330,6 +334,7 @@ const c = {
             // dataset = this.genDataset(date, 0, 0, 0, yAxisMarkLeft);
           }
           vm.stateFlag = "0545";
+          // TODO: modulize
           if (i == 0) {
             xAxisData.push(new Date(date).toDateString());
             yAxisData1.push(calculatedMin);
@@ -360,6 +365,7 @@ const c = {
       yAxisMarkLeft = yAxisMarkRight;
       yAxisMarkRight = "";
     }
+    vm.chart.myOptions.title = chartTitle;
     vm.chart.data.xAxis = xAxisData;
     vm.chart.data.yAxis1 = yAxisData1;
     vm.chart.myOptions.yAxisMarkLeft = yAxisMarkLeft;

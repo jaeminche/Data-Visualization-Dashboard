@@ -17,6 +17,7 @@ const vm = {
   // },
   currentLogin: {
     name: null,
+    display: null,
     id: null,
     uuid: null,
     o_name: null,
@@ -151,8 +152,8 @@ const vm = {
         id: 6, // !chart on pg 4 in ppt
         name: "NO. OF ACTIVE ORGANIZATIONS PER DAY THIS MONTH",
         isCardShown: false,
-        isDefaultForChart: false,
-        // isDefaultForChart: true, // !must be only one true for each showtype(two for stacked-bar), also (this card.isCardShown && !!card.query)
+        // isDefaultForChart: false,
+        isDefaultForChart: true, // !must be only one true for each showtype(two for stacked-bar), also (this card.isCardShown && !!card.query)
         isForLeftXaxis: true,
         yAxisMark: "cust.",
         period: "month",
@@ -219,8 +220,8 @@ const vm = {
         id: 9,
         name: "AVERAGE TIME THIS WEEK",
         isCardShown: false,
-        isDefaultForChart: true,
-        // isDefaultForChart: false,
+        // isDefaultForChart: true,
+        isDefaultForChart: false,
         isForLeftXaxis: true,
         yAxisMark: "min.",
         period: "week",
@@ -451,7 +452,7 @@ const vm = {
           })) AND DATE(client_timestamp) < DATE_TRUNC('month', DATE(${
             vm.today
           }) + INTERVAL '1 month') GROUP BY DATE(DATE_TRUNC('day', DATE(client_timestamp)) )`;
-          // below is simply a number for a month, not daily
+          // !below is simply a number for a month, not daily
           // return `SELECT userid FROM log_startcycling WHERE orgid = $1 AND DATE(client_timestamp) >= DATE_TRUNC('month', DATE(${
           //   vm.today
           // })) AND DATE(client_timestamp) < DATE_TRUNC('month', DATE(${
@@ -785,6 +786,7 @@ const vm = {
   },
   chart: {
     myOptions: {
+      title: "unable to retrieve title",
       yAxisMarkLeft: "left unit1",
       yAxisMarkRight: "right unit2"
     },

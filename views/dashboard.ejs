@@ -7,7 +7,7 @@
     <h1 class="h3 mb-0 text-gray-800 font-weight-bold">Dashboard :
     <% if (typeof currentShow !== "undefined") { %> 
       <% if (currentShowType === "user") { %>
-       <span class="font-weight-normal"><%= currentShow.name %></span></h1>
+       <span class="font-weight-normal"><%= currentShow.display %></span></h1>
       <% } else if (currentShowType === "admin") {%>
        <span class="font-weight-normal">Org <%= currentShow.o_id %>'s <%= currentShow.o_name %></span></h1>
       <% } else if (currentShowType === "superadmin") {%>
