@@ -1,6 +1,6 @@
 const vm = {
   // TODO: when deployment, change the date to current_date
-  today: "'2017-06-13'",
+  today: "'2017-06-08'",
   pgload: 1,
   stateFlag: "",
   jwt: {
@@ -39,7 +39,7 @@ const vm = {
         isCardShown: false,
         isDefaultForChart: false, // !must be only one true for each showtype(two for stacked-bar), also (this card.isCardShown && !!card.query)
         isForLeftXaxis: false, // !true only if time
-        yAxisTickMark: "cust.",
+        yAxisMark: "cust.",
         period: "day",
         classname: "sa",
         number: 0,
@@ -60,7 +60,7 @@ const vm = {
         isCardShown: false,
         isDefaultForChart: false,
         isForLeftXaxis: false,
-        yAxisTickMark: "cust.",
+        yAxisMark: "cust.",
         period: "month",
         number: 0,
         isForTimeCalc: false,
@@ -82,7 +82,7 @@ const vm = {
         isCardShown: true,
         isDefaultForChart: false,
         isForLeftXaxis: false,
-        yAxisTickMark: "cust.",
+        yAxisMark: "cust.",
         period: null,
         number: 0,
         isForTimeCalc: false,
@@ -98,7 +98,7 @@ const vm = {
         isCardShown: false,
         isDefaultForChart: false,
         isForLeftXaxis: false,
-        yAxisTickMark: "users",
+        yAxisMark: "users",
         period: null,
         number: 0,
         isForTimeCalc: false,
@@ -114,7 +114,7 @@ const vm = {
         isCardShown: true,
         isDefaultForChart: false,
         isForLeftXaxis: true,
-        yAxisTickMark: "cust.",
+        yAxisMark: "cust.",
         get period() {
           if (!vm.cards.areForChart) {
             return "day";
@@ -151,9 +151,10 @@ const vm = {
         id: 6, // !chart on pg 4 in ppt
         name: "NO. OF ACTIVE ORGANIZATIONS PER DAY THIS MONTH",
         isCardShown: false,
-        isDefaultForChart: true, // !must be only one true for each showtype(two for stacked-bar), also (this card.isCardShown && !!card.query)
+        isDefaultForChart: false,
+        // isDefaultForChart: true, // !must be only one true for each showtype(two for stacked-bar), also (this card.isCardShown && !!card.query)
         isForLeftXaxis: true,
-        yAxisTickMark: "cust.",
+        yAxisMark: "cust.",
         period: "month",
         number: null,
         isForTimeCalc: false,
@@ -175,7 +176,7 @@ const vm = {
         isCardShown: true,
         isDefaultForChart: false,
         isForLeftXaxis: false,
-        yAxisTickMark: "cust.",
+        yAxisMark: "cust.",
         period: "month",
         number: 0,
         isForTimeCalc: false,
@@ -198,7 +199,7 @@ const vm = {
         isCardShown: false,
         isDefaultForChart: false,
         isForLeftXaxis: true,
-        yAxisTickMark: "cust.",
+        yAxisMark: "cust.",
         period: "year",
         number: null,
         isForTimeCalc: false,
@@ -218,9 +219,10 @@ const vm = {
         id: 9,
         name: "AVERAGE TIME THIS WEEK",
         isCardShown: false,
-        isDefaultForChart: false,
+        isDefaultForChart: true,
+        // isDefaultForChart: false,
         isForLeftXaxis: true,
-        yAxisTickMark: "min.",
+        yAxisMark: "min.",
         period: "week",
         number: 0,
         isForTimeCalc: true,
@@ -242,9 +244,10 @@ const vm = {
         id: 10,
         name: "AVERAGE TIME THIS MONTH",
         isCardShown: false,
+        // isDefaultForChart: true,
         isDefaultForChart: false,
         isForLeftXaxis: true,
-        yAxisTickMark: "min.",
+        yAxisMark: "min.",
         period: "month",
         number: 0,
         isForTimeCalc: true,
@@ -271,7 +274,7 @@ const vm = {
         isCardShown: true,
         isDefaultForChart: false,
         isForLeftXaxis: true,
-        yAxisTickMark: "month",
+        yAxisMark: "month",
         get period() {
           if (!vm.cards.areForChart) {
             return "days";
@@ -309,7 +312,7 @@ const vm = {
         isCardShown: false,
         isDefaultForChart: true,
         isForLeftXaxis: true,
-        yAxisTickMark: "days",
+        yAxisMark: "days",
         period: "year",
         number: 0,
         isForTimeCalc: false,
@@ -334,7 +337,7 @@ const vm = {
         isCardShown: true,
         isDefaultForChart: false, // !must be only one true for each showtype(two for stacked-bar), also (this card.isCardShown && !!card.query)
         isForLeftXaxis: false,
-        yAxisTickMark: "min.",
+        yAxisMark: "min.",
         get period() {
           if (!vm.cards.areForChart) {
             return "month";
@@ -374,7 +377,7 @@ const vm = {
         isCardShown: false,
         isDefaultForChart: true,
         isForLeftXaxis: false,
-        yAxisTickMark: "min.",
+        yAxisMark: "min.",
         period: "year",
         number: null,
         isForTimeCalc: true,
@@ -398,7 +401,7 @@ const vm = {
         isCardShown: false,
         isDefaultForChart: false,
         isForLeftXaxis: false,
-        yAxisTickMark: "users",
+        yAxisMark: "users",
         get period() {
           if (!vm.cards.areForChart) {
             return "day";
@@ -434,7 +437,7 @@ const vm = {
         isCardShown: false,
         isDefaultForChart: false,
         isForLeftXaxis: true,
-        yAxisTickMark: "users",
+        yAxisMark: "users",
         period: "month",
         number: 0,
         isForTimeCalc: false,
@@ -463,7 +466,7 @@ const vm = {
         isCardShown: false,
         isDefaultForChart: false, // !must be only one true for each showtype(two for stacked-bar), also (this card.isCardShown && !!card.query)
         isForLeftXaxis: true,
-        yAxisTickMark: "min.",
+        yAxisMark: "min.",
         period: "month",
         isForTimeCalc: true,
         color: "success",
@@ -487,7 +490,7 @@ const vm = {
         isCardShown: false,
         isDefaultForChart: false,
         isForLeftXaxis: false,
-        yAxisTickMark: "min.",
+        yAxisMark: "min.",
         period: "month",
         get number() {
           return vm.average.admin_monthly.usersDailyAvgThisMonth;
@@ -507,7 +510,7 @@ const vm = {
         isCardShown: false,
         isDefaultForChart: false,
         isForLeftXaxis: false,
-        yAxisTickMark: "users",
+        yAxisMark: "users",
         period: null,
         number: 0,
         isForTimeCalc: false,
@@ -526,7 +529,7 @@ const vm = {
         isCardShown: true,
         isDefaultForChart: false,
         isForLeftXaxis: true,
-        yAxisTickMark: "days",
+        yAxisMark: "days",
         get period() {
           if (!vm.cards.areForChart) {
             return "month";
@@ -564,7 +567,7 @@ const vm = {
         isCardShown: false,
         isDefaultForChart: true,
         isForLeftXaxis: true,
-        yAxisTickMark: "days",
+        yAxisMark: "days",
         period: "year",
         number: 0,
         isForTimeCalc: false,
@@ -589,7 +592,7 @@ const vm = {
         isCardShown: true,
         isDefaultForChart: false, // !must be only one true for each showtype(two for stacked-bar), also (this card.isCardShown && !!card.query)
         isForLeftXaxis: false,
-        yAxisTickMark: "min.",
+        yAxisMark: "min.",
         get period() {
           if (!vm.cards.areForChart) {
             return "month";
@@ -629,7 +632,7 @@ const vm = {
         isCardShown: false,
         isDefaultForChart: true,
         isForLeftXaxis: false,
-        yAxisTickMark: "min.",
+        yAxisMark: "min.",
         period: "year",
         number: null,
         isForTimeCalc: true,
@@ -653,7 +656,7 @@ const vm = {
         isCardShown: false,
         isDefaultForChart: false,
         isForLeftXaxis: true,
-        yAxisTickMark: "min.",
+        yAxisMark: "min.",
         period: "week",
         number: 0,
         isForTimeCalc: true,
@@ -677,7 +680,7 @@ const vm = {
         isCardShown: true,
         isDefaultForChart: false,
         isForLeftXaxis: true,
-        yAxisTickMark: "min.",
+        yAxisMark: "min.",
         period: "day",
         number: 0,
         isForTimeCalc: true,
@@ -696,7 +699,7 @@ const vm = {
       //   name: "ACTIVE TIME FOR THE LAST 7 DAYS",
       //   isDefaultForChart: false,//
       //   isForLeftXaxis: true,
-      //   yAxisTickMark: "min.",
+      //   yAxisMark: "min.",
       //   period: "7days",
       //   number: 0,
       //   isForTimeCalc: true,

@@ -154,14 +154,14 @@ router.get("/dashboard/:uuid", async function(req, res) {
     // foundCardsAndRes = { cardObjs: [{}, {}], resRowArrs: [[], []]}
     vm.stateFlag = "0215";
     let period = foundCardsAndRes.cardObjs[0].period; // you need only one period data because there's one xAxis
+    let firstDay = await c.getFirstDayOfWeek(client, period);
     console.log("foundCardsAndRes.resRowArrs: ", foundCardsAndRes.resRowArrs);
     await c.updateVM_chart(
       "default",
       foundCardsAndRes.cardObjs, //[{}, {}]
       foundCardsAndRes.resRowArrs, //[[], []]
       period, //""
-      // null,
-      c.getFirstDayOfWeek(period)
+      firstDay
     );
     // vm.cards.areForChart = true;
     // for await (let card of vm.cards[`for${vm.currentShowType}`]) {
@@ -399,7 +399,7 @@ router.post("/updatechart", async function(req, res) {
 
     vm.stateFlag = "0501";
     // let resChart = vm.tempresChart;
-    let firstDayOfWeek = c.getFirstDayOfWeek(period);
+    let firstDayOfWeek = await c.getFirstDayOfWeek(period);
     // if (period === "week") {
     //   firstDayOfWeek = await client.query(
     //     `select * from date_trunc('week', date(${vm.today}))`
