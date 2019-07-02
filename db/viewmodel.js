@@ -1,3 +1,10 @@
+/**
+ * todo 1. Get clickable period tabs working
+ * todo 2. Get clickable arrows working
+ * todo 3. Get clickable cards working
+ * todo 4. implement middleware for security
+ */
+
 const vm = {
   // TODO: when deployment, change the date to current_date
   today: "'2017-06-08'",
