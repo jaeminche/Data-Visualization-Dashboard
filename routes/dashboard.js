@@ -3,6 +3,7 @@ const router = express.Router({ mergeParams: true });
 const bodyParser = require("body-parser");
 const { Pool, Client } = require("pg");
 const client_config = require("../config/client");
+const basic_config = require("../config/basic_config");
 const Chart = require("chart.js");
 const vm = require("../db/viewmodel");
 const c = require("../db/control");
@@ -145,7 +146,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
     // *========================================
     // *| DEFAULT CHART, LOOP OVER CARDS |
     // *========================================
-    vm.stateFlag = "0200";
+    vm.stateFlag = "0201";
     forChart = true;
     let foundCardsAndRes = await c.findCardsAndGetResOrUpdateCardsNo(
       client,
@@ -243,6 +244,9 @@ router.get("/dashboard/:uuid", async function(req, res) {
     vm.stateFlag = "0310";
     if (typeof vm.resOrgList != "undefined") data["orgs"] = vm.resOrgList;
     if (typeof vm.resUserList != "undefined") data["users"] = vm.resUserList;
+    typeof basic_config != "undefined"
+      ? (data["basic_config"] = basic_config)
+      : (data["basic_config"] = { product_name: "Company" });
     if (typeof vm.resPie != "undefined") {
       data["pie"] = vm.resPie;
       data["pieData"] = vm.pie;
@@ -264,213 +268,6 @@ router.get("/dashboard/:uuid", async function(req, res) {
     await client.release();
     console.log("Client disconnected");
   }
-});
-
-router.post("/createchart", async function(req, res) {
-  try {
-    // res.send(dataForChartArea);
-  } catch (ex) {
-    // await client.query('ROLLBACK')
-    console.log(`something went wrong ${ex} at ${vm.stateFlag}`);
-    vm.currentShow = null;
-    // TODO: modify redirect destination
-    setTimeout(function redirect() {
-      res.redirect(`/dashboard/${req.params.uuid}`);
-    }, 5000);
-  } finally {
-    await client.release();
-    console.log("Client disconnected");
-  }
-});
-
-router.post("/updatechartforcard", async function(req, res) {
-  console.log("card clicked=====================");
-  const client = await pool.connect();
-  vm.stateFlag = "0700";
-  try {
-    let resChart, showStatePosted;
-    cardIdClickedOn = req.body.card_id;
-    let reqType = "card";
-    console.log("TCL: cardIdClickedOn", cardIdClickedOn);
-    console.log("vm.currentShowType:", vm.currentShowType);
-
-    vm.stateFlag = "0701";
-    for await (let card of vm.cards[`for${vm.currentShowType}`]) {
-      console.log("in for of loop and before if");
-      console.log("card.id: ", typeof card.id);
-      console.log("cardIdClickedOn: ", typeof cardIdClickedOn);
-      // if (cardIdClickedOn.equals(card.id)) {
-      //   console.log("finally in...");
-      if (card.id == cardIdClickedOn) {
-        console.log("finally in...");
-        // showStatePosted = card.auth[card.auth.length - 1];
-        // if (card.isForLeftXaxis) {
-        if (card["idRedirectedForChartQuery"] != null) {
-          console.log(
-            "in idRedirectedForChartQuery!!",
-            card.idRedirectedForChartQuery
-          );
-          if (vm.currentShowType === "superadmin") {
-            resChart = await client.query(
-              c.getQueryAndValueFromRedirectedCard(
-                card.idRedirectedForChartQuery
-              )["query"]
-            );
-          } else if (vm.currentShowType === "admin") {
-            resChart = await client.query(
-              c.getQueryAndValueFromRedirectedCard(
-                card.idRedirectedForChartQuery
-              )["query"],
-              [vm.currentShow.o_id]
-            );
-          } else if (vm.currentShowType === "user") {
-            resChart = await client.query(
-              c.getQueryAndValueFromRedirectedCard(
-                card.idRedirectedForChartQuery
-              )["query"],
-              [vm.currentShow.id]
-            );
-          }
-        } else {
-          resChart = await client.query(card.query);
-        }
-      }
-    }
-
-    vm.stateFlag = "0710";
-    resChart = resChart.rows;
-    console.log("TCL: forawait -> ###resChart", resChart);
-
-    c.updateVM_chart(reqType, resChart, null, null);
-    vm.stateFlag = "0600";
-
-    let labels = [],
-      data = [];
-    // TODO: change vm.area
-    vm.area.datasets.forEach(dataset => {
-      labels.push(dataset.label);
-      data.push(dataset.data);
-    });
-    // TODO: manipulate labels into such as "Mon"
-    let result = {
-      date: labels,
-      labels: labels,
-      data: data,
-      yAxisUnit: "min."
-    };
-    // let labels = [],
-    //   data = [];
-
-    // resChart.map(set => {
-    //   labels.push(set.date);
-    //   data.push(set.count);
-    // });
-    // TODO: use c.createBarChart instead of the following line
-    // let dataForChartArea = {
-    //   data: labels,
-    //   labels: labels,
-    //   data: data,
-    //   yAxisUnit: "cust."
-    // };
-    // console.log(dataForChartArea);
-    res.send(result);
-  } catch (ex) {
-    // await client.query('ROLLBACK')
-    console.log(`something went wrong ${ex} at ${vm.stateFlag}`);
-    vm.currentShow = null;
-    // TODO: modify redirect destination
-    setTimeout(function redirect() {
-      res.redirect(`/dashboard/${req.params.uuid}`);
-    }, 5000);
-  } finally {
-    await client.release();
-    console.log("Client disconnected");
-  }
-});
-
-router.post("/updatechart", async function(req, res) {
-  const client = await pool.connect();
-  vm.stateFlag = "0500";
-  try {
-    let resChart;
-    period = req.body.period;
-    let reqFrom = "period";
-    console.log("TCL: period", period);
-    console.log("vm.currentShowType:", vm.currentShowType);
-
-    vm.stateFlag = "0501";
-    // let resChart = vm.tempresChart;
-    let firstDayOfWeek = await c.getFirstDayOfWeek(period);
-    // if (period === "week") {
-    //   firstDayOfWeek = await client.query(
-    //     `select * from date_trunc('week', date(${vm.today}))`
-    //   );
-    //   firstDayOfWeek = firstDayOfWeek.rows[0].date_trunc;
-    // } else {
-    //   firstDayOfWeek = "";
-    // }
-
-    vm.stateFlag = "0510";
-    // get response only from cards that correspond with user-picked period
-    for await (let card of vm.cards[`for${vm.currentShowType}`]) {
-      if (card.period === period) {
-        if (card.isForLeftXaxis) {
-          resChart = await client.query(card.query, [vm.currentShow.id]);
-          resChart = resChart.rows;
-        } else {
-        }
-        // break;
-      }
-    }
-
-    vm.stateFlag = "0520";
-    c.updateVM_chart(reqFrom, resChart, period, firstDayOfWeek);
-
-    vm.stateFlag = "0600";
-    let labels = [],
-      data = [];
-    vm.area.datasets.forEach(dataset => {
-      labels.push(dataset.label);
-      data.push(dataset.data);
-    });
-    // TODO: manipulate labels into such as "Mon"
-    let result = {
-      date: labels,
-      labels: labels,
-      data: data,
-      yAxisUnit: "min."
-    };
-
-    res.send(result);
-  } catch (ex) {
-    // await client.query('ROLLBACK')
-    console.log(`something went wrong ${ex} at ${vm.stateFlag}`);
-    vm.currentShow = null;
-    // TODO: modify redirect destination
-    setTimeout(function redirect() {
-      res.redirect(`/dashboard/${req.params.uuid}`);
-    }, 5000);
-  } finally {
-    await client.release();
-    console.log("Client disconnected");
-  }
-});
-
-router.get("/dashboard/usernameupdate", async function(req, res) {
-  const client = await pool.connect();
-  const { rows } = await client.query("select * from users");
-  let index = 0;
-
-  for await (let row of rows) {
-    let rowid = row.id;
-    let roworgid = row.organisation;
-    client.query("UPDATE users SET name = $1 WHERE id = $2", [
-      `${roworgid.toString()}_${vm.names[index]}_${rowid.toString()}`,
-      rowid
-    ]);
-    index++;
-  }
-  res.redirect("/dashboard/5cce22c0-8bac-4662-b52c-cfa0504ec987");
 });
 
 module.exports = router;
