@@ -69,6 +69,23 @@ router.get("/dashboard/mydashboard/:uuid", async function(req, res) {
   res.redirect(`/dashboard/${req.params.uuid}`);
 });
 
+router.get("/dashboard/usernameupdate", async function(req, res) {
+  const client = await pool.connect();
+  const { rows } = await client.query("select * from users");
+  let index = 0;
+
+  for await (let row of rows) {
+    let rowid = row.id;
+    let roworgid = row.organisation;
+    client.query("UPDATE users SET name = $1 WHERE id = $2", [
+      `${roworgid.toString()}_${vm.names[index]}_${rowid.toString()}`,
+      rowid
+    ]);
+    index++;
+  }
+  res.redirect("/dashboard/5cce22c0-8bac-4662-b52c-cfa0504ec987");
+});
+
 // =========================
 // AUTH ROUTES
 // =========================
