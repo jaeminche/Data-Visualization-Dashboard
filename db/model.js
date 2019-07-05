@@ -1,42 +1,20 @@
-// Which customer uses Memoride, and who does not?
-// How often does a customer use Memoride?
-// How many days per month
-// Duration (total, per month)
-// Duration (per day)
-// Evolution of these parameters
-// How many routes are done?
-// Routes per month
-// Average duration per route
-// Characteristics of route
-// How do they use memoride?
-// Motion sensor versus taxi mode (per user and in total)
+// const vm = require("./viewmodel");
+// const c = require("./control");
+// const v = require("./view");
 
-class Org {
-  // get userArray() {if (userArray[0].org === this.id) {return userArray}}
-  constructor(name, id, avg) {
-    this.name = name;
-    this.id = id;
-    this.avg = avg;
-    this.userArray = userArray;
-  }
-}
-class User {
-  constructor(name, id, org, time, avg) {
-    this.name = name;
-    this.id = id;
-    this.org = org;
-    this.time = time;
-    this.avg = avg;
-  }
-}
+// class State {
+//   // get userArray() {if (userArray[0].org === this.id) {return userArray}}
+//   constructor(card_id, chart_id) {
+//     this.card_id = card_id;
+//     this.chart_id = chart_id;
+//     return this;
+//   }
 
-let testUser = new User("james", 2, 1, 60, 6);
-let testOrg = new Org("Acti84Health", 1, 10);
-// console.log("TCL: testOrg", testOrg);
-// console.log("test: ", testUser);
+//   static update() {
+//     c.updateVM_cards;
+//   }
+// }
 
-const userArray = [];
-for (let testUser of ["jae", "dan", "a", "nick"]) {
-  userArray.push(new User(testUser));
-}
-// console.log("TCL: userArray", userArray);
+// let newState = new State();
+
+// State.update();

@@ -6,14 +6,14 @@
           <h6 class="m-0 font-weight-bold text-primary"><%= vm.chart.myOptions.title %></h6>
           
             <ul class="nav nav-tabs" id="myTab" role="tablist">
-              <li class="nav-item chart-tab chart-tab-week" value="week">
-                <a class="nav-link" value="week" id="week-tab" data-toggle="tab" role="tab" aria-controls="week" aria-selected="false">W</a>
+              <li class="nav-item chart-updates chart-tab chart-tab-week" data-reqBy="tab" data-clickedOn="week" data-cardId=<%= vm.state.chart._id %>>
+                <a class="nav-link" id="week-tab" data-toggle="tab" role="tab" aria-controls="week" aria-selected="false">W</a>
               </li>
-              <li class="nav-item chart-tab chart-tab-month" value="month">
-                <a class="nav-link active" value="month" id="month-tab" data-toggle="tab" role="tab" aria-controls="month" aria-selected="true">M</a>
+              <li class="nav-item chart-updates chart-tab chart-tab-month" data-reqBy="tab" data-clickedOn="month" data-cardId=<%= vm.state.chart._id %>>
+                <a class="nav-link active" id="month-tab" data-toggle="tab" role="tab" aria-controls="month" aria-selected="true">M</a>
               </li>
-              <li class="nav-item chart-tab chart-tab-year" value="year">
-                <a class="nav-link" value="year" id="year-tab" data-toggle="tab" role="tab" aria-controls="year" aria-selected="false">Y</a>
+              <li class="nav-item chart-updates chart-tab chart-tab-year" data-reqBy="tab" data-clickedOn="year" data-cardId=<%= vm.state.chart._id %>>
+                <a class="nav-link" id="year-tab" data-toggle="tab" role="tab" aria-controls="year" aria-selected="false">Y</a>
               </li>
             </ul>
 
@@ -35,9 +35,9 @@
           <div class="chart-area">
 
             <div class="d-flex justify-content-between">
-              <i class="my-arrows fas fa-chevron-left"></i>
+              <i class="chart-updates my-arrows fas fa-chevron-left" id="left"  data-reqBy="arrow" data-clickedOn="left" data-cardId=<%= vm.state.chart._id %>></i>
               <div id="date-range"><%= vm.chart.data.xAxis[0] %> ~ <%= vm.chart.data.xAxis[vm.chart.data.xAxis.length - 1] %></div>
-              <i class="my-arrows fas fa-chevron-right"></i>
+              <i class="chart-updates my-arrows fas fa-chevron-right" id="right" data-reqBy="arrow" data-clickedOn="right" data-cardId=<%= vm.state.chart._id %>></i>
             </div>
 
             <canvas id="myAreaChart"></canvas>

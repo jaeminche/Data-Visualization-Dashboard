@@ -152,25 +152,74 @@ const c = {
   //   };
   // },
 
+  findCardsAndGetRes: async function(client, key, value, towards) {
+    let res;
+    const foundCardObjs = [];
+    const resRows = [];
+    const resRowArrs = [];
+
+    vm.cards.areForChart = true;
+    if (towards === "right") {
+      let d = new Date(vm.today);
+      d.setMonth(d.getMonth() + 1);
+      vm.today = "'" + d.toDateString() + "'";
+      // console.log(vm.today);
+    } else if (towards === "left") {
+      let d = new Date(vm.today);
+      d.setMonth(d.getMonth() - 1);
+      vm.today = "'" + d.toDateString() + "'";
+    }
+
+    for await (let card of vm.cards[`for${vm.currentShowType}`]) {
+      if (card[key] === value) {
+        switch (vm.currentShowType) {
+          case "superadmin":
+            vm.stateFlag = "0210";
+            res = await client.query(card.query);
+            break;
+          case "admin":
+            vm.stateFlag = "0220";
+            res = await client.query(card.query, [vm.currentShow.o_id]);
+            break;
+          case "user":
+            console.log("user card ----");
+            vm.stateFlag = "0230";
+            res = await client.query(card.query, [vm.currentShow.id]);
+            break;
+        }
+
+        await foundCardObjs.push(card); // to get myoption data
+        await resRowArrs.push(res.rows); // for stacked-bar, 2 sets pushed
+        console.log(foundCardObjs);
+      }
+      // resRowSets.push(resRows);
+    }
+    vm.stateFlag = "0213";
+    return { cardObjs: foundCardObjs, resRowArrs: resRowArrs }; // { cardObjs: [{}, {}], resRowArrs: [[], []]}
+  },
+
   /**
    * @description finds cards and get res if areForChart === true,
    * Or updates cards' numbers if areForChart === false
    * @param {boolean} areForChart
    * @return {object} foundCardsAndRes
    */
-  findCardsAndGetResOrUpdateCardsNo: async function(client, areForChart) {
-    let key, res;
+  findCardsAndGetResOrUpdateCardsNo: async function(client, areForChart, key) {
+    let res;
     const foundCardObjs = [];
     const resRows = [];
     const resRowArrs = [];
 
     vm.cards.areForChart = areForChart;
+    if (areForChart) {
+      key = "isDefaultForChart";
+    } else {
+      key = "isCardShown";
+      this.resetState("card");
+    }
 
     for await (let card of vm.cards[`for${vm.currentShowType}`]) {
-      if (
-        card[areForChart ? "isDefaultForChart" : "isCardShown"] &&
-        !!card.query
-      ) {
+      if (card[key] && !!card.query) {
         switch (vm.currentShowType) {
           case "superadmin":
             vm.stateFlag = "0210";
@@ -201,6 +250,13 @@ const c = {
     return { cardObjs: foundCardObjs, resRowArrs: resRowArrs }; // { cardObjs: [{}, {}], resRowArrs: [[], []]}
   },
 
+  updateState: function(type, id) {
+    vm.state[type]["_id"].push(id);
+  },
+
+  resetState: function(type) {
+    vm.state[type]["_id"] = [];
+  },
   /**
    * updates cards' numbers in viewmodel
    * @param {object}
@@ -218,6 +274,7 @@ const c = {
     } else {
       card.number = "something went wrong";
     }
+    this.updateState("card", card.id);
   },
 
   // TODO: move this to browser-side
@@ -241,6 +298,7 @@ const c = {
     const dataForChart = [];
     // let [resrows1, resrows2, resrows3] = resRowArrs;
     vm.stateFlag = "0543";
+    this.resetState("chart");
     cardObjs.forEach((card, i) => {
       if (i == 0) chartTitle = card.name;
       if (card.isForLeftXaxis) {
@@ -248,6 +306,7 @@ const c = {
       } else {
         yAxisMarkRight = card.yAxisMark;
       }
+
       if (card.resType === "retrievable_date_count") {
         resRowArrs[i].forEach(row => {
           // TODO: modulize
@@ -354,6 +413,7 @@ const c = {
         // });
       } else {
       }
+      this.updateState("chart", card.id);
     });
     // console.log("dataForBarChart: ", dataForChart);
     // dataForChart.map(set => {

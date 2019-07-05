@@ -21,82 +21,86 @@ pool.on("error", (err, client) => {
 router.post("/updatechart", async function(req, res) {
   const client = await pool.connect();
   vm.stateFlag = "0500";
+
   try {
-    let resChart, reqFrom, card_id;
+    let resChart, reqBy, card_id;
     let areForChart = true;
 
     vm.stateFlag = "0501";
-    if (req.body.reqFrom === "tab") {
-      period = req.body.period;
-      reqFrom = "period";
-      console.log("TCL: period", period);
-      console.log("vm.currentShowType:", vm.currentShowType);
-      for await (let card of vm.cards[`for${vm.currentShowType}`]) {
-        if (card.period === period) {
-          if (card.isForLeftXaxis) {
-            resChart = await client.query(card.query, [vm.currentShow.id]);
-            resChart = resChart.rows;
-          } else {
-          }
-          // break;
-        }
-      }
-      let firstDayOfWeek = await c.getFirstDayOfWeek(period);
-    } else if (req.body.reqFrom === "card") {
-      card_id = req.body.card_id;
-    } else if (req.body.reqFrom === "arrow") {
-      console.log("clicked on arrow");
-      console.log(req.body);
-      let foundCardsAndRes = await c.findCardsAndGetRes(
-        client,
-        "name",
-        req.body.cardtitle,
-        req.body.towards
-      );
-    }
+    console.log("updatechart post route is called");
+    console.log("req.body: ", req.body);
+    // if (req.body.reqBy === "tab") {
+    //   period = req.body.period;
+    //   reqBy = "period";
+    //   console.log("TCL: period", period);
+    //   console.log("vm.currentShowType:", vm.currentShowType);
+    //   for await (let card of vm.cards[`for${vm.currentShowType}`]) {
+    //     if (card.period === period) {
+    //       if (card.isForLeftXaxis) {
+    //         resChart = await client.query(card.query, [vm.currentShow.id]);
+    //         resChart = resChart.rows;
+    //       } else {
+    //       }
+    //       // break;
+    //     }
+    //   }
+    //   let firstDayOfWeek = await c.getFirstDayOfWeek(period);
+    // } else if (req.body.reqBy === "card") {
+    //   card_id = req.body.card_id;
+    // } else if (req.body.reqBy === "arrow") {
+    //   console.log("clicked on arrow");
+    //   console.log(req.body);
+    //   let foundCardsAndRes = await c.findCardsAndGetRes(
+    //     client,
+    //     "name",
+    //     req.body.cardtitle,
+    //     req.body.towards
+    //   );
+    // }
 
-    // let resChart = vm.tempresChart;
+    // // let resChart = vm.tempresChart;
 
-    vm.stateFlag = "0510";
-    // get response only from cards that correspond with user-picked period
+    // vm.stateFlag = "0510";
+    // // get response only from cards that correspond with user-picked period
 
-    // foundCardsAndRes = { cardObjs: [{}, {}], resRowArrs: [[], []]}
-    vm.stateFlag = "0215";
-    let period = foundCardsAndRes.cardObjs[0].period; // you need only one period data because there's one xAxis
-    // TODO: check if firstDay must be passed in as param here.
-    let firstDay = await c.getFirstDayOfWeek(client, period);
-    console.log("foundCardsAndRes.resRowArrs: ", foundCardsAndRes.resRowArrs);
-    await c.updateVM_chart(
-      "default",
-      foundCardsAndRes.cardObjs, //[{}, {}]
-      foundCardsAndRes.resRowArrs, //[[], []]
-      period, //""
-      firstDay
-    );
+    // // foundCardsAndRes = { cardObjs: [{}, {}], resRowArrs: [[], []]}
+    // vm.stateFlag = "0215";
+    // let period = foundCardsAndRes.cardObjs[0].period; // you need only one period data because there's one xAxis
+    // // TODO: check if firstDay must be passed in as param here.
+    // let firstDay = await c.getFirstDayOfWeek(client, period);
+    // console.log("foundCardsAndRes.resRowArrs: ", foundCardsAndRes.resRowArrs);
+    // await c.updateVM_chart(
+    //   "default",
+    //   foundCardsAndRes.cardObjs, //[{}, {}]
+    //   foundCardsAndRes.resRowArrs, //[[], []]
+    //   period, //""
+    //   firstDay
+    // );
 
-    vm.stateFlag = "0600";
-    let xAxis = [],
-      yAxis1 = [];
-    xAxis = vm.chart.data.xAxis;
-    yAxis1 = vm.chart.data.yAxis1;
+    // vm.stateFlag = "0600";
+    // let xAxis = [],
+    //   yAxis1 = [];
+    // xAxis = vm.chart.data.xAxis;
+    // yAxis1 = vm.chart.data.yAxis1;
 
-    // TODO: manipulate labels into such as "Mon"
-    let result = {
-      date: xAxis,
-      labels: xAxis,
-      data: yAxis1,
-      yAxisUnit: "min."
-    };
+    // // TODO: manipulate labels into such as "Mon"
+    // let result = {
+    //   date: xAxis,
+    //   labels: xAxis,
+    //   data: yAxis1,
+    //   yAxisUnit: "min."
+    // };
 
-    res.send(result);
+    // res.send(result);
+    res.send(null);
   } catch (ex) {
     // await client.query('ROLLBACK')
     console.log(`something went wrong ${ex} at ${vm.stateFlag}`);
-    vm.currentShow = null;
-    // TODO: modify redirect destination
-    setTimeout(function redirect() {
-      res.redirect(`/dashboard/${req.params.uuid}`);
-    }, 5000);
+    // vm.currentShow = null;
+    // // TODO: modify redirect destination
+    // setTimeout(function redirect() {
+    //   res.redirect(`/dashboard/${req.params.uuid}`);
+    // }, 5000);
   } finally {
     await client.release();
     console.log("Client disconnected");

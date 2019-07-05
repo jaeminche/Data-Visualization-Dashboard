@@ -8,6 +8,7 @@ const express = require("express"),
 // requiring routes
 const indexRoutes = require("./routes/index");
 const dashboardRoutes = require("./routes/dashboard");
+const updatechartRoutes = require("./routes/updatechart");
 const sharedroutesRoutes = require("./routes/sharedroutes");
 // const log_login = require("./routes/log_login"),
 //   log_startcycling = require("./routes/log_startcycling"),
@@ -36,6 +37,7 @@ app.use(bodyParser.json());
 
 app.use("/", indexRoutes);
 app.use("/", dashboardRoutes);
+app.use("/", updatechartRoutes);
 app.use("/", sharedroutesRoutes);
 // app.use("/", log_login);
 // app.use("/", log_startcycling);

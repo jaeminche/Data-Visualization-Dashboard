@@ -228,7 +228,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
     //   vm.stateFlag = "0300";
     //   c.createBarChart(resChart, calendarType);
     // }
-
+    console.log("vm.state: ", vm.state);
     // resBar = await client.query(m.bar.find)
     // *=======================================
     // *| PASS IN DATA
