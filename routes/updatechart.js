@@ -29,34 +29,36 @@ router.post("/updatechart", async function(req, res) {
     vm.stateFlag = "0501";
     console.log("updatechart post route is called");
     console.log("req.body: ", req.body);
-    // if (req.body.reqBy === "tab") {
-    //   period = req.body.period;
-    //   reqBy = "period";
-    //   console.log("TCL: period", period);
-    //   console.log("vm.currentShowType:", vm.currentShowType);
-    //   for await (let card of vm.cards[`for${vm.currentShowType}`]) {
-    //     if (card.period === period) {
-    //       if (card.isForLeftXaxis) {
-    //         resChart = await client.query(card.query, [vm.currentShow.id]);
-    //         resChart = resChart.rows;
-    //       } else {
-    //       }
-    //       // break;
-    //     }
-    //   }
-    //   let firstDayOfWeek = await c.getFirstDayOfWeek(period);
-    // } else if (req.body.reqBy === "card") {
-    //   card_id = req.body.card_id;
-    // } else if (req.body.reqBy === "arrow") {
-    //   console.log("clicked on arrow");
-    //   console.log(req.body);
-    //   let foundCardsAndRes = await c.findCardsAndGetRes(
-    //     client,
-    //     "name",
-    //     req.body.cardtitle,
-    //     req.body.towards
-    //   );
-    // }
+    // req.body:  { reqBy: 'tab', clickedOn: 'week', card_id: '6' }
+
+    if (req.body.reqBy === "tab") {
+      //   period = req.body.period;
+      //   reqBy = "period";
+      //   console.log("TCL: period", period);
+      //   console.log("vm.currentShowType:", vm.currentShowType);
+      //   for await (let card of vm.cards[`for${vm.currentShowType}`]) {
+      //     if (card.period === period) {
+      //       if (card.isForLeftXaxis) {
+      //         resChart = await client.query(card.query, [vm.currentShow.id]);
+      //         resChart = resChart.rows;
+      //       } else {
+      //       }
+      //       // break;
+      //     }
+      //   }
+      //   let firstDayOfWeek = await c.getFirstDayOfWeek(period);
+    } else if (req.body.reqBy === "card") {
+      //   card_id = req.body.card_id;
+    } else if (req.body.reqBy === "arrow") {
+      //   console.log("clicked on arrow");
+      //   console.log(req.body);
+      //   let foundCardsAndRes = await c.findCardsAndGetRes(
+      //     client,
+      //     "name",
+      //     req.body.cardtitle,
+      //     req.body.towards
+      //   );
+    }
 
     // // let resChart = vm.tempresChart;
 

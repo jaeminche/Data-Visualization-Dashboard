@@ -3,27 +3,12 @@ let stateFlag = "0001";
 //   let defaultChartData = myBarChart;
 // }
 
-// let el_cards = document.getElementsByClassName("mycard");
-// let el_ChartTabs = document.getElementsByClassName("chart-tab");
-// let el_arrows = document.getElementsByClassName("my-arrows");
 let el_dateRange = document.getElementById("date-range");
 
 let el_for_chartupdates = document.getElementsByClassName("chart-updates");
 
-// console.log("createchart at card is clicked");
 // get unique classname from the card, and post.
 // in the route, create the chart.
-
-// let getTabValue = function(self) {
-//   // if (myBarChart.data.xAxis.length > 0) {
-//   // console.log("this: ", this);
-//   // console.log("e: ", e);
-//   // console.log("value: ", this.getAttribute("value"));
-//   return { period: self.getAttribute("value") };
-//   // } else {
-//   // return "";
-//   // }
-// };
 
 // let getCardClassNm = function(self) {
 //   return;
@@ -60,14 +45,11 @@ let el_for_chartupdates = document.getElementsByClassName("chart-updates");
 let updateChartByElem = function(e) {
   console.log("clicked on something, this time arrow");
   stateFlag = "0030";
-  // console.log(this.getAttribute("value"));
+  console.log("data-cardId: ", this.getAttribute("data-cardId"));
   let reqBodySetup = {
-    // reqBy: this.dataset.reqBy,
-    // clickedOn: this.dataset.clickedOn,
-    // card_id: this.dataset.cardId
     reqBy: this.getAttribute("data-reqBy"),
     clickedOn: this.getAttribute("data-clickedOn"),
-    card_id: this.getAttribute("data-cardId")
+    card_id: JSON.parse(this.getAttribute("data-cardId"))
   };
   updateChart("/updatechart", reqBodySetup);
 };
@@ -95,14 +77,7 @@ let updateChart = function(url, reqBodyData) {
 };
 
 // TODO: the first eventlistener should make a bar chart, not a STACKED one
-// Array.prototype.forEach.call(el_cards, function(card) {
-//   stateFlag = "0005";
-//   card.addEventListener("click", updateChartByCards);
-// });
-// Array.prototype.forEach.call(el_ChartTabs, function(tab) {
-//   stateFlag = "0010";
-//   tab.addEventListener("click", updateChartByTabs);
-// });
+
 Array.prototype.forEach.call(el_for_chartupdates, function(elem) {
   stateFlag = "0013";
   elem.addEventListener("click", updateChartByElem);
@@ -115,12 +90,10 @@ let h = {
     console.log("thischart: ", chart);
     //////
     chart.data.xAxis = labelArr;
-    // chart.data.yAxis1 =
     chart.data.datasets.forEach((dataset, i) => {
       dataset.data = nestedDataArr[i];
     });
     yAxisTickMark = yAxisTickMark;
-    // chart.myOptions.yAxisUnit = yAxisUnit;
     //////
     chart.update();
   },
