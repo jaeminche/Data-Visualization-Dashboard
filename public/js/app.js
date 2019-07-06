@@ -43,7 +43,7 @@ let el_for_chartupdates = document.getElementsByClassName("chart-updates");
 // };
 
 let updateChartByElem = function(e) {
-  console.log("clicked on something, this time arrow");
+  console.log("clicked on something");
   stateFlag = "0030";
   console.log("data-cardId: ", this.getAttribute("data-cardId"));
   let reqBodySetup = {
@@ -64,14 +64,27 @@ let updateChart = function(url, reqBodyData) {
   h.postData(url, reqBodyData)
     .then(resMyJson => {
       stateFlag = "0060";
+      let yAxis2, yAxis3, yAxisMarkRight;
       console.log("resMyJson: ", resMyJson);
-      let xAxisArr = resMyJson.xAxis;
-      let yAxisArr1 = resMyJson.yAxis1;
+      let xAxis = resMyJson.xAxis;
+      let yAxis1 = resMyJson.yAxis1;
+      stateFlag = "0062";
+      if (!!resMyJson.yAxis2) yAxis2 = resMyJson.yAxis2;
+      if (!!resMyJson.yAxis3) yAxis3 = resMyJson.yAxis3;
+      let title = resMyJson.title;
       let yAxisMarkLeft = resMyJson.yAxisMarkLeft;
-      h.writeData(myBarChart, xAxisArr, yAxisArr1, yAxisMarkLeft);
-      el_dateRange.textContent = `${xAxisArr[0]} ~ ${
-        xAxisArr[xAxisArr.length - 1]
-      }`;
+      if (!!resMyJson.yAxisMarkRight) yAxisMarkRight = resMyJson.yAxisMarkRight;
+      stateFlag = "0064";
+      console.log("myBarChart: ", myBarChart);
+      h.removeData(myBarChart);
+      stateFlag = "0080";
+      h.addData(myBarChart, xAxis, yAxis1, yAxis2, yAxis3);
+      stateFlag = "0090";
+      h.updateConfig(myBarChart, title, yAxisMarkLeft, yAxisMarkRight);
+      stateFlag = "0100";
+      // myBarChart.update();
+      stateFlag = "0110";
+      el_dateRange.textContent = `${xAxis[0]} ~ ${xAxis[xAxis.length - 1]}`;
     }) // JSON-string from `response.json()` call
     .catch(error => console.error(error + " at " + stateFlag));
 };
@@ -86,40 +99,14 @@ Array.prototype.forEach.call(el_for_chartupdates, function(elem) {
 // chartTab.type = "button";
 
 let h = {
-  writeData: function(chart, labelArr, nestedDataArr, yAxisTickMark) {
-    console.log("thischart: ", chart);
-    //////
-    chart.data.xAxis = labelArr;
-    chart.data.datasets.forEach((dataset, i) => {
-      dataset.data = nestedDataArr[i];
-    });
-    yAxisTickMark = yAxisTickMark;
-    //////
-    chart.update();
-  },
-
-  updateConfigByMutating: function(chart) {
-    chart.options.title.text = "new title";
-    chart.update();
-  },
-
-  addData: function(chart, label, data) {
-    chart.data.xAxis.push(label);
-    chart.data.datasets.forEach(dataset => {
-      dataset.data.push(data);
-    });
-    chart.update();
-  },
-
-  removeData: function(chart) {
-    chart.data.xAxis = [];
-    chart.data.datasets.forEach(dataset => {
-      dataset.data = [];
-    });
-    chart.update();
-  },
-
-  postData: async function(url = "/updateChart", data = { period: "month" }) {
+  postData: async function(
+    url = "/updateChart",
+    data = {
+      reqBy: "not submitted",
+      clickedOn: "not submitted",
+      card_id: "not submitted"
+    }
+  ) {
     console.log(typeof data);
     console.log("stringified data in postdata: ", JSON.stringify(data));
     try {
@@ -153,5 +140,73 @@ let h = {
       // await client.release();
       // console.log("Client disconnected");
     }
+  },
+
+  addData: function(
+    chart,
+    xAxis = ["sample label 1", "sample label 2"],
+    yAxisData1 = [1, 2],
+    yAxisData2,
+    yAxisData3
+  ) {
+    const yAxisData = [yAxisData1, yAxisData2, yAxisData3];
+    chart.data.labels = xAxis;
+    chart.data.datasets.forEach((dataset, i) => {
+      if (!!yAxisData[i]) dataset.data = yAxisData[i];
+    });
+    // chart.data.yAxis1 = yAxisData1;
+    // if (!!yAxisData2) chart.data.yAxis2 = yAxisData2;
+    // if (!!yAxisData3) chart.data.yAxis3 = yAxisData3;
+
+    chart.update();
+  },
+
+  updateConfig: function(
+    chart,
+    title = "unable to find title",
+    yAxisMarkLeft = "sample mark left",
+    yAxisMarkRight
+  ) {
+    stateFlag = "0091";
+    console.log("title is ", title);
+    document.getElementsByClassName("chart-title")[0].textContent = title;
+    yAxisMarkLeft = yAxisMarkLeft;
+    if (!!yAxisMarkRight) yAxisMarkRight = yAxisMarkRight;
+
+    chart.update();
+  },
+
+  removeData: function(chart) {
+    chart.data.xAxis = [];
+    chart.data.datasets.forEach((dataset, i) => {
+      dataset.data = [];
+    });
+
+    chart.update();
   }
+
+  // writeData: function(chart, labelArr, nestedDataArr, yAxisTickMark) {
+  //   console.log("thischart: ", chart);
+  //   //////
+  //   chart.data.xAxis = labelArr;
+  //   chart.data.datasets.forEach((dataset, i) => {
+  //     dataset.data = nestedDataArr[i];
+  //   });
+  //   yAxisTickMark = yAxisTickMark;
+  //   //////
+  //   chart.update();
+  // },
+
+  // updateConfigByMutating: function(chart) {
+  //   chart.options.yAxisMarkLeft = "new title";
+  //   chart.update();
+  // }
+
+  // addData: function(chart, label, data) {
+  //   chart.data.xAxis.push(label);
+  //   chart.data.datasets.forEach(dataset => {
+  //     dataset.data.push(data);
+  //   });
+  //   chart.update();
+  // },
 };

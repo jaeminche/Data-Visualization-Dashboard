@@ -152,26 +152,34 @@ const c = {
   //   };
   // },
 
-  findCardsAndGetRes: async function(client, key, value, towards) {
+  findCards: async function(client, req) {
     let res;
     const foundCardObjs = [];
     const resRows = [];
     const resRowArrs = [];
+    const reqBy = req.reqBy;
+    const clickedOn = req.clickedOn;
+    const cardId = req.card_id;
 
     vm.cards.areForChart = true;
-    if (towards === "right") {
-      let d = new Date(vm.today);
-      d.setMonth(d.getMonth() + 1);
-      vm.today = "'" + d.toDateString() + "'";
-      // console.log(vm.today);
-    } else if (towards === "left") {
-      let d = new Date(vm.today);
-      d.setMonth(d.getMonth() - 1);
-      vm.today = "'" + d.toDateString() + "'";
+    if (reqBy === "arrow") {
+      if (clickedOn === "right") {
+        let d = new Date(vm.today);
+        d.setMonth(d.getMonth() + 1);
+        vm.today = "'" + d.toDateString() + "'";
+        console.log("vm.today: ", vm.today);
+      } else if (clickedOn === "left") {
+        let d = new Date(vm.today);
+        d.setMonth(d.getMonth() - 1);
+        vm.today = "'" + d.toDateString() + "'";
+        console.log("vm.today: ", vm.today);
+      }
+    } else if (reqBy === "tab") {
+    } else if (reqBy === "card") {
     }
 
     for await (let card of vm.cards[`for${vm.currentShowType}`]) {
-      if (card[key] === value) {
+      if (cardId.includes(card["id"]) && !!card.query) {
         switch (vm.currentShowType) {
           case "superadmin":
             vm.stateFlag = "0210";
@@ -429,9 +437,15 @@ const c = {
     vm.chart.data.xAxis = xAxisData;
     vm.chart.data.yAxis1 = yAxisData1;
     vm.chart.myOptions.yAxisMarkLeft = yAxisMarkLeft;
-    if (yAxisData2.length > 0) vm.chart.data.yAxis2 = yAxisData2;
-    if (yAxisData3.length > 0) vm.chart.data.yAxis3 = yAxisData3;
-    if (!!yAxisMarkRight) vm.chart.myOptions.yAxisMarkRight = yAxisMarkRight;
+    yAxisData2.length > 0
+      ? (vm.chart.data.yAxis2 = yAxisData2)
+      : (vm.chart.data.yAxis2 = []);
+    yAxisData3.length > 0
+      ? (vm.chart.data.yAxis3 = yAxisData3)
+      : (vm.chart.data.yAxis3 = []);
+    !!yAxisMarkRight
+      ? (vm.chart.myOptions.yAxisMarkRight = yAxisMarkRight)
+      : (vm.chart.myOptions.yAxisMarkRight = "");
   },
 
   getXaxisDates: function(period, cYear, cMonth, index, firstDay) {
@@ -486,21 +500,6 @@ const c = {
 
   daysInMonth: function(month, year) {
     return new Date(year, month, 0).getDate();
-  },
-
-  addData: function(chart, label, yAxisData1, yAxisData2, yAxisData3) {
-    chart.data.xAxis.push(label);
-    // TODO: add yAxis data
-    // chart.data.yAxis1.forEach(dataset => {
-    //   dataset.data.push(yAxisData1);
-    // });
-    chart.update();
-  },
-
-  removeData: function(chart) {
-    chart.data.xAxis.pop();
-    chart.data.yAxis1.pop();
-    chart.update();
   },
 
   convertDay: function(number) {

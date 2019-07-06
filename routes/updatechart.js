@@ -23,14 +23,29 @@ router.post("/updatechart", async function(req, res) {
   vm.stateFlag = "0500";
 
   try {
-    let resChart, reqBy, card_id;
+    let resChart, reqBy, card_id, foundCards;
     let areForChart = true;
+    c.init();
 
     vm.stateFlag = "0501";
     console.log("updatechart post route is called");
     console.log("req.body: ", req.body);
     // req.body:  { reqBy: 'tab', clickedOn: 'week', card_id: '6' }
 
+    foundCards = await c.findCards(client, req.body);
+
+    vm.stateFlag = "0504";
+    let period = foundCards.cardObjs[0].period;
+    let firstDay = await c.getFirstDayOfWeek(client, period);
+
+    vm.stateFlag = "0508";
+    await c.updateVM_chart(
+      req.body.reqBy,
+      foundCards.cardObjs,
+      foundCards.resRowArrs,
+      period,
+      firstDay
+    );
     if (req.body.reqBy === "tab") {
       //   period = req.body.period;
       //   reqBy = "period";
@@ -86,15 +101,18 @@ router.post("/updatechart", async function(req, res) {
     // yAxis1 = vm.chart.data.yAxis1;
 
     // // TODO: manipulate labels into such as "Mon"
-    // let result = {
-    //   date: xAxis,
-    //   labels: xAxis,
-    //   data: yAxis1,
-    //   yAxisUnit: "min."
-    // };
+    vm.stateFlag = "0510";
+    let resMyJson = await {
+      xAxis: vm.chart.data.xAxis,
+      yAxis1: vm.chart.data.yAxis1,
+      yAxis2: vm.chart.data.yAxis2,
+      yAxis3: vm.chart.data.yAxis3,
+      title: vm.chart.myOptions.title,
+      yAxisMarkLeft: vm.chart.myOptions.yAxisMarkLeft,
+      yAxisMarkRight: vm.chart.myOptions.yAxisMarkRight
+    };
 
-    // res.send(result);
-    res.send(null);
+    await res.send(resMyJson);
   } catch (ex) {
     // await client.query('ROLLBACK')
     console.log(`something went wrong ${ex} at ${vm.stateFlag}`);
