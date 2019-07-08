@@ -155,7 +155,7 @@ const c = {
   // },
 
   findCards: async function(client, req) {
-    let res;
+    let res = [];
     const foundCardObjs = [];
     const resRows = [];
     const resRowArrs = [];
@@ -166,6 +166,7 @@ const c = {
 
     vm.cards.areForChart = true;
     console.log("period: ", period);
+    // resets today's date one unit before or after
     if (reqBy === "arrow") {
       let plusOrMinusOne;
       let d = new Date(vm.today);
@@ -179,9 +180,8 @@ const c = {
       } else if (period === "month") {
         d.setMonth(d.getMonth() + plusOrMinusOne);
       } else if (period === "year") {
-        d.setYear(d.getYear() + plusOrMinusOne);
+        d.setFullYear(d.getFullYear() + plusOrMinusOne);
       }
-
       vm.today = "'" + d.toDateString() + "'";
       console.log("vm.today: ", vm.today);
     } else if (reqBy === "tab") {
@@ -208,7 +208,6 @@ const c = {
 
         await foundCardObjs.push(card); // to get myoption data
         await resRowArrs.push(res.rows); // for stacked-bar, 2 sets pushed
-        console.log(foundCardObjs);
       }
       // resRowSets.push(resRows);
     }
