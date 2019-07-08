@@ -490,17 +490,17 @@ const c = {
     };
   },
 
-  genNestedArr: function(type, m, y) {
+  genNestedArr: function(period, m, y) {
     vm.stateFlag = "0561";
     const nestedArray = [];
     let no_x_axis;
-    if (type === "month") {
+    if (period === "month") {
       no_x_axis = this.daysInMonth(m, y);
-    } else if (type === "year") {
+    } else if (period === "year") {
       no_x_axis = 12;
-    } else if (type === "week") {
+    } else if (period === "week") {
       no_x_axis = 7;
-    } else if (type === "day") {
+    } else if (period === "day") {
       no_x_axis = 24;
     }
     for (let i = 0; i < no_x_axis; i++) {
