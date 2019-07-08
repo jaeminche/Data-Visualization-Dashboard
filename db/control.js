@@ -461,7 +461,7 @@ const c = {
 
   getXaxisDates: function(period, cYear, cMonth, index, firstDay) {
     vm.stateFlag = "0544";
-    // TODO: add year and day, and delete 'ly's
+    // TODO: add day
     if (period === "month") {
       return new Date(cYear, cMonth, index + 1);
     } else if (period === "week") {

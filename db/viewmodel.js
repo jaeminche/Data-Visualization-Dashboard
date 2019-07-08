@@ -288,7 +288,7 @@ const vm = {
         yAxisMark: "month",
         get period() {
           if (!vm.cards.areForChart) {
-            return "days";
+            return "month";
           } else {
             return vm.cards.foradmin[1].period;
           }
