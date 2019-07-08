@@ -8,6 +8,8 @@ const c = {
   },
 
   init: function() {
+    this.resetState("card");
+    this.resetState("chart");
     vm.chart = {
       myOptions: {
         yAxisMarkLeft: "left unit1",
@@ -159,21 +161,29 @@ const c = {
     const resRowArrs = [];
     const reqBy = req.reqBy;
     const clickedOn = req.clickedOn;
+    const period = req.period[0];
     const cardId = req.card_id;
 
     vm.cards.areForChart = true;
+    console.log("period: ", period);
     if (reqBy === "arrow") {
-      if (clickedOn === "right") {
-        let d = new Date(vm.today);
-        d.setMonth(d.getMonth() + 1);
-        vm.today = "'" + d.toDateString() + "'";
-        console.log("vm.today: ", vm.today);
-      } else if (clickedOn === "left") {
-        let d = new Date(vm.today);
-        d.setMonth(d.getMonth() - 1);
-        vm.today = "'" + d.toDateString() + "'";
-        console.log("vm.today: ", vm.today);
+      let plusOrMinusOne;
+      let d = new Date(vm.today);
+      clickedOn === "right" ? (plusOrMinusOne = 1) : (plusOrMinusOne = -1);
+      if (period === "week") {
+        let plusOrMinusSeven;
+        clickedOn === "right"
+          ? (plusOrMinusSeven = 7)
+          : (plusOrMinusSeven = -7);
+        d.setDate(d.getDate() + plusOrMinusSeven);
+      } else if (period === "month") {
+        d.setMonth(d.getMonth() + plusOrMinusOne);
+      } else if (period === "year") {
+        d.setYear(d.getYear() + plusOrMinusOne);
       }
+
+      vm.today = "'" + d.toDateString() + "'";
+      console.log("vm.today: ", vm.today);
     } else if (reqBy === "tab") {
     } else if (reqBy === "card") {
     }
@@ -258,12 +268,14 @@ const c = {
     return { cardObjs: foundCardObjs, resRowArrs: resRowArrs }; // { cardObjs: [{}, {}], resRowArrs: [[], []]}
   },
 
-  updateState: function(type, id) {
+  updateState: function(type, id, period) {
     vm.state[type]["_id"].push(id);
+    vm.state[type]["period"].push(period);
   },
 
   resetState: function(type) {
     vm.state[type]["_id"] = [];
+    vm.state[type]["period"] = [];
   },
   /**
    * updates cards' numbers in viewmodel
@@ -282,7 +294,7 @@ const c = {
     } else {
       card.number = "something went wrong";
     }
-    this.updateState("card", card.id);
+    this.updateState("card", card.id, card.period);
   },
 
   // TODO: move this to browser-side
@@ -421,7 +433,7 @@ const c = {
         // });
       } else {
       }
-      this.updateState("chart", card.id);
+      this.updateState("chart", card.id, card.period);
     });
     // console.log("dataForBarChart: ", dataForChart);
     // dataForChart.map(set => {

@@ -24,6 +24,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
   vm.stateFlag = "0000";
   try {
     c.init();
+    vm.today = "'2017-06-08'";
     vm.stateFlag = "0001";
     console.log("================ dashboard pg starts ===============");
     // console.log("m.jwt: ", m.jwt);

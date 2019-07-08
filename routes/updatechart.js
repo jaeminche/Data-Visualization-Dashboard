@@ -33,7 +33,7 @@ router.post("/updatechart", async function(req, res) {
     // req.body:  { reqBy: 'tab', clickedOn: 'week', card_id: '6' }
 
     foundCards = await c.findCards(client, req.body);
-
+    console.log("foundCards: ", foundCards);
     vm.stateFlag = "0504";
     let period = foundCards.cardObjs[0].period;
     let firstDay = await c.getFirstDayOfWeek(client, period);

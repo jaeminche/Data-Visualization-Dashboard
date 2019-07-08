@@ -7,12 +7,12 @@
 
 const vm = {
   state: {
-    card: { _id: [] },
-    chart: { _id: [] }
+    card: { _id: [], period: [] },
+    chart: { _id: [], period: [] }
   },
   // TODO: move following current & show-related data into vm.state
   // TODO: when deployment, change the date to current_date
-  today: "'2017-06-08'",
+  today: "'2017-06-08'", // !there's another line as this one in dashboard router
   pgload: 1,
   stateFlag: "",
   jwt: {
@@ -290,7 +290,7 @@ const vm = {
           if (!vm.cards.areForChart) {
             return "days";
           } else {
-            return vm.cards.foruser[1].period;
+            return vm.cards.foradmin[1].period;
           }
         },
         number: 0,
@@ -301,7 +301,7 @@ const vm = {
           if (!vm.cards.areForChart) {
             return "rowCountable";
           } else {
-            return vm.cards.foruser[1].resType;
+            return vm.cards.foradmin[1].resType;
           }
         },
         get query() {
@@ -312,7 +312,7 @@ const vm = {
               vm.today
             }) + interval '1 month')`;
           } else {
-            return vm.cards.foruser[1].query;
+            return vm.cards.foradmin[1].query;
           }
         },
         auth: ["superadmin", "admin", "user"]
@@ -353,7 +353,7 @@ const vm = {
           if (!vm.cards.areForChart) {
             return "month";
           } else {
-            return vm.cards.foruser[3].period;
+            return vm.cards.foradmin[3].period;
           }
         },
         number: 0,
@@ -364,7 +364,7 @@ const vm = {
           if (!vm.cards.areForChart) {
             return "timeCalculatable";
           } else {
-            return vm.cards.foruser[3].resType;
+            return vm.cards.foradmin[3].resType;
           }
         },
         get query() {
@@ -377,7 +377,7 @@ const vm = {
               vm.today
             }) + interval '1 month')`;
           } else {
-            return vm.cards.foruser[3].query;
+            return vm.cards.foradmin[3].query;
           }
         },
         auth: ["superadmin", "admin", "user"]
@@ -417,7 +417,7 @@ const vm = {
           if (!vm.cards.areForChart) {
             return "day";
           } else {
-            return vm.cards.foradmin[1].period;
+            return vm.cards.foradmin[5].period;
           }
         },
         number: 0,
@@ -428,7 +428,7 @@ const vm = {
           if (!vm.cards.areForChart) {
             return "rowCountable";
           } else {
-            return vm.cards.foradmin[1].resType;
+            return vm.cards.foradmin[5].resType;
           }
         },
         get query() {
@@ -437,7 +437,7 @@ const vm = {
               vm.today
             } AND orgid = $1 GROUP BY userid`;
           } else {
-            return vm.cards.foradmin[1].query;
+            return vm.cards.foradmin[5].query;
           }
         },
         auth: ["superadmin", "admin"]
@@ -494,7 +494,7 @@ const vm = {
         },
         auth: ["superadmin", "admin"]
       },
-      // TODO:
+      // TODO: revise averaging query
       {
         id: 108,
         name: "USERS' DAILY AVERAGE CYCLING TIME THIS MONTH",

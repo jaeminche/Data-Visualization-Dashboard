@@ -49,6 +49,7 @@ let updateChartByElem = function(e) {
   let reqBodySetup = {
     reqBy: this.getAttribute("data-reqBy"),
     clickedOn: this.getAttribute("data-clickedOn"),
+    period: JSON.parse(this.getAttribute("data-period")),
     card_id: JSON.parse(this.getAttribute("data-cardId"))
   };
   updateChart("/updatechart", reqBodySetup);
@@ -104,6 +105,7 @@ let h = {
     data = {
       reqBy: "not submitted",
       clickedOn: "not submitted",
+      period: "not submitted",
       card_id: "not submitted"
     }
   ) {
