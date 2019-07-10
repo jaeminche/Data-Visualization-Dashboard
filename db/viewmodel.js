@@ -257,6 +257,7 @@ const vm = {
         name: "AVERAGE TIME THIS MONTH",
         isCardShown: false,
         isDefaultForChart: false,
+        // isDefaultForChart: true,
         isForLeftXaxis: true,
         yAxisMark: "min.",
         period: "month",

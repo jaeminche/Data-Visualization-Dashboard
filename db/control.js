@@ -1,5 +1,6 @@
 const vm = require("./viewmodel");
 const v = require("./view");
+const { UpdateChart } = require("./updateChart");
 
 const c = {
   init_login_show: function() {
@@ -91,7 +92,7 @@ const c = {
   },
 
   getDateDayMonth: function(timestamp, period) {
-    vm.stateFlag = "0540";
+    vm.stateFlag = "0541";
     if (period === "month") {
       return new Date(timestamp).getDate();
     } else if (period === "year") {
@@ -319,15 +320,37 @@ const c = {
     vm.stateFlag = "0543";
     this.resetState("chart");
     cardObjs.forEach((card, i) => {
-      if (i == 0) chartTitle = card.name;
+      // ? Why the following block looping twice and getting only the last ones
+      if (i == 0) {
+        chartTitle = card.name;
+      }
       if (card.isForLeftXaxis) {
         yAxisMarkLeft = card.yAxisMark;
       } else {
         yAxisMarkRight = card.yAxisMark;
       }
+      // console.log("UpdateChart imported: ", UpdateChart);
+      let updateChart = new UpdateChart(
+        this,
+        i,
+        resRowArrs[i],
+        card.resType,
+        period,
+        firstDayOfWeek
+      );
+      // updateChart(this, i, resRowArrs[i], card.resType, period, firstDayOfWeek);
+
+      // let resRowsInScale = this.formatResRowsInScale(
+      //   resRowArrs[i],
+      //   card.resType,
+      //   period
+      // );
 
       if (card.resType === "retrievable_date_count") {
+        // let tempTimestamp = resRowArrs[i][0].date;
+        // let prevDDM = this.getDateDayMonth(tempTimestamp, period);
         resRowArrs[i].forEach(row => {
+          // if (this.getDateDayMonth(row.date, period) === prevDDM)
           // TODO: modulize
           if (i == 0) {
             xAxisData.push(new Date(row.date).toDateString());
@@ -335,103 +358,101 @@ const c = {
           } else if (i == 1) {
             yAxisData2.push(row.count);
           } else if (i == 2) {
-            yAixsData3.push(row.count);
+            yAxisData3.push(row.count);
           }
         });
       } else if (card.resType === "timeCalculatable") {
         vm.stateFlag = "0521";
-        let cMonth, cYear;
-        let tempTimestamp = resRowArrs[i][0].packet_generated;
-        // generate as many nested array as the period,
-        // and organize the res data day by day.
-        vm.stateFlag = "0535";
-        let prevDDM = this.getDateDayMonth(tempTimestamp, period);
-        cMonth = new Date(tempTimestamp).getMonth();
-        cYear = new Date(tempTimestamp).getFullYear();
-        let indexForNestedArr = prevDDM - 1;
-        // make a placeholder
-        let nestedArrByDDM = this.genNestedArr(period, cMonth, cYear);
-        resRowArrs[i].forEach(row => {
-          if (this.getDateDayMonth(row.packet_generated, period) != prevDDM) {
-            prevDDM = this.getDateDayMonth(row.packet_generated, period);
-            indexForNestedArr = prevDDM - 1;
-          }
-          nestedArrByDDM[indexForNestedArr].push(row);
-        });
+        // let cMonth, cYear;
+        // let tempTimestamp = resRowArrs[i][0].packet_generated;
+        // // generate as many nested array as the period,
+        // // and organize the res data day by day.
+        // vm.stateFlag = "0535";
+        // let prevDDM = this.getDateDayMonth(tempTimestamp, period);
+        // cMonth = new Date(tempTimestamp).getMonth();
+        // cYear = new Date(tempTimestamp).getFullYear();
+        // let indexForNewResRows = prevDDM - 1;
+        // // make a placeholder
+        // let resRowsInScale = this.genNestedArr(period, cMonth, cYear);
+        // // make a complete set of resRows with null data as well
+        // resRowArrs[i].forEach(row => {
+        //   if (this.getDateDayMonth(row.packet_generated, period) != prevDDM) {
+        //     prevDDM = this.getDateDayMonth(row.packet_generated, period);
+        //     indexForNewResRows = prevDDM - 1;
+        //   }
+        //   resRowsInScale[indexForNewResRows].push(row);
+        // });
+
         // manipulate the res data into dataset
         vm.stateFlag = "0570";
-        nestedArrByDDM.forEach((dataForOneDDM, index) => {
-          let dataset, date, calculatedMin;
-          if (!!dataForOneDDM && dataForOneDDM.length > 0) {
-            vm.stateFlag = "0571";
-            date = new Date(dataForOneDDM[0].packet_generated);
-            if (period === "year") {
-              date = `${this.convertMonth(
-                date.getMonth()
-              )} ${date.getFullYear()}`;
-            } else if (period === "day") {
-              // TODO: change the date to hourly
-              date = date.toDateString();
-            } else {
-              date = date.toDateString();
-            }
+        // resRowsInScale.forEach((dataForOneDDM, index) => {
+        //   let dataset, date, calculatedMin;
+        //   if (!!dataForOneDDM && dataForOneDDM.length > 0) {
+        //     vm.stateFlag = "0571";
+        //     date = new Date(dataForOneDDM[0].packet_generated);
+        //     if (period === "year") {
+        //       date = `${this.convertMonth(
+        //         date.getMonth()
+        //       )} ${date.getFullYear()}`;
+        //     } else if (period === "day") {
+        //       // TODO: change the date to hourly
+        //       date = date.toDateString();
+        //     } else {
+        //       date = date.toDateString();
+        //     }
 
-            calculatedMin = this.convToMin(
-              this.getTimeCycledInMilSec(dataForOneDDM),
-              yAxisMarkLeft
-            );
+        //     calculatedMin = this.convToMin(
+        //       this.getTimeCycledInMilSec(dataForOneDDM),
+        //       yAxisMarkLeft
+        //     );
 
-            // dataset = this.genDataset(
-            //   date,
-            //   this.convToMin(
-            //     this.getTimeCycledInMilSec(dataForOneDDM),
-            //     yAxisMarkLeft
-            //   )
-            // );
-          } else {
-            // Even with no data coming in for yAxis, display the chart by sendng 0s for yAxes and labels for xAxis
-            vm.stateFlag = "0580";
-            date = this.getXaxisDates(
-              period,
-              cYear,
-              cMonth,
-              index,
-              firstDayOfWeek
-            );
-            if (period === "year") {
-              date = `${this.convertMonth(
-                date.getMonth()
-              )} ${date.getFullYear()}`;
-            } else if (period === "day") {
-              // TODO: change the date to hourly
-              date = date.toDateString();
-            } else {
-              date = date.toDateString();
-            }
-            calculatedMin = 0;
-            // dataset = this.genDataset(date, 0, 0, 0, yAxisMarkLeft);
-          }
-          vm.stateFlag = "0545";
-          // TODO: modulize
-          if (i == 0) {
-            xAxisData.push(new Date(date).toDateString());
-            yAxisData1.push(calculatedMin);
-          } else if (i == 1) {
-            yAxisData2.push(calculatedMin);
-          } else if (i == 2) {
-            yAixsData3.push(calculatedMin);
-          }
-          // dataForChart.push(dataset);
-        });
-        // console.log("dataForBarChart: ", dataForChart);
-        // dataForChart.map(set => {
-        //   xAxisData.push(set.xAxis);
-        //   yAxisData1.push(set.yAxis1);
-        //   yAxisData2.push(set.yAxis2);
-        //   yAxisData3.push(set.yAxis3);
+        //     // dataset = this.genDataset(
+        //     //   date,
+        //     //   this.convToMin(
+        //     //     this.getTimeCycledInMilSec(dataForOneDDM),
+        //     //     yAxisMarkLeft
+        //     //   )
+        //     // );
+        //   } else {
+        //     // Even with no data coming in for yAxis, display the chart by sendng 0s for yAxes and labels for xAxis
+        //     vm.stateFlag = "0580";
+        //     date = this.getXaxisDates(
+        //       period,
+        //       cYear,
+        //       cMonth,
+        //       index,
+        //       firstDayOfWeek
+        //     );
+
+        //     calculatedMin = 0;
+        //     // dataset = this.genDataset(date, 0, 0, 0, yAxisMarkLeft);
+        //   }
+
+        //   vm.stateFlag = "0545";
+        //   // TODO: modulize
+        //   if (i == 0) {
+        //     xAxisData.push(new Date(date).toDateString());
+        //     yAxisData1.push(calculatedMin);
+        //   } else if (i == 1) {
+        //     yAxisData2.push(calculatedMin);
+        //   } else if (i == 2) {
+        //     yAxisData3.push(calculatedMin);
+        //   }
         // });
+        updateChart.formatResRowsInScale(this).fillResRowsInScale(this);
       } else {
       }
+
+      if (i == 0) {
+        xAxisData = updateChart.xAxisData;
+        yAxisData1 = updateChart.yAxisData1;
+      } else if (i == 1) {
+        yAxisData2 = updateChart.yAxisData2;
+      } else if (i == 2) {
+        yAxisData3 = updateChart.yAxisData3;
+      }
+      console.log("updateChart obj: ", updateChart);
+
       this.updateState("chart", card.id, card.period);
     });
     // console.log("dataForBarChart: ", dataForChart);
@@ -459,17 +480,57 @@ const c = {
       : (vm.chart.myOptions.yAxisMarkRight = "");
   },
 
+  // formatResRowsInScale: function(resRowArrs, resType, period) {
+  //   vm.stateFlag = "0560";
+  //   let time_col = resType === "timeCalculatable" ? "packet_generated" : "date";
+  //   // resType === "timeCalculatable" ? (time_col = "packet_generated") : (time_col = "date");
+  //   let cMonth, cYear;
+  //   let tempTimestamp = resRowArrs[0][time_col];
+  //   // generate as many nested array as the period,
+  //   // and organize the res data day by day.
+  //   vm.stateFlag = "0535";
+  //   let prevDDM = this.getDateDayMonth(tempTimestamp, period);
+  //   cMonth = new Date(tempTimestamp).getMonth();
+  //   cYear = new Date(tempTimestamp).getFullYear();
+  //   let indexForResRowsInScale = prevDDM - 1;
+  //   // make a placeholder
+  //   let resRowsInScale = this.genNestedArr(period, cMonth, cYear);
+  //   // make a complete set of resRows with null data as well
+  //   resRowArrs.forEach(row => {
+  //     if (this.getDateDayMonth(row[time_col], period) != prevDDM) {
+  //       prevDDM = this.getDateDayMonth(row[time_col], period);
+  //       indexForResRowsInScale = prevDDM - 1;
+  //     }
+  //     resRowsInScale[indexForResRowsInScale].push(row);
+  //   });
+  //   console.log("resRowsInScale: ", resRowsInScale);
+  //   return resRowsInScale;
+  // },
+
+  fillInNoDataLabel: function(arr, period) {
+    const d = new Date();
+    if (period === "month") {
+    }
+    arr.forEach(date => {
+      d(date);
+    });
+    return;
+  },
+
   getXaxisDates: function(period, cYear, cMonth, index, firstDay) {
     vm.stateFlag = "0544";
     // TODO: add day
     if (period === "month") {
-      return new Date(cYear, cMonth, index + 1);
+      return new Date(cYear, cMonth, index + 1).toDateString();
     } else if (period === "week") {
       let nextDay = new Date(firstDay);
       nextDay.setDate(nextDay.getDate() + index);
-      return nextDay;
+      return nextDay.toDateString();
     } else if (period === "year") {
-      return new Date(cYear, index, 1);
+      date = new Date(cYear, index, 1);
+      return `${this.convertMonth(date.getMonth())} ${date.getFullYear()}`;
+    } else if (period === "day") {
+      // return new Date(cYear, cMonth, index + 1).toDateString();
     }
   },
 

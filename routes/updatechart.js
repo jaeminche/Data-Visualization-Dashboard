@@ -7,6 +7,7 @@ const basic_config = require("../config/basic_config");
 const Chart = require("chart.js");
 const vm = require("../db/viewmodel");
 const c = require("../db/control");
+const { UpdateChart } = require("./updateChart");
 const v = require("../db/view");
 const db = require("../db/index");
 
