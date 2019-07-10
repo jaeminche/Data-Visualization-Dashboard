@@ -134,27 +134,6 @@ const c = {
     }
   },
 
-  // checkCardForDefaultChartAndStoreData: function(card, resCard) {
-  //   let exists = false;
-  //   let reqFrom = "card";
-  //   let resChart, period, yAxisMarkLeft;
-  //   // TODO: IMPLEMENT LINES FOR EXCEPTION: THERE COULD BE RESCARD WITH NO ROWS
-  //   if (card.isForLeftXaxis && card.isDefaultForChart) {
-  //     vm.stateFlag = "0240";
-  //     resChart = resCard.rows;
-  //     period = card.period;
-  //     yAxisMarkLeft = card.yAxisMarkLeft;
-  //     exists = true;
-  //   }
-  //   return {
-  //     reqFrom: reqFrom,
-  //     resChart: resChart,
-  //     period: period,
-  //     yAxisMarkLeft: yAxisMarkLeft,
-  //     exists: exists
-  //   };
-  // },
-
   findCards: async function(client, req) {
     let res = [];
     const foundCardObjs = [];
@@ -321,15 +300,11 @@ const c = {
     this.resetState("chart");
     cardObjs.forEach((card, i) => {
       // ? Why the following block looping twice and getting only the last ones
-      if (i == 0) {
-        chartTitle = card.name;
-      }
       if (card.isForLeftXaxis) {
         yAxisMarkLeft = card.yAxisMark;
       } else {
         yAxisMarkRight = card.yAxisMark;
       }
-      // console.log("UpdateChart imported: ", UpdateChart);
       let updateChart = new UpdateChart(
         this,
         i,
@@ -338,112 +313,17 @@ const c = {
         period,
         firstDayOfWeek
       );
-      // updateChart(this, i, resRowArrs[i], card.resType, period, firstDayOfWeek);
 
-      // let resRowsInScale = this.formatResRowsInScale(
-      //   resRowArrs[i],
-      //   card.resType,
-      //   period
-      // );
-
-      if (card.resType === "retrievable_date_count") {
-        // let tempTimestamp = resRowArrs[i][0].date;
-        // let prevDDM = this.getDateDayMonth(tempTimestamp, period);
-        resRowArrs[i].forEach(row => {
-          // if (this.getDateDayMonth(row.date, period) === prevDDM)
-          // TODO: modulize
-          if (i == 0) {
-            xAxisData.push(new Date(row.date).toDateString());
-            yAxisData1.push(row.count);
-          } else if (i == 1) {
-            yAxisData2.push(row.count);
-          } else if (i == 2) {
-            yAxisData3.push(row.count);
-          }
-        });
-      } else if (card.resType === "timeCalculatable") {
-        vm.stateFlag = "0521";
-        // let cMonth, cYear;
-        // let tempTimestamp = resRowArrs[i][0].packet_generated;
-        // // generate as many nested array as the period,
-        // // and organize the res data day by day.
-        // vm.stateFlag = "0535";
-        // let prevDDM = this.getDateDayMonth(tempTimestamp, period);
-        // cMonth = new Date(tempTimestamp).getMonth();
-        // cYear = new Date(tempTimestamp).getFullYear();
-        // let indexForNewResRows = prevDDM - 1;
-        // // make a placeholder
-        // let resRowsInScale = this.genNestedArr(period, cMonth, cYear);
-        // // make a complete set of resRows with null data as well
-        // resRowArrs[i].forEach(row => {
-        //   if (this.getDateDayMonth(row.packet_generated, period) != prevDDM) {
-        //     prevDDM = this.getDateDayMonth(row.packet_generated, period);
-        //     indexForNewResRows = prevDDM - 1;
-        //   }
-        //   resRowsInScale[indexForNewResRows].push(row);
-        // });
-
-        // manipulate the res data into dataset
-        vm.stateFlag = "0570";
-        // resRowsInScale.forEach((dataForOneDDM, index) => {
-        //   let dataset, date, calculatedMin;
-        //   if (!!dataForOneDDM && dataForOneDDM.length > 0) {
-        //     vm.stateFlag = "0571";
-        //     date = new Date(dataForOneDDM[0].packet_generated);
-        //     if (period === "year") {
-        //       date = `${this.convertMonth(
-        //         date.getMonth()
-        //       )} ${date.getFullYear()}`;
-        //     } else if (period === "day") {
-        //       // TODO: change the date to hourly
-        //       date = date.toDateString();
-        //     } else {
-        //       date = date.toDateString();
-        //     }
-
-        //     calculatedMin = this.convToMin(
-        //       this.getTimeCycledInMilSec(dataForOneDDM),
-        //       yAxisMarkLeft
-        //     );
-
-        //     // dataset = this.genDataset(
-        //     //   date,
-        //     //   this.convToMin(
-        //     //     this.getTimeCycledInMilSec(dataForOneDDM),
-        //     //     yAxisMarkLeft
-        //     //   )
-        //     // );
-        //   } else {
-        //     // Even with no data coming in for yAxis, display the chart by sendng 0s for yAxes and labels for xAxis
-        //     vm.stateFlag = "0580";
-        //     date = this.getXaxisDates(
-        //       period,
-        //       cYear,
-        //       cMonth,
-        //       index,
-        //       firstDayOfWeek
-        //     );
-
-        //     calculatedMin = 0;
-        //     // dataset = this.genDataset(date, 0, 0, 0, yAxisMarkLeft);
-        //   }
-
-        //   vm.stateFlag = "0545";
-        //   // TODO: modulize
-        //   if (i == 0) {
-        //     xAxisData.push(new Date(date).toDateString());
-        //     yAxisData1.push(calculatedMin);
-        //   } else if (i == 1) {
-        //     yAxisData2.push(calculatedMin);
-        //   } else if (i == 2) {
-        //     yAxisData3.push(calculatedMin);
-        //   }
-        // });
+      if (
+        card.resType === "retrievable_date_count" ||
+        card.resType === "timeCalculatable"
+      ) {
         updateChart.formatResRowsInScale(this).fillResRowsInScale(this);
       } else {
       }
 
       if (i == 0) {
+        chartTitle = card.name;
         xAxisData = updateChart.xAxisData;
         yAxisData1 = updateChart.yAxisData1;
       } else if (i == 1) {
@@ -451,15 +331,9 @@ const c = {
       } else if (i == 2) {
         yAxisData3 = updateChart.yAxisData3;
       }
-      console.log("updateChart obj: ", updateChart);
-
       this.updateState("chart", card.id, card.period);
     });
-    // console.log("dataForBarChart: ", dataForChart);
-    // dataForChart.map(set => {
-    //   xAxisData.push(set.label);
-    //   yAxisData1.push(set.data);
-    // });
+
     vm.stateFlag = "0545";
     if (!yAxisMarkLeft && !!yAxisMarkRight) {
       yAxisMarkLeft = yAxisMarkRight;
@@ -551,7 +425,7 @@ const c = {
     };
   },
 
-  genNestedArr: function(period, m, y) {
+  genNestedPlaceholder: function(period, m, y) {
     vm.stateFlag = "0561";
     const nestedArray = [];
     let no_x_axis;
@@ -564,6 +438,7 @@ const c = {
     } else if (period === "day") {
       no_x_axis = 24;
     }
+
     for (let i = 0; i < no_x_axis; i++) {
       nestedArray.push([]);
     }
@@ -571,7 +446,7 @@ const c = {
   },
 
   daysInMonth: function(month, year) {
-    return new Date(year, month, 0).getDate();
+    return new Date(year, month + 1, 0).getDate();
   },
 
   convertDay: function(number) {
@@ -640,10 +515,6 @@ const c = {
         break;
     }
   }
-
-  // sortDateArr: function(arr) {
-  //   arr.
-  // }
 };
 
 module.exports = c;
