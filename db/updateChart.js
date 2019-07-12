@@ -38,7 +38,7 @@ class UpdateChart {
       this.cMonth,
       this.cYear
     );
-    // make a complete set of resRows with null data as well
+    // make a complete nested arrays of resRows with null data array where there's no data
     this.resRowArrs.forEach(row => {
       if (c.getDateDayMonth(row[this.time_col], this.period) != this.prevDDM) {
         this.prevDDM = c.getDateDayMonth(row[this.time_col], this.period);

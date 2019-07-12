@@ -36,6 +36,7 @@
 
             <div class="d-flex justify-content-between">
               <i class="chart-updates my-arrows fas fa-chevron-left" id="left" data-reqBy="arrow" data-clickedOn="left" data-period=<%- JSON.stringify(vm.state.chart.period) %> data-cardId=<%- JSON.stringify(vm.state.chart._id) %>></i>
+              <%# TODO: updates the DATE RANGE directly, instead of getting it from the xAxis labels %>
               <div id="date-range"><%= vm.chart.data.xAxis[0] %> ~ <%= vm.chart.data.xAxis[vm.chart.data.xAxis.length - 1] %></div>
               <i class="chart-updates my-arrows fas fa-chevron-right" id="right" data-reqBy="arrow" data-clickedOn="right" data-period=<%- JSON.stringify(vm.state.chart.period) %> data-cardId=<%- JSON.stringify(vm.state.chart._id) %>></i>
             </div>

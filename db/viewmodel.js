@@ -8,7 +8,9 @@
 const vm = {
   state: {
     card: { _id: [], period: [] },
-    chart: { _id: [], period: [] }
+    chart: { _id: [], period: [] },
+    // TODO: updates the DATE RANGE directly, instead of getting it from the xAxis labels
+    date_range: { from: "", to: "" }
   },
   // TODO: move following current & show-related data into vm.state
   // TODO: when deployment, change the date to current_date

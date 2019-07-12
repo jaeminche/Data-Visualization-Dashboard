@@ -168,6 +168,9 @@ const c = {
     } else if (reqBy === "card") {
     }
 
+    // TODO: updates the DATE RANGE directly, instead of getting it from the xAxis labels
+    // TODO: c.updateState("date_range", fromdate, todate);
+
     for await (let card of vm.cards[`for${vm.currentShowType}`]) {
       if (cardId.includes(card["id"]) && !!card.query) {
         switch (vm.currentShowType) {
