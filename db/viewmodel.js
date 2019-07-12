@@ -14,6 +14,7 @@ const vm = {
   },
   // TODO: move following current & show-related data into vm.state
   // TODO: when deployment, change the date to current_date
+  // today: "'2017-01-26'", // !there's another line as this one in dashboard router
   today: "'2017-06-08'", // !there's another line as this one in dashboard router
   pgload: 1,
   stateFlag: "",
