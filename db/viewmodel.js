@@ -167,8 +167,8 @@ const vm = {
         id: 6, // !chart on pg 4 in ppt
         name: "NO. OF ACTIVE ORGANIZATIONS PER DAY THIS MONTH",
         isCardShown: false,
-        // isDefaultForChart: false,
-        isDefaultForChart: true, // !must be only one true for each showtype(two for stacked-bar), also (this card.isCardShown && !!card.query)
+        isDefaultForChart: false,
+        // isDefaultForChart: true, // !must be only one true for each showtype(two for stacked-bar), also (this card.isCardShown && !!card.query)
         isForLeftXaxis: true,
         yAxisMark: "cust.",
         period: "month",
@@ -193,19 +193,34 @@ const vm = {
         isDefaultForChart: false,
         isForLeftXaxis: false,
         yAxisMark: "cust.",
-        period: "month",
+        get period() {
+          if (!vm.cards.areForChart) {
+            return "month";
+          } else {
+            return vm.cards.forsuperadmin[7].period;
+          }
+        },
         number: 0,
         isForTimeCalc: false,
         color: "info",
         fa: "chart-line",
-        // idRedirectedForChartQuery: 8,
-        resType: "rowCountable",
+        get resType() {
+          if (!vm.cards.areForChart) {
+            return "rowCountable";
+          } else {
+            return vm.cards.forsuperadmin[7].resType;
+          }
+        },
         get query() {
-          return `SELECT orgid FROM log_startcycling WHERE DATE(client_timestamp) >= DATE_TRUNC('month', DATE(${
-            vm.today
-          })) AND DATE(client_timestamp) < DATE_TRUNC('month', DATE(${
-            vm.today
-          }) + INTERVAL '1 month') GROUP BY orgid`;
+          if (!vm.cards.areForChart) {
+            return `SELECT orgid FROM log_startcycling WHERE DATE(client_timestamp) >= DATE_TRUNC('month', DATE(${
+              vm.today
+            })) AND DATE(client_timestamp) < DATE_TRUNC('month', DATE(${
+              vm.today
+            }) + INTERVAL '1 month') GROUP BY orgid`;
+          } else {
+            return vm.cards.forsuperadmin[7].query;
+          }
         },
         auth: ["superadmin"]
       },
@@ -213,7 +228,8 @@ const vm = {
         id: 8, // !chart on pg 5 in ppt
         name: "NO. OF ACTIVE ORGANIZATIONS PER MONTH THIS YEAR",
         isCardShown: false,
-        isDefaultForChart: false,
+        // isDefaultForChart: false,
+        isDefaultForChart: true,
         isForLeftXaxis: true,
         yAxisMark: "cust.",
         period: "year",
