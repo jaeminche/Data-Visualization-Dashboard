@@ -24,14 +24,14 @@ router.post("/updatechart", async function(req, res) {
   vm.stateFlag = "0500";
 
   try {
-    let resChart, reqBy, card_id, foundCards;
+    let resChart, reqBy, chart_id, foundCards;
     let areForChart = true;
     c.init();
 
     vm.stateFlag = "0501";
     console.log("updatechart post route is called");
     console.log("req.body: ", req.body);
-    // req.body:  { reqBy: 'tab', clickedOn: 'week', card_id: '6' }
+    // req.body:  {"reqBy":"card","clickedOn":"5","period":["year"],"chart_id":[8]}
 
     foundCards = await c.findCards(client, req.body);
     console.log("foundCards: ", foundCards);
@@ -64,7 +64,7 @@ router.post("/updatechart", async function(req, res) {
       //   }
       //   let firstDayOfWeek = await c.getFirstDayOfWeek(period);
     } else if (req.body.reqBy === "card") {
-      //   card_id = req.body.card_id;
+      //   chart_id = req.body.chart_id;
     } else if (req.body.reqBy === "arrow") {
       //   console.log("clicked on arrow");
       //   console.log(req.body);
@@ -154,7 +154,7 @@ router.post("/updateChartWithCards", async function(req, res) {
   vm.stateFlag = "0700";
   try {
     let resChart, showStatePosted;
-    cardIdClickedOn = req.body.card_id;
+    cardIdClickedOn = req.body.chart_id;
     let reqType = "card";
     console.log("TCL: cardIdClickedOn", cardIdClickedOn);
     console.log("vm.currentShowType:", vm.currentShowType);

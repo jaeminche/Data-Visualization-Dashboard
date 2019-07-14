@@ -45,12 +45,12 @@ let el_for_chartupdates = document.getElementsByClassName("chart-updates");
 let updateChartByElem = function(e) {
   console.log("clicked on something");
   stateFlag = "0030";
-  console.log("data-cardId: ", this.getAttribute("data-cardId"));
+  console.log("data-chartId: ", this.getAttribute("data-chartId"));
   let reqBodySetup = {
     reqBy: this.getAttribute("data-reqBy"),
     clickedOn: this.getAttribute("data-clickedOn"),
     period: JSON.parse(this.getAttribute("data-period")),
-    card_id: JSON.parse(this.getAttribute("data-cardId"))
+    chart_id: JSON.parse(this.getAttribute("data-chartId"))
   };
   updateChart("/updatechart", reqBodySetup);
 };

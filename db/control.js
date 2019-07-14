@@ -142,14 +142,14 @@ const c = {
     const reqBy = req.reqBy;
     const clickedOn = req.clickedOn;
     const period = req.period[0];
-    const cardId = req.card_id;
+    const chartId = req.chart_id;
 
     vm.cards.areForChart = true;
     console.log("period: ", period);
     // resets today's date one unit before or after
+    let d = new Date(vm.today);
     if (reqBy === "arrow") {
       let plusOrMinusOne;
-      let d = new Date(vm.today);
       clickedOn === "right" ? (plusOrMinusOne = 1) : (plusOrMinusOne = -1);
       if (period === "week") {
         let plusOrMinusSeven;
@@ -166,13 +166,14 @@ const c = {
       console.log("vm.today: ", vm.today);
     } else if (reqBy === "tab") {
     } else if (reqBy === "card") {
+      // req:  {"reqBy":"card","clickedOn":"5","period":["year"],"chart_id":[8]}
     }
 
     // TODO: updates the DATE RANGE directly, instead of getting it from the xAxis labels
     // TODO: c.updateState("date_range", fromdate, todate);
 
     for await (let card of vm.cards[`for${vm.currentShowType}`]) {
-      if (cardId.includes(card["id"]) && !!card.query) {
+      if (chartId.includes(card["id"]) && !!card.query) {
         switch (vm.currentShowType) {
           case "superadmin":
             vm.stateFlag = "0210";
