@@ -9,8 +9,8 @@ const c = {
   },
 
   init: function() {
-    this.resetState("card");
-    this.resetState("chart");
+    // this.resetState("card");
+    // this.resetState("chart");
     vm.chart = {
       myOptions: {
         yAxisMarkLeft: "left unit1",
@@ -135,17 +135,19 @@ const c = {
   },
 
   findCards: async function(client, req) {
+    // req:  {"reqBy":"card","clickedOn":"5","period":["year"],"chart_id":[8]}
     let res = [];
     const foundCardObjs = [];
     const resRows = [];
     const resRowArrs = [];
     const reqBy = req.reqBy;
-    const clickedOn = req.clickedOn;
+    let clickedOn = req.clickedOn;
     const period = req.period[0];
-    const chartId = req.chart_id;
+    let chartId = req.chart_id;
 
     vm.cards.areForChart = true;
     console.log("period: ", period);
+    vm.stateFlag = "0505";
     // resets today's date one unit before or after
     let d = new Date(vm.today);
     if (reqBy === "arrow") {
@@ -166,14 +168,19 @@ const c = {
       console.log("vm.today: ", vm.today);
     } else if (reqBy === "tab") {
     } else if (reqBy === "card") {
-      // req:  {"reqBy":"card","clickedOn":"5","period":["year"],"chart_id":[8]}
+      chartId = [];
+      chartId.push(JSON.parse(clickedOn));
     }
+    console.log("chartId: ", chartId, clickedOn);
 
     // TODO: updates the DATE RANGE directly, instead of getting it from the xAxis labels
     // TODO: c.updateState("date_range", fromdate, todate);
 
     for await (let card of vm.cards[`for${vm.currentShowType}`]) {
       if (chartId.includes(card["id"]) && !!card.query) {
+        // if (reqBy === "card") {
+        //   period = [];
+        // }
         switch (vm.currentShowType) {
           case "superadmin":
             vm.stateFlag = "0210";
@@ -252,6 +259,7 @@ const c = {
   },
 
   updateState: function(type, id, period) {
+    vm.cards.areForChart = type === "chart" ? true : false;
     vm.state[type]["_id"].push(id);
     vm.state[type]["period"].push(period);
   },
@@ -336,6 +344,7 @@ const c = {
         yAxisData3 = updateChart.yAxisData3;
       }
       this.updateState("chart", card.id, card.period);
+      console.log("=====vm.state has been updated just now: ", vm.state);
     });
 
     vm.stateFlag = "0545";

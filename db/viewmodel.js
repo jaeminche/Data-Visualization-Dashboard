@@ -126,6 +126,13 @@ const vm = {
       },
       {
         id: 5, //! card on pg 4 in ppt
+        // get id() {
+        //   if (!vm.cards.areForChart) {
+        //     return 5;
+        //   } else {
+        //     return vm.cards.forsuperadmin[5].id;
+        //   }
+        // },
         name: "NO. OF ACTIVE ORGANIZATIONS TODAY",
         isCardShown: true,
         isDefaultForChart: false,
@@ -167,8 +174,8 @@ const vm = {
         id: 6, // !chart on pg 4 in ppt
         name: "NO. OF ACTIVE ORGANIZATIONS PER DAY THIS MONTH",
         isCardShown: false,
-        isDefaultForChart: false,
-        // isDefaultForChart: true, // !must be only one true for each showtype(two for stacked-bar), also (this card.isCardShown && !!card.query)
+        // isDefaultForChart: false,
+        isDefaultForChart: true, // !must be only one true for each showtype(two for stacked-bar), also (this card.isCardShown && !!card.query)
         isForLeftXaxis: true,
         yAxisMark: "cust.",
         period: "month",
@@ -188,6 +195,13 @@ const vm = {
       },
       {
         id: 7, // !card on pg 5 in ppt
+        // get id() {
+        //   if (!vm.cards.areForChart) {
+        //     return 7;
+        //   } else {
+        //     return vm.cards.forsuperadmin[7].id;
+        //   }
+        // },
         name: "NO. OF ACTIVE ORGANIZATIONS THIS MONTH",
         isCardShown: true,
         isDefaultForChart: false,
@@ -228,8 +242,8 @@ const vm = {
         id: 8, // !chart on pg 5 in ppt
         name: "NO. OF ACTIVE ORGANIZATIONS PER MONTH THIS YEAR",
         isCardShown: false,
-        // isDefaultForChart: false,
-        isDefaultForChart: true,
+        isDefaultForChart: false,
+        // isDefaultForChart: true,
         isForLeftXaxis: true,
         yAxisMark: "cust.",
         period: "year",
@@ -301,6 +315,13 @@ const vm = {
       // !must include at least $1 for o_id
       {
         id: 101,
+        // get id() {
+        //   if (!vm.cards.areForChart) {
+        //     return 101;
+        //   } else {
+        //     return vm.cards.foradmin[1].id;
+        //   }
+        // },
         name: "ACTIVE DAYS THIS MONTH",
         isCardShown: true,
         isDefaultForChart: false,
@@ -365,6 +386,13 @@ const vm = {
       },
       {
         id: 103,
+        // get id() {
+        //   if (!vm.cards.areForChart) {
+        //     return 103;
+        //   } else {
+        //     return vm.cards.foradmin[3].id;
+        //   }
+        // },
         name: "ACTIVE TIME THIS MONTH",
         isCardShown: true,
         isDefaultForChart: false, // !must be only one true for each showtype(two for stacked-bar), also (this card.isCardShown && !!card.query)
@@ -429,6 +457,13 @@ const vm = {
       },
       {
         id: 105,
+        // get id() {
+        //   if (!vm.cards.areForChart) {
+        //     return 105;
+        //   } else {
+        //     return vm.cards.foradmin[5].id;
+        //   }
+        // },
         name: "NO. OF ACTIVE USERS TODAY",
         isCardShown: false,
         isDefaultForChart: false,
@@ -557,6 +592,13 @@ const vm = {
       // !must include at leat $1 for id (user's id)
       {
         id: 201,
+        // get id() {
+        //   if (!vm.cards.areForChart) {
+        //     return 201;
+        //   } else {
+        //     return vm.cards.foruser[1].id;
+        //   }
+        // },
         name: "ACTIVE DAYS THIS MONTH",
         isCardShown: true,
         isDefaultForChart: false,
@@ -620,6 +662,13 @@ const vm = {
       },
       {
         id: 203,
+        // get id() {
+        //   if (!vm.cards.areForChart) {
+        //     return 203;
+        //   } else {
+        //     return vm.cards.foruser[3].id;
+        //   }
+        // },
         name: "ACTIVE TIME THIS MONTH",
         isCardShown: true,
         isDefaultForChart: false, // !must be only one true for each showtype(two for stacked-bar), also (this card.isCardShown && !!card.query)
@@ -713,16 +762,57 @@ const vm = {
         isDefaultForChart: false,
         isForLeftXaxis: true,
         yAxisMark: "min.",
-        period: "day",
+        get period() {
+          if (!vm.cards.areForChart) {
+            return "day";
+          } else {
+            return vm.cards.foruser[6].period;
+          }
+        },
         number: 0,
         isForTimeCalc: true,
         color: "success",
         fa: "stopwatch",
         resType: "timeCalculatable",
+        get resType() {
+          if (!vm.cards.areForChart) {
+            return "timeCalculatable";
+          } else {
+            return vm.cards.foruser[6].resType;
+          }
+        },
+        get query() {
+          if (!vm.cards.areForChart) {
+            return `${
+              vm.qr.cyclingTime
+            } WHERE u.id = $1 AND date(packet_generated) = date ${vm.today}`;
+          } else {
+            return vm.cards.foruser[6].query;
+          }
+        },
+        auth: ["superadmin", "admin", "user"]
+      },
+      {
+        id: 207,
+        name: "ACTIVE TIME THIS MONTH",
+        isCardShown: false,
+        isDefaultForChart: false,
+        isForLeftXaxis: false,
+        yAxisMark: "min.",
+        period: "month",
+        number: 0,
+        isForTimeCalc: true,
+        color: "warning",
+        fa: "stopwatch",
+        resType: "timeCalculatable",
         get query() {
           return `${
             vm.qr.cyclingTime
-          } WHERE u.id = $1 AND date(packet_generated) = date ${vm.today}`;
+          } WHERE event_userid = $1 AND packet_generated >= date_trunc('month', date(${
+            vm.today
+          })) AND packet_generated < date_trunc('month', date(${
+            vm.today
+          }) + interval '1 month')`;
         },
         auth: ["superadmin", "admin", "user"]
       }

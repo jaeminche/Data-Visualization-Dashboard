@@ -106,7 +106,7 @@ let h = {
       reqBy: "not submitted",
       clickedOn: "not submitted",
       period: "not submitted",
-      card_id: "not submitted"
+      chart_id: "not submitted"
     }
   ) {
     console.log(typeof data);
