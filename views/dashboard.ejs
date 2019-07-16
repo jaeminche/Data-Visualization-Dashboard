@@ -36,6 +36,10 @@
       <% include ./partials/chart_area %>
     <%# } %>
 
+    <% if (vm.currentLoginType != "user") { %>
+    <% include ./partials/table %>
+    <% } %>
+
     <%# if (typeof pie !== "undefined") { %>
       <%# if (!!vm.resPie) { %>
       <%# include ./partials/chart_pie %>
