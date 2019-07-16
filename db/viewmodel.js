@@ -362,8 +362,8 @@ const vm = {
         id: 102,
         name: "ACTIVE DAYS PER MONTH THIS YEAR",
         isCardShown: false,
-        // isDefaultForChart: true,
-        isDefaultForChart: false,
+        isDefaultForChart: true,
+        // isDefaultForChart: false,
         isForLeftXaxis: true,
         yAxisMark: "days",
         period: "year",
@@ -396,7 +396,7 @@ const vm = {
         name: "ACTIVE TIME THIS MONTH",
         isCardShown: true,
         isDefaultForChart: false, // !must be only one true for each showtype(two for stacked-bar), also (this card.isCardShown && !!card.query)
-        isForLeftXaxis: false,
+        isForLeftXaxis: true,
         yAxisMark: "min.",
         get period() {
           if (!vm.cards.areForChart) {
