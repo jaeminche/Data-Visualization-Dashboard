@@ -871,6 +871,36 @@ const vm = {
       }
     }
   },
+  table: {
+    col1: {
+      get query() {
+        // vm.cards.areForChart = false;
+        return vm.cards.foradmin[0].query;
+        // vm.cards.foradmin.forEach(function(card) {
+        //   if (
+        //     card.isCardShown === true &&
+        //     card.name === "ACTIVE DAYS THIS MONTH"
+        //   ) {
+        //     return card.query;
+        //   }
+        // });
+      }
+    },
+    col2: {
+      get query() {
+        // vm.cards.areForChart = false;
+        return vm.cards.foradmin[2].query;
+        // vm.cards.foradmin.forEach(function(card) {
+        //   if (
+        //     card.isCardShown === true &&
+        //     card.name === "ACTIVE TIME THIS MONTH"
+        //   ) {
+        //     return card.query;
+        //   }
+        // });
+      }
+    }
+  },
   orgList: {
     findAll: {
       // query: "SELECT name, id, uuid FROM public.organisations ORDER BY name",

@@ -1,24 +1,25 @@
-<div class="col-xl-4 col-lg-5">
+<div class="">
   <div class="card shadow mb-4">
     <table data-toggle="table">
       <thead class="card-header font-weight-bold text-primary chart-title">
         <tr>
-          <th>Item ID</th>
-          <th>Item Name</th>
-          <th>Item Price</th>
+          <th></th>
+          <th>ID</th>
+          <th>Active Days / m</th>
+          <th>Active Time / m</th>
+          <th>Average Time / d</th>
         </tr>       
       </thead>
       <tbody>
-      <tr>
-        <td>1</td>
-        <td>Item 1</td>
-        <td>$1</td>
-      </tr>
-      <tr>
-        <td>2</td>
-        <td>Item 2</td>
-        <td>$2</td>
-      </tr>
+        <% orgs.forEach((org, i) => { %>
+        <tr>
+          <td><%= i + 1 %></td>
+          <td><%= org.id %>_<%= org.name %></td>
+          <td><%= org.days %></td>
+          <td><%= org.dpTime %></td>
+          <td><%= org.average %></td>          
+        </tr>
+        <% }) %>
       </tbody>
     </table>
   </div>

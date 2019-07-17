@@ -139,6 +139,45 @@ router.get("/dashboard/:uuid", async function(req, res) {
       // console.log(vm.average.admin_monthly.usersDailyAvgThisMonth);
     }
 
+    // *=======================================
+    // *| TABLE - start |
+    // *=======================================
+    // let orgsDailyAvgThisMonth;
+    if (typeof vm.resOrgList != "undefined") {
+      vm.stateFlag = "0155";
+      let resTableCol1, resTableCol2, average;
+      // let sumAllOrgs = 0;
+      console.log("=====vm.resOrgList: ", vm.resOrgList);
+      for await (let org of vm.resOrgList) {
+        // get accumulated data for one org for the last 30 days
+        resTableCol1 = await client.query(vm.table.col1.query, [org.id]);
+        resTableCol2 = await client.query(vm.table.col2.query, [org.id]);
+        vm.stateFlag = "0156";
+
+        timeCycledInMilSec = c.getTimeCycledInMilSec(resTableCol2.rows);
+        // *===================================
+        // *| CARD(w/out query)
+        // *| org' DAILY AVERAGE THIS MONTH |
+        // *===================================
+        // org.dpTime = c.convMilSecToFin(timeCycledInMilSec);
+        org.days = resTableCol1.rowCount;
+        org.dpTime = c.convToMin(timeCycledInMilSec);
+        average = org.dpTime / org.days;
+        org.average = average > 0 ? average : "0";
+        // org.dpMonthlyAvgTCycled = c.convMilSecToFin(timeCycledInMilSec / 30);
+        // sumAllOrgs = sumAllOrgs + timeCycledInMilSec;
+      }
+      vm.stateFlag = "0160";
+      // console.log("sumAllOrgs: ", sumAllOrgs);
+      // orgsDailyAvgThisMonth = sumAllOrgs / vm.resOrgList.length / 30;
+      // vm.average.admin_monthly.o_id = vm.currentShow.o_id;
+      // vm.average.admin_monthly.orgsDailyAvgThisMonth = c.convMilSecToFin(
+      // orgsDailyAvgThisMonth
+      // );
+      vm.stateFlag = "0170";
+      // console.log(vm.average.admin_monthly.orgsDailyAvgThisMonth);
+    }
+
     // *=========================================
     // *| CARD(only w/ query)
     // *| defines card.number
@@ -261,6 +300,11 @@ router.get("/dashboard/:uuid", async function(req, res) {
     // console.log("================ dashboard pg ends ===============");
     vm.pgload++;
     vm.stateFlag = "0320";
+    console.log(
+      "===================================================data.orgs:",
+      data.orgs
+    );
+
     res.render("dashboard", data);
   } catch (ex) {
     // await client.query('ROLLBACK')
