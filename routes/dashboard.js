@@ -10,6 +10,8 @@ const c = require("../db/control");
 const { UpdateChart } = require("../db/updateChart");
 const v = require("../db/view");
 const db = require("../db/index");
+const file = require("file-system");
+const fs = require("fs");
 
 const pool = new Pool(client_config);
 // const client = new Client(client_config);
@@ -168,6 +170,19 @@ router.get("/dashboard/:uuid", async function(req, res) {
         // sumAllOrgs = sumAllOrgs + timeCycledInMilSec;
       }
       vm.stateFlag = "0160";
+
+      const tableObj = {
+        data: []
+      };
+      tableObj.data = vm.resOrgList;
+      const tempJson = JSON.stringify(tableObj);
+      fs.writeFile("./public/js/api/myData.json", tempJson, "utf8", function(
+        err
+      ) {
+        if (err) throw err;
+        console.log("complete");
+      });
+
       // console.log("sumAllOrgs: ", sumAllOrgs);
       // orgsDailyAvgThisMonth = sumAllOrgs / vm.resOrgList.length / 30;
       // vm.average.admin_monthly.o_id = vm.currentShow.o_id;

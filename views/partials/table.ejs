@@ -3,24 +3,32 @@
     <table data-toggle="table" id="table_id" data-page-length='25' class="display table table-striped table-bordered">
       <thead class="card-header font-weight-bold text-primary chart-title">
         <tr>
-          <th></th>
+          <%# <th></th> %>
           <th>ID</th>
           <th>Active Days/M</th>
           <th>Active Time/M</th>
           <th>Average Time/D</th>
         </tr>       
       </thead>
-      <tbody>
-        <% orgs.forEach((org, i) => { %>
+      <%# <tbody>
         <tr>
-          <td><%= i + 1 %></td>
-          <td><%= org.id %>_<%= org.name %></td>
-          <td><%= org.days %></td>
-          <td><%= org.dpTime %></td>
-          <td><%= org.average %></td>          
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>           
         </tr>
-        <% }) %>
-      </tbody>
+      </tbody> %>
+      <tfoot>
+        <tr>
+          <%# <th></th> %>
+          <th>ID</th>
+          <th>Active Days/M</th>
+          <th>Active Time/M</th>
+          <th>Average Time/D</th>
+        </tr>
+      </tfoot>
     </table>
   </div>
 </div>
