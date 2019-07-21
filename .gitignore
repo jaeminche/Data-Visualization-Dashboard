@@ -8,3 +8,4 @@ bash.exe.stackdump
 .vscode
 db/model.js
 public/js/api
+public/headerForLoggedinTBD
