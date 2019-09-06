@@ -86,23 +86,6 @@ router.get("/dashboard/usernameupdate", async function(req, res) {
   res.redirect("/dashboard/5cce22c0-8bac-4662-b52c-cfa0504ec987");
 });
 
-// =========================
-// AUTH ROUTES
-// =========================
-
-// handling login logic
-// router.post("/login", passport.authenticate("local"), function(req, res) {
-//   // If this function gets called, authentication was successful.
-//   // `req.user` contains the authenticated user.
-//   if (req.user === superadmin) {
-//     res.redirect("/dashboard_super/" + req.user.uuid);
-//   } else if (req.user === org) {
-//     res.redirect("/dashboard_org/" + req.user.uuid);
-//   } else {
-//     res.redirect("/dashboard_user/" + req.user.uuid);
-//   }
-// });
-
 // logout route
 router.get("/logout", function(req, res) {
   req.logout();

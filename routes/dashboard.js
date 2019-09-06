@@ -33,7 +33,6 @@ router.get("/dashboard/:uuid", async function(req, res) {
     vm.today = "'2017-06-08'";
     vm.stateFlag = "0001";
     console.log("================ dashboard pg starts ===============");
-    // console.log("m.jwt: ", m.jwt);
     console.log("m.currentLogin: ", vm.currentLogin);
     // *========================================
     // *| Set current LOGIN & currentLoginType |
@@ -91,14 +90,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
         ]);
         vm.resOrgList = resOrgList.rows;
         vm.resUserList = resUserList.rows;
-        /*
-        // Only when showType, fetch top 10 votes' rows in sharedroutes table for pie graph
-        if (vm.currentShowType === "superadmin") {
-          vm.stateFlag = "0115";
-          resPie = await client.query(vm.pie.query);
-          vm.resPie = resPie.rows;
-        }
-        */
+
         break;
       case "admin":
         vm.stateFlag = "0120";
@@ -161,13 +153,10 @@ router.get("/dashboard/:uuid", async function(req, res) {
         // *| CARD(w/out query)
         // *| org' DAILY AVERAGE THIS MONTH |
         // *===================================
-        // org.dpTime = c.convMilSecToFin(timeCycledInMilSec);
         org.days = resTableCol1.rowCount;
         org.dpTime = c.convToMin(timeCycledInMilSec);
         average = org.dpTime / org.days;
         org.average = average > 0 ? average : "0";
-        // org.dpMonthlyAvgTCycled = c.convMilSecToFin(timeCycledInMilSec / 30);
-        // sumAllOrgs = sumAllOrgs + timeCycledInMilSec;
       }
       vm.stateFlag = "0160";
 
@@ -183,14 +172,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
         console.log("complete");
       });
 
-      // console.log("sumAllOrgs: ", sumAllOrgs);
-      // orgsDailyAvgThisMonth = sumAllOrgs / vm.resOrgList.length / 30;
-      // vm.average.admin_monthly.o_id = vm.currentShow.o_id;
-      // vm.average.admin_monthly.orgsDailyAvgThisMonth = c.convMilSecToFin(
-      // orgsDailyAvgThisMonth
-      // );
       vm.stateFlag = "0170";
-      // console.log(vm.average.admin_monthly.orgsDailyAvgThisMonth);
     }
 
     // *=========================================
@@ -224,71 +206,15 @@ router.get("/dashboard/:uuid", async function(req, res) {
       period, //""
       firstDay
     );
-    // vm.cards.areForChart = true;
-    // for await (let card of vm.cards[`for${vm.currentShowType}`]) {
-    //   let resChart, period, yAxisTickMark;
-    //   if (card.isDefaultForChart) {
-    //     period = card.period;
-    //     yAxisTickMark = card.yAxisTickMark;
-    //     if (vm.currentShowType === "superadmin") {
-    //       resChart = await client.query(card.query);
-    //     } else if (vm.currentShowType === "admin") {
-    //       resCard = await client.query(card.query, [vm.currentShow.o_id]);
-    //     } else if (vm.currentShowType === "user") {
-    //       resChart = await client.query(card.query, [vm.currentShow.id]);
-    //     }
-
-    // await c.createBarChart(
-    //   "card",
-    //   resChart.rows,
-    //   period,
-    //   yAxisTickMark,
-    //   c.getFirstDayOfWeek(period)
-    // );
-    //     vm.stateFlag = "0308";
-    //     console.log(vm.stateFlag);
-    //     break; // !MUST GET ONLY ONE default (OR/OTHERWISE, the FIRST) set of data in the vm.cards object because it's default.
-    //     // TODO: idRedirectedForChartQuery
-
-    //     // tempChartDataForDefaultCard = c.checkCardForDefaultChartAndStoreData(
-    //     //   card,
-    //     //   resChart
-    //     // );
-    //     // if (tempChartDataForDefaultCard.exists) {
-    //     //   chartDataForDefaultCard = tempChartDataForDefaultCard;
-    //     //   if (forChart === true) {
-    //     //     chartDataForDefaultCard.period = period;
-    //     //     chartDataForDefaultCard.yAxisTickMark = yAxisTickMark;
-    //     //   }
-    //     // }
-    //     // console.log("chartDataForDefaultCard: ", chartDataForDefaultCard);
-    //   }
-    // }
 
     vm.stateFlag = "0301";
     console.log(vm.stateFlag);
-    // c.createBarChart(
-    //   chartDataForDefaultCard.reqFrom,
-    //   chartDataForDefaultCard.resChart,
-    //   chartDataForDefaultCard.period,
-    //   chartDataForDefaultCard.yAxisTickMark,
-    //   c.getFirstDayOfWeek(chartDataForDefaultCard.period)
-    // );
+
     // *=======================================
     // *| AREA-CHART - start |
     // *=======================================
 
-    // console.log("resChart: ", resChart);
-
-    // if (
-    //   typeof resChart != "undefined" &&
-    //   typeof resChart[0].packet_generated != "undefined"
-    // ) {
-    //   vm.stateFlag = "0300";
-    //   c.createBarChart(resChart, calendarType);
-    // }
     console.log("vm.state: ", vm.state);
-    // resBar = await client.query(m.bar.find)
     // *=======================================
     // *| PASS IN DATA
     // *=======================================
@@ -310,9 +236,7 @@ router.get("/dashboard/:uuid", async function(req, res) {
       data["pie"] = vm.resPie;
       data["pieData"] = vm.pie;
     }
-    // console.log("req.user: ", req.user);
-    // console.log("req.params: ", req.params);
-    // console.log("================ dashboard pg ends ===============");
+
     vm.pgload++;
     vm.stateFlag = "0320";
     console.log(
@@ -335,17 +259,3 @@ router.get("/dashboard/:uuid", async function(req, res) {
 });
 
 module.exports = router;
-
-// callback - checkout a client
-// pool.connect((err, client, done) => {
-//   if (err) throw err
-//   client.query('SELECT * FROM users WHERE id = $1', [1], (err, res) => {
-//     done()
-
-//     if (err) {
-//       console.log(err.stack)
-//     } else {
-//       console.log(res.rows[0])
-//     }
-//   })
-// })

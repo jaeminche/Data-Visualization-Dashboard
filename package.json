@@ -1,7 +1,7 @@
 {
-  "name": "recipebook",
+  "name": "dashboard",
   "version": "1.0.0",
-  "description": "Recipe manager",
+  "description": "data visualization",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

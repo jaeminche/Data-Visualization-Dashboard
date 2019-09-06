@@ -9,8 +9,6 @@ const c = {
   },
 
   init: function() {
-    // this.resetState("card");
-    // this.resetState("chart");
     vm.chart = {
       myOptions: {
         yAxisMarkLeft: "left unit1",
@@ -25,10 +23,6 @@ const c = {
     };
     vm.resPie = null;
   },
-
-  // setCurrentLoginType: function() {
-  //   this.setCurrentType(m.currentLogin, "currentLoginType");
-  // },
 
   setCurrentType: function(data, key) {
     if (data.superadmin === true && data.admin === true) {
@@ -178,9 +172,6 @@ const c = {
 
     for await (let card of vm.cards[`for${vm.currentShowType}`]) {
       if (chartId.includes(card["id"]) && !!card.query) {
-        // if (reqBy === "card") {
-        //   period = [];
-        // }
         switch (vm.currentShowType) {
           case "superadmin":
             vm.stateFlag = "0210";
@@ -366,33 +357,6 @@ const c = {
       ? (vm.chart.myOptions.yAxisMarkRight = yAxisMarkRight)
       : (vm.chart.myOptions.yAxisMarkRight = "");
   },
-
-  // formatResRowsInScale: function(resRowArrs, resType, period) {
-  //   vm.stateFlag = "0560";
-  //   let time_col = resType === "timeCalculatable" ? "packet_generated" : "date";
-  //   // resType === "timeCalculatable" ? (time_col = "packet_generated") : (time_col = "date");
-  //   let cMonth, cYear;
-  //   let tempTimestamp = resRowArrs[0][time_col];
-  //   // generate as many nested array as the period,
-  //   // and organize the res data day by day.
-  //   vm.stateFlag = "0535";
-  //   let prevDDM = this.getDateDayMonth(tempTimestamp, period);
-  //   cMonth = new Date(tempTimestamp).getMonth();
-  //   cYear = new Date(tempTimestamp).getFullYear();
-  //   let indexForResRowsInScale = prevDDM - 1;
-  //   // make a placeholder
-  //   let resRowsInScale = this.genNestedArr(period, cMonth, cYear);
-  //   // make a complete set of resRows with null data as well
-  //   resRowArrs.forEach(row => {
-  //     if (this.getDateDayMonth(row[time_col], period) != prevDDM) {
-  //       prevDDM = this.getDateDayMonth(row[time_col], period);
-  //       indexForResRowsInScale = prevDDM - 1;
-  //     }
-  //     resRowsInScale[indexForResRowsInScale].push(row);
-  //   });
-  //   console.log("resRowsInScale: ", resRowsInScale);
-  //   return resRowsInScale;
-  // },
 
   fillInNoDataLabel: function(arr, period) {
     const d = new Date();

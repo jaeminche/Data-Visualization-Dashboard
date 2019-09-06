@@ -1,11 +1,4 @@
-dev_references
-versions
 node_modules
 config
 public/img
-jae_table_layout_v0.01.xls
-bash.exe.stackdump
-.vscode
-db/model.js
-public/js/api
 public/headerForLoggedinTBD

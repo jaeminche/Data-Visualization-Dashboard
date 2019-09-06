@@ -1,7 +1,7 @@
 /**
- * todo 1. Get clickable period tabs working
- * todo 2. Get clickable arrows working
- * todo 3. Get clickable cards working
+ * todo 1. Get clickable period tabs working => TO BE DELETED CONFIRMED
+ * todo 2. Get clickable arrows working => DONE
+ * todo 3. Get clickable cards working => SOME DONE, SOME TO BE DONE
  * todo 4. implement middleware for security
  */
 

@@ -47,6 +47,7 @@ router.post("/updatechart", async function(req, res) {
       period,
       firstDay
     );
+    // TAB FEATURE TO BE DELETED CONFIRMED BY ROEL.
     if (req.body.reqBy === "tab") {
       //   period = req.body.period;
       //   reqBy = "period";
@@ -76,32 +77,6 @@ router.post("/updatechart", async function(req, res) {
       //   );
     }
 
-    // // let resChart = vm.tempresChart;
-
-    // vm.stateFlag = "0510";
-    // // get response only from cards that correspond with user-picked period
-
-    // // foundCardsAndRes = { cardObjs: [{}, {}], resRowArrs: [[], []]}
-    // vm.stateFlag = "0215";
-    // let period = foundCardsAndRes.cardObjs[0].period; // you need only one period data because there's one xAxis
-    // // TODO: check if firstDay must be passed in as param here.
-    // let firstDay = await c.getFirstDayOfWeek(client, period);
-    // console.log("foundCardsAndRes.resRowArrs: ", foundCardsAndRes.resRowArrs);
-    // await c.updateVM_chart(
-    //   "default",
-    //   foundCardsAndRes.cardObjs, //[{}, {}]
-    //   foundCardsAndRes.resRowArrs, //[[], []]
-    //   period, //""
-    //   firstDay
-    // );
-
-    // vm.stateFlag = "0600";
-    // let xAxis = [],
-    //   yAxis1 = [];
-    // xAxis = vm.chart.data.xAxis;
-    // yAxis1 = vm.chart.data.yAxis1;
-
-    // // TODO: manipulate labels into such as "Mon"
     vm.stateFlag = "0510";
     let resMyJson = await {
       xAxis: vm.chart.data.xAxis,
@@ -223,13 +198,7 @@ router.post("/updateChartWithCards", async function(req, res) {
       data: data,
       yAxisUnit: "min."
     };
-    // let labels = [],
-    //   data = [];
 
-    // resChart.map(set => {
-    //   labels.push(set.date);
-    //   data.push(set.count);
-    // });
     // TODO: use c.createBarChart instead of the following line
     // let dataForChartArea = {
     //   data: labels,

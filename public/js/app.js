@@ -1,46 +1,8 @@
 let stateFlag = "0001";
-// if (!!myBarChart) {
-//   let defaultChartData = myBarChart;
-// }
 
 let el_dateRange = document.getElementById("date-range");
 
 let el_for_chartupdates = document.getElementsByClassName("chart-updates");
-
-// get unique classname from the card, and post.
-// in the route, create the chart.
-
-// let getCardClassNm = function(self) {
-//   return;
-// };
-
-// let updateChartByCards = function(e) {
-//   console.log("clicked on card");
-//   stateFlag = "0030";
-//   updateChart("/updatechart", {
-//     reqBy: "card",
-//     value: this.getAttribute("value"),
-//     card_id: this.getAttribute("id") // 1, 11, or 201 .. card id
-//   });
-// };
-// let updateChartByTabs = function(e) {
-//   console.log("clicked on tab");
-//   stateFlag = "0020";
-//   updateChart("/updatechart", {
-//     reqBy: "tab",
-//     value: this.getAttribute("value"), // W, M, or Y
-//     card_id: this.getAttribute("id")
-//   });
-// };
-// let updateChartByArrows = function(e) {
-//   console.log("clicked on arrow");
-//   stateFlag = "0030";
-//   updateChart("/updatechart", {
-//     reqBy: "arrow",
-//     value: this.getAttribute("value"), //
-//     card_id: this.getAttribute("id")
-//   });
-// };
 
 let updateChartByElem = function(e) {
   console.log("clicked on something");
@@ -186,29 +148,4 @@ let h = {
 
     chart.update();
   }
-
-  // writeData: function(chart, labelArr, nestedDataArr, yAxisTickMark) {
-  //   console.log("thischart: ", chart);
-  //   //////
-  //   chart.data.xAxis = labelArr;
-  //   chart.data.datasets.forEach((dataset, i) => {
-  //     dataset.data = nestedDataArr[i];
-  //   });
-  //   yAxisTickMark = yAxisTickMark;
-  //   //////
-  //   chart.update();
-  // },
-
-  // updateConfigByMutating: function(chart) {
-  //   chart.options.yAxisMarkLeft = "new title";
-  //   chart.update();
-  // }
-
-  // addData: function(chart, label, data) {
-  //   chart.data.xAxis.push(label);
-  //   chart.data.datasets.forEach(dataset => {
-  //     dataset.data.push(data);
-  //   });
-  //   chart.update();
-  // },
 };
